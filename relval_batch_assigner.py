@@ -3,7 +3,7 @@ import sys,os
 
 import cherrypy
 
-class StringGenerator(object):
+class RelvalBatchAssigner(object):
     @cherrypy.expose
     def index(self):
         return """<html>
@@ -114,4 +114,4 @@ Enter the name of the file where the statistics about the output datasets will b
         return return_value
 
 if __name__ == '__main__':
-    cherrypy.quickstart(StringGenerator())
+    cherrypy.quickstart(RelvalBatchAssigner())
