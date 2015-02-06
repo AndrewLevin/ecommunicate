@@ -74,9 +74,6 @@ Enter the name of the file where the statistics about the output datasets will b
 
     @cherrypy.expose
     def handle_POST(self, HypernewsPost, Description, AnnouncementTitle, ListOfWorkflows, ProcessingVersion, Site, StatisticsFilename):
-        f = open("relval_batch_assigner_logs/log.dat", 'a')
-        f.write(str(datetime.now())+"\n")
-        f.flush()
         return_value="Description: "+Description+"\n"
         return_value=return_value+"<br>\n"
         return_value=return_value+"Hypernews Post: "+HypernewsPost+"\n"
