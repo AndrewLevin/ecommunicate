@@ -70,6 +70,33 @@ Enter the name of the file where the statistics about the output datasets will b
     @cherrypy.expose
     def handle_POST(self, Description, AnnouncementTitle, ListOfWorkflows, ProcessingVersion, Site, StatisticsFilename):
         dn=cherrypy.request.headers['Cms-Authn-Dn']
+
+        if Description == "":
+            return_value="Your request was rejected for the following reason:\n"
+            return_value=return_value+"<br>\n"
+            return_value=return_value+"No description given.\n"
+            return return_value
+        elif StatisticsFilename == "":
+            return_value="Your request was rejected for the following reason:\n"
+            return_value=return_value+"<br>\n"
+            return_value=return_value+"No statistics filename given.\n"
+            return return_value
+        elif AnnouncementTitle == "":
+            return_value="Your request was rejected for the following reason:\n"
+            return_value=return_value+"<br>\n"
+            return_value=return_value+"No announcement e-mail title was given.\n"
+            return return_value
+        elif ProcessingVersion == "":
+            return_value="Your request was rejected for the following reason:\n"
+            return_value=return_value+"<br>\n"
+            return_value=return_value+"No processing version was given.\n"
+            return return_value
+        elif ListOfWorkflows == "":
+            return_value="Your request was rejected for the following reason:\n"
+            return_value=return_value+"<br>\n"
+            return_value=return_value+"No workflows were given.\n"
+            return return_value
+
         return_value="Your request has been received.\n"
         return_value=return_value+"<br>\n"
         return_value=return_value+"<br>\n"
