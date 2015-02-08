@@ -19,12 +19,6 @@ Please contact amlevin@mit.edu if you have problems with this service.
 <br>
 <br>
 
-Enter the hypernews post where this batch was requested (e.g. https://hypernews.cern.ch/HyperNews/CMS/get/dataopsrequests/5493.html) <br>
-<input type="text" name="HypernewsPost" size=100 />
-
-<br>
-<br>
-
 Enter a description of this batch (e.g. "https://hypernews.cern.ch/HyperNews/CMS/get/dataopsrequests/5493.html first try") <br>
 <input type="text" name="Description" size=100 />
 
@@ -74,10 +68,18 @@ Enter the name of the file where the statistics about the output datasets will b
         </html>"""
 
     @cherrypy.expose
-    def handle_POST(self, HypernewsPost, Description, AnnouncementTitle, ListOfWorkflows, ProcessingVersion, Site, StatisticsFilename):
-        return_value="Description: "+Description+"\n"
+    def handle_POST(self, Description, AnnouncementTitle, ListOfWorkflows, ProcessingVersion, Site, StatisticsFilename):
+        dn=cherrypy.request.headers['Cms-Authn-Dn']
+        return_value="Your request has been received.\n"
         return_value=return_value+"<br>\n"
-        return_value=return_value+"Hypernews Post: "+HypernewsPost+"\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"You may monitor its progress at http://cms-project-relval.web.cern.ch/cms-project-relval/relval_monitor.txt\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"The information we have received is shown below.\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"Description: "+Description+"\n"
         return_value=return_value+"<br>\n"
         return_value=return_value+"StatisticsFilename: "+StatisticsFilename+"\n"
         return_value=return_value+"<br>\n"
@@ -110,7 +112,6 @@ Enter the name of the file where the statistics about the output datasets will b
 
         #os.system("python2.6 insert_batch.py "+HypernewsPost+" "+wf_names_fname+" \""+AnnouncementTitle+"\" "+StatisticsFilename+" \""+Description+"\" "+ProcessingVersion+" "+Site+";")
 
-        hnrequest=HypernewsPost
         wf_names=wf_names_fname
         email_title=AnnouncementTitle
         stats_file=StatisticsFilename
@@ -118,7 +119,6 @@ Enter the name of the file where the statistics about the output datasets will b
         proc_ver=ProcessingVersion
         site=Site
 
-        print "hnrequest = "+hnrequest
         print "wf_names = "+wf_names
         print "email_title = "+email_title
         print "stats_file = "+stats_file
@@ -184,8 +184,13 @@ Enter the name of the file where the statistics about the output datasets will b
             workflow=line.rstrip('\n')
             for c in workflow:
                 if c != 'a' and c != 'b' and c != 'c' and c != 'd' and c != 'e' and c != 'f' and c != 'g' and c != 'h' and c != 'i' and c != 'j' and c != 'k' and c != 'l' and c != 'm' and c != 'n' and c != 'o' and c != 'p' and c != 'q' and c != 'r' and c != 's' and c != 't' and c != 'u' and c != 'v' and c != 'w' and c != 'x' and c != 'y' and c != 'z' and c != 'A' and c != 'B' and c != 'C' and c != 'D' and c != 'E' and c != 'F' and c != 'G' and c != 'H' and c != 'I' and c != 'J' and c != 'K' and c != 'L' and c != 'M' and c != 'N' and c != 'O' and c != 'P' and c != 'Q' and c != 'R' and c != 'S' and c != 'T' and c != 'U' and c != 'V' and c != 'W' and c != 'X' and c != 'Y' and c != 'Z' and c != '0' and c != '1' and c != '2' and c != '3' and c != '4' and c != '5' and c != '6' and c != '7' and c != '8' and c != '9' and c != '_' and c != '-':
-                    print "workflow "+workflow+" contains the character "+str(c)+" which is not allowed, exiting"
-                    sys.exit(0)          
+                    return_value="Your request was rejected for the following reason:\n"
+                    return_value=return_value+"<br>\n"
+                    return_value=return_value+"workflow "+workflow+" contains the character "+str(c)+" which is not allowed.\n"
+                    return return_value
+
+        #need to reopen the file because it was already iterated over        
+        f=open(wf_names, 'r')
 
         #check that no workflows are repeated in the file
         for line1 in f:
@@ -197,8 +202,10 @@ Enter the name of the file where the statistics about the output datasets will b
                     g_index=g_index+1
                 workflow2 = line2.rstrip('\n')
                 if workflow1 == workflow2:
-                    print "workflow "+ workflow1+" is repeated twice in the input file, exiting"
-                    sys.exit(1)
+                    return_value="Your request was rejected for the following reason:\n"
+                    return_value=return_value+"<br>\n"
+                    return_value=return_value+"workflow "+ workflow1+" is repeated twice in the list of workflows\n"
+                    return return_value
                 g_index=g_index+1
             f_index=f_index+1
 
@@ -206,7 +213,7 @@ Enter the name of the file where the statistics about the output datasets will b
 
         print "creating a new batch with batch_id = "+str(batchid)
 
-        curs.execute("insert into batches set batch_id="+str(batchid)+", hn_req=\""+hnrequest+"\", announcement_title=\""+email_title+"\", stats_file=\""+stats_file+"\", processing_version="+proc_ver+", site=\""+site+"\", description=\""+description+"\", status=\"inserted\", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
+        curs.execute("insert into batches set batch_id="+str(batchid)+", announcement_title=\""+email_title+"\", stats_file=\""+stats_file+"\", processing_version="+proc_ver+", site=\""+site+"\", DN=\""+dn+"\", description=\""+description+"\", status=\"inserted\", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
 
 
         for line in f:
@@ -225,4 +232,3 @@ Enter the name of the file where the statistics about the output datasets will b
 
 if __name__ == '__main__':
     cherrypy.quickstart(RelvalBatchAssigner())
-
