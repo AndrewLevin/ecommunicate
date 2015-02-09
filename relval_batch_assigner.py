@@ -20,7 +20,7 @@ Please contact amlevin@mit.edu if you have problems with this service.
 <br>
 
 Enter a description of this batch (e.g. "https://hypernews.cern.ch/HyperNews/CMS/get/dataopsrequests/5493.html first try") <br>
-<input type="text" name="Description" size=100 />
+<textarea name="Description" rows="5" cols="150"></textarea>
 
 <br>
 <br>
@@ -43,18 +43,12 @@ Enter the processing version here: <br>
 <br>
 <br>
 
-Select the site where the workflow will run here:<br>
+Does this batch include any heavy ion workflows? (This affects where the workflows can be run.)<br>
 
-<select name="Site">
-<option selected>T2_CH_CERN</option>
-<option>T1_US_FNAL</option>
+<select name="HI">
+<option selected>No</option>
+<option>Yes</option>
 </select>
-
-<br>
-<br>
-
-Enter the name of the file where the statistics about the output datasets will be stored (e.g. CMSSW_7_2_0_pre5_pileup.txt):<br> 
-<input type="text" name="StatisticsFilename" size=50 />
 
 <br>
 <br>
@@ -68,18 +62,13 @@ Enter the name of the file where the statistics about the output datasets will b
         </html>"""
 
     @cherrypy.expose
-    def handle_POST(self, Description, AnnouncementTitle, ListOfWorkflows, ProcessingVersion, Site, StatisticsFilename):
+    def handle_POST(self, Description, AnnouncementTitle, ListOfWorkflows, ProcessingVersion, HI):
         dn=cherrypy.request.headers['Cms-Authn-Dn']
 
         if Description == "":
             return_value="Your request was rejected for the following reason:\n"
             return_value=return_value+"<br>\n"
             return_value=return_value+"No description given.\n"
-            return return_value
-        elif StatisticsFilename == "":
-            return_value="Your request was rejected for the following reason:\n"
-            return_value=return_value+"<br>\n"
-            return_value=return_value+"No statistics filename given.\n"
             return return_value
         elif AnnouncementTitle == "":
             return_value="Your request was rejected for the following reason:\n"
@@ -97,34 +86,7 @@ Enter the name of the file where the statistics about the output datasets will b
             return_value=return_value+"No workflows were given.\n"
             return return_value
 
-        return_value="Your request has been received.\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"You may monitor its progress at http://cms-project-relval.web.cern.ch/cms-project-relval/relval_monitor.txt\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"The information we have received is shown below.\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"Description: "+Description+"\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"StatisticsFilename: "+StatisticsFilename+"\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"Announcement e-mail title: "+AnnouncementTitle+"\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"Site: "+Site+"\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"Processing version: "+ProcessingVersion+"\n"
-        return_value=return_value+"<br>\n"
-        return_value=return_value+"Workflows:"
-        return_value=return_value+"<br>\n"
-        for wf in ListOfWorkflows.split('\n'):
-            wf = wf.rstrip('\n')
-            wf = wf.rstrip('\r')
-            if wf.strip() == "":
-                continue
-            return_value=return_value+wf+"\n"
-            return_value=return_value+"<br>"
+
 
         wf_names_fname=os.popen("mktemp").read()
         wf_names_fname=wf_names_fname.rstrip('\n')
@@ -141,14 +103,20 @@ Enter the name of the file where the statistics about the output datasets will b
 
         wf_names=wf_names_fname
         email_title=AnnouncementTitle
-        stats_file=StatisticsFilename
         description=Description
         proc_ver=ProcessingVersion
-        site=Site
+
+        if HI == "Yes":
+            site = "T2_CH_CERN"
+        elif HI == "No":
+            site = "T1_US_FNAL"
+        else:
+            print "unknown value of site, exiting"
+            return "Your request was rejected due to an unexpected value of the HI variable."
 
         print "wf_names = "+wf_names
         print "email_title = "+email_title
-        print "stats_file = "+stats_file
+
         print "description = "+description
         print "proc_ver = "+proc_ver
         print "site = "+site
@@ -175,6 +143,7 @@ Enter the name of the file where the statistics about the output datasets will b
                 print "workflow "+workflow+" was already inserted into the database, exiting"
                 sys.exit(1)
                     
+
         #the batch id of the new batch should be 1 more than any existing batch id
         curs.execute("select MAX(batch_id) from batches;")
         max_batchid_batches=curs.fetchall()[0][0]
@@ -200,6 +169,43 @@ Enter the name of the file where the statistics about the output datasets will b
         if len(curs.fetchall()) > 0:
             print "batch_id "+str(batchid)+" was already inserted into the workflows database, exiting"
             sys.exit(1)     
+
+
+        now=datetime.datetime.now()    
+
+        useridyear=now.strftime("%Y")
+        useridmonth=now.strftime("%m")
+        useridday=now.strftime("%d")
+
+        print "select MAX(user_num) from batches where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\";"
+
+        #the batch id of the new batch should be 1 more than any existing batch id
+        curs.execute("select MAX(useridnum) from batches where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\";")
+        max_user_num_batches=curs.fetchall()[0][0]
+        curs.execute("select MAX(useridnum) from batches_archive where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\";")
+        max_user_num_batches_archive=curs.fetchall()[0][0]
+
+        if max_user_num_batches == None and max_user_num_batches_archive == None:
+            usernum=0;
+        elif max_user_num_batches == None and max_user_num_batches_archive != None:
+            usernum=max_user_num_batches_archive+1
+        elif max_user_num_batches != None and max_user_num_batches_archive == None:
+            usernum=max_user_num_batches+1
+        else:     
+            usernum=max(max_user_num_batches,max_user_num_batches_archive)+1
+
+        #sanity checks to make sure this is really a new userbatchid
+        curs.execute("select batch_id from batches where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\" and useridnum="+str(usernum)+";")
+        if len(curs.fetchall()) > 0:
+            print "batch_id "+str(batchid)+" was already inserted into the batches database, exiting"
+            sys.exit(1)
+
+        curs.execute("select batch_id from batches_archive where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\" and useridnum="+str(usernum)+";")
+        if len(curs.fetchall()) > 0:
+            print "batch_id "+str(batchid)+" was already inserted into the workflows database, exiting"
+            sys.exit(1)     
+
+        userbatchid=useridyear + "_"+useridmonth+"_"+useridday+"_"+str(usernum)
 
         f_index=0
         g_index=0
@@ -240,7 +246,7 @@ Enter the name of the file where the statistics about the output datasets will b
 
         print "creating a new batch with batch_id = "+str(batchid)
 
-        curs.execute("insert into batches set batch_id="+str(batchid)+", announcement_title=\""+email_title+"\", stats_file=\""+stats_file+"\", processing_version="+proc_ver+", site=\""+site+"\", DN=\""+dn+"\", description=\""+description+"\", status=\"inserted\", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
+        curs.execute("insert into batches set batch_id="+str(batchid)+", announcement_title=\""+email_title+"\", processing_version="+proc_ver+", site=\""+site+"\", DN=\""+dn+"\", description=\""+description+"\", status=\"inserted\", useridyear=\""+useridyear+"\", useridmonth=\""+useridmonth+"\", useridday=\""+useridday+"\", useridnum="+str(usernum)+", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
 
 
         for line in f:
@@ -254,6 +260,66 @@ Enter the name of the file where the statistics about the output datasets will b
         conn.close()
 
         os.popen("echo "+Description+" | mail -s \"[RelVal] "+ AnnouncementTitle +"\" andrew.m.levin@vanderbilt.edu --");  
+
+        return_value="Your request has been received.\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"This batch was given the following batch id: "+str(userbatchid)
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"You may monitor its progress at http://cms-project-relval.web.cern.ch/cms-project-relval/relval_monitor.txt\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"The information we have received is shown below.\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"Description: "+Description+"\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"HI: "+HI+"\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"Announcement e-mail title: "+AnnouncementTitle+"\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"Processing version: "+ProcessingVersion+"\n"
+        return_value=return_value+"<br>\n"
+        return_value=return_value+"Workflows:"
+        return_value=return_value+"<br>\n"
+        for wf in ListOfWorkflows.split('\n'):
+            wf = wf.rstrip('\n')
+            wf = wf.rstrip('\r')
+            if wf.strip() == "":
+                continue
+            return_value=return_value+wf+"\n"
+            return_value=return_value+"<br>"
+
+        hn_email=os.popen("mktemp").read()    
+
+        os.system("echo \"Dear all,\" >> "+hn_email)    
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \"A new batch of relval workflows was requested.\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \"Batch ID:\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \""+str(userbatchid)+"\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \"Requestor:\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \""+dn+"\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \"Description of this request:\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \""+description+"\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \"List of workflows:\" >> "+hn_email)
+        for wf in ListOfWorkflows.split('\n'):
+            wf = wf.rstrip('\n')
+            wf = wf.rstrip('\r')
+            if wf.strip() == "":
+                continue
+            os.system("echo \""+wf+"\" >> "+hn_email)
+        os.system("echo \"\" >> "+hn_email)
+        os.system("echo \"RelVal Batch Manager\" >> "+hn_email)
+
+        os.popen("cat "+hn_email+" | mail -s \"[RelVal] "+ AnnouncementTitle +"\" hn-cms-hnTest@cern.ch --");      
 
         return return_value
 
