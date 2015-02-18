@@ -32,13 +32,9 @@ class RelvalBatchApprover(object):
 <head><title>batch request manager</title>
 </head>
 <body>
-
-<form action="handle_POST_2" method="get">"""
+<form action="relval5.php" method="post">"""
 
         for batch in batches:
-
-
-
             for name, value in zip(colnames, batch):
                 if name=="status":
                     status=value
@@ -47,8 +43,8 @@ class RelvalBatchApprover(object):
                 elif name == "site":
                     site=value
 
-            if status != "inserted":
-                continue
+            #if status != "inserted":
+            #    continue
                
             return_value=return_value+str(batchid)+"\n"
             return_value=return_value+"<br>"
@@ -68,7 +64,12 @@ class RelvalBatchApprover(object):
         return return_value
 
     @cherrypy.expose
-    def handle_POST_2(self,*args,**kwargs):
+    def handle_POST_2(self,User,*args,**kwargs):
+
+        print User
+
+        if User!="anlevin" and User!="amaltaro" and User!="jbadillo":
+            return "User "+User+" is not allowed to approve requests"
 
         dbname = "relval"
 
@@ -84,8 +85,6 @@ class RelvalBatchApprover(object):
         return_value=""
 
         for kwarg in kwargs:
-            print kwarg
-            print kwargs[kwarg]
             if kwargs[kwarg] == "approve":
                 curs.execute("update batches set status=\"approved\", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\" where batch_id = "+ kwarg.strip("batch") +";")
                 return_value=return_value+kwarg+" was approved\n"
