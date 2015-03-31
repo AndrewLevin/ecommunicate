@@ -11,6 +11,42 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.Utils import COMMASPACE, formatdate
 
+import subprocess
+
+from HTMLParser import HTMLParser
+
+# create a subclass and override the handler methods
+class MyHTMLParser(HTMLParser):
+    email = ""
+    get_name = False
+    name = ""
+    def handle_data(self, data):
+        if (data.find('@') != -1):
+            self.email = data
+        if (data.find('CMS Member Info:') != -1):
+            self.get_name = True
+            return False
+        if self.get_name:
+            self.name = data
+            self.get_name = False
+    def result(self):
+        return self.email
+    def userName(self):
+        return self.name
+
+def get_HNews_info(user_name):
+    if user_name.lower() == "defilip":    ##when users are registered in HN with
+        user_name = "ndefilip"            ##different email than lxplus account
+    elif user_name.lower() == "ligabue":
+        user_name = "fligabue"
+    hyperNews_url = 'https://hypernews.cern.ch/HyperNews/CMS/view-member.pl?'+user_name.lower()
+    args = ['curl','--insecure', hyperNews_url, '-s']
+    proc = subprocess.Popen(args, stdout = subprocess.PIPE)
+    proc_output = proc.communicate()[0]
+    parser = MyHTMLParser()
+    html_resp = parser.feed(proc_output)
+    return parser #return a HTML parser
+
 class RelvalBatchAssigner(object):
     @cherrypy.expose
     def index(self):
@@ -253,7 +289,7 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
         print "creating a new batch with batch_id = "+str(batchid)
 
 
-        os.popen("echo "+Description+" | mail -s \"[RelVal] "+ AnnouncementTitle +"\" andrew.m.levin@vanderbilt.edu --");  
+        #os.popen("echo "+Description+" | mail -s \"[RelVal] "+ AnnouncementTitle +"\" andrew.m.levin@vanderbilt.edu --");  
 
         return_value="Your request has been received.\n"
         return_value=return_value+"<br>\n"
@@ -318,12 +354,19 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
 
         msg = MIMEMultipart()
         reply_to = []
-        send_to = ["hn-cms-dataopsrequests@cern.ch"]
+        send_to = ["hn-cms-dataopsrequests@cern.ch","andrew.m.levin@vanderbilt.edu"]
         #send_to = ["hn-cms-hnTest@cern.ch"]
         #send_to = ["andrew.m.levin@vanderbilt.edu"]
         msg_subj = AnnouncementTitle
 
-        msg['From'] = "amlevin@mit.edu"
+
+        hnemail= get_HNews_info(dn).result()
+
+        if hnemail == "":
+            msg['From'] = "amlevin@mit.edu"
+        else:
+            msg['From'] = hnemail
+        #msg['From'] = str(dn)+"@cern.ch"
         msg['reply-to'] = COMMASPACE.join(reply_to)
         msg['To'] = COMMASPACE.join(send_to)
         msg['Date'] = formatdate(localtime=True)
@@ -341,7 +384,7 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
         except Exception as e:
             print "Error: unable to send email: %s" %(str(e))
 
-        curs.execute("insert into batches set batch_id="+str(batchid)+", announcement_title=\""+email_title+"\", processing_version="+proc_ver+", site=\""+site+"\", DN=\""+dn+"\", description=\""+description+"\", status=\"inserted\", hn_message_id=\""+msg['Message-ID']+"\", useridyear=\""+useridyear+"\", useridmonth=\""+useridmonth+"\", useridday=\""+useridday+"\", useridnum="+str(usernum)+", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
+        curs.execute("insert into batches set batch_id="+str(batchid)+", announcement_title=\""+email_title+"\", processing_version="+proc_ver+", site=\""+site+"\", DN=\""+dn+"\", description=\""+description+"\", status=\"approved\", hn_message_id=\""+msg['Message-ID']+"\", useridyear=\""+useridyear+"\", useridmonth=\""+useridmonth+"\", useridday=\""+useridday+"\", useridnum="+str(usernum)+", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
 
         for line in f:
             workflow = line.rstrip('\n')
