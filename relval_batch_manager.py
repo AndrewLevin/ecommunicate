@@ -186,6 +186,12 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
                 return_value=return_value+"<br>\n"
                 return_value=return_value+"The workflow "+workflow+" was already requested.\n"
                 return return_value
+            curs.execute("select workflow_name from workflows_archive where workflow_name=\""+ workflow +"\";")
+            if len(curs.fetchall()) > 0:
+                return_value="Your request was rejected for the following reason:\n"
+                return_value=return_value+"<br>\n"
+                return_value=return_value+"The workflow "+workflow+" was already requested.\n"
+                return return_value
 
         #the batch id of the new batch should be 1 more than any existing batch id
         curs.execute("select MAX(batch_id) from batches;")

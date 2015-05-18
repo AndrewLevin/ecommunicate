@@ -43,8 +43,8 @@ class RelvalBatchApprover(object):
                 elif name == "site":
                     site=value
 
-            #if status != "inserted":
-            #    continue
+            if status != "inserted":
+                continue
                
             return_value=return_value+str(batchid)+"\n"
             return_value=return_value+"<br>"
