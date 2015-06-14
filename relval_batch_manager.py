@@ -149,7 +149,7 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
         proc_ver=str(1)
 
         if HI == "Yes":
-            site = "T2_CH_CERN"
+            site = "T2_CH_CERN_T0"
         elif HI == "No":
             site = "T1_US_FNAL"
         else:
@@ -165,7 +165,7 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
 
         dbname = "relval"
 
-        conn = MySQLdb.connect(host='dbod-altest1.cern.ch', user='relval', passwd="relval", port=5505)
+        conn = MySQLdb.connect(host='dbod-cmsrv1.cern.ch', user='relval', passwd="relval", port=5506)
         #conn = MySQLdb.connect(host='localhost', user='relval', passwd="relval")
 
         curs = conn.cursor()
