@@ -186,38 +186,6 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
                 return_value=return_value+"<br>\n"
                 return_value=return_value+"The workflow "+workflow+" was already requested.\n"
                 return return_value
-            curs.execute("select workflow_name from workflows_archive where workflow_name=\""+ workflow +"\";")
-            if len(curs.fetchall()) > 0:
-                return_value="Your request was rejected for the following reason:\n"
-                return_value=return_value+"<br>\n"
-                return_value=return_value+"The workflow "+workflow+" was already requested.\n"
-                return return_value
-
-        #the batch id of the new batch should be 1 more than any existing batch id
-        curs.execute("select MAX(batch_id) from batches;")
-        max_batchid_batches=curs.fetchall()[0][0]
-        curs.execute("select MAX(batch_id) from batches_archive;")
-        max_batchid_batches_archive=curs.fetchall()[0][0]
-
-        if max_batchid_batches == None and max_batchid_batches_archive == None:
-            batchid=0;
-        elif max_batchid_batches == None and max_batchid_batches_archive != None:
-            batchid=max_batchid_batches_archive+1
-        elif max_batchid_batches != None and max_batchid_batches_archive == None:
-            batchid=max_batchid_batches+1
-        else:     
-            batchid=max(max_batchid_batches,max_batchid_batches_archive)+1
-
-        #sanity checks to make sure this is really a new batchid
-        curs.execute("select batch_id from batches where batch_id="+ str(batchid) +";")
-        if len(curs.fetchall()) > 0:
-            return_value="An exception occurred and your request was not accepted. Please send an e-mail to amlevin@mit.edu.\n"
-            return return_value
-
-        curs.execute("select batch_id from workflows where batch_id="+ str(batchid) +";")
-        if len(curs.fetchall()) > 0:
-            return_value="An exception occurred and your request was not accepted. Please send an e-mail to amlevin@mit.edu.\n"
-            return return_value
 
         now=datetime.datetime.now()    
 
@@ -225,35 +193,22 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
         useridmonth=now.strftime("%m")
         useridday=now.strftime("%d")
 
-        print "select MAX(user_num) from batches where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\";"
-
         #the batch id of the new batch should be 1 more than any existing batch id
         curs.execute("select MAX(useridnum) from batches where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\";")
         max_user_num_batches=curs.fetchall()[0][0]
-        curs.execute("select MAX(useridnum) from batches_archive where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\";")
-        max_user_num_batches_archive=curs.fetchall()[0][0]
 
-        if max_user_num_batches == None and max_user_num_batches_archive == None:
+        if max_user_num_batches == None:
             usernum=0;
-        elif max_user_num_batches == None and max_user_num_batches_archive != None:
-            usernum=max_user_num_batches_archive+1
-        elif max_user_num_batches != None and max_user_num_batches_archive == None:
+        else:    
             usernum=max_user_num_batches+1
-        else:     
-            usernum=max(max_user_num_batches,max_user_num_batches_archive)+1
+
+        userbatchid=useridyear + "_"+useridmonth+"_"+useridday+"_"+str(usernum)+"_0"
 
         #sanity checks to make sure this is really a new userbatchid
-        curs.execute("select batch_id from batches where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\" and useridnum="+str(usernum)+";")
+        curs.execute("select * from batches where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\" and useridnum="+str(usernum)+";")
         if len(curs.fetchall()) > 0:
-            print "batch_id "+str(batchid)+" was already inserted into the batches database, exiting"
+            print "batch_id "+str(userbatchid)+" was already inserted into the batches database, exiting"
             sys.exit(1)
-
-        curs.execute("select batch_id from batches_archive where useridyear=\""+useridyear+"\" and useridmonth=\""+useridmonth+"\" and useridday=\""+useridday+"\" and useridnum="+str(usernum)+";")
-        if len(curs.fetchall()) > 0:
-            print "batch_id "+str(batchid)+" was already inserted into the workflows database, exiting"
-            sys.exit(1)     
-
-        userbatchid=useridyear + "_"+useridmonth+"_"+useridday+"_"+str(usernum)
 
         f_index=0
         g_index=0
@@ -292,8 +247,6 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
 
         f=open(wf_names, 'r')
 
-        print "creating a new batch with batch_id = "+str(batchid)
-
 
         #os.popen("echo "+Description+" | mail -s \"[RelVal] "+ AnnouncementTitle +"\" andrew.m.levin@vanderbilt.edu --");  
 
@@ -303,7 +256,7 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
         return_value=return_value+"This batch was given the following batch id: "+str(userbatchid)
         return_value=return_value+"<br>\n"
         return_value=return_value+"<br>\n"
-        return_value=return_value+"You may monitor its progress at http://cms-project-relval.web.cern.ch/cms-project-relval/relval_monitor.txt\n"
+        return_value=return_value+"You may monitor its progress at http://cms-project-relval.web.cern.ch/cms-project-relval/relval_monitor_most_recent_50_batches.txt\n"
         return_value=return_value+"<br>\n"
         return_value=return_value+"<br>\n"
         return_value=return_value+"The information we have received is shown below.\n"
@@ -360,7 +313,7 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
 
         msg = MIMEMultipart()
         reply_to = []
-        send_to = ["hn-cms-dataopsrequests@cern.ch","andrew.m.levin@vanderbilt.edu"]
+        send_to = ["hn-cms-dataopsrequests@cern.ch","andrew.m.levin@vanderbilt.edu","andrew.m.levin.filter1@gmail.com"]
         #send_to = ["hn-cms-hnTest@cern.ch"]
         #send_to = ["andrew.m.levin@vanderbilt.edu"]
         msg_subj = AnnouncementTitle
@@ -390,11 +343,11 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
         except Exception as e:
             print "Error: unable to send email: %s" %(str(e))
 
-        curs.execute("insert into batches set batch_id="+str(batchid)+", announcement_title=\""+email_title+"\", processing_version="+proc_ver+", site=\""+site+"\", DN=\""+dn+"\", description=\""+description+"\", status=\"approved\", hn_message_id=\""+msg['Message-ID']+"\", useridyear=\""+useridyear+"\", useridmonth=\""+useridmonth+"\", useridday=\""+useridday+"\", useridnum="+str(usernum)+", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
+        curs.execute("insert into batches set announcement_title=\""+email_title+"\", batch_version_num=0, processing_version="+proc_ver+", site=\""+site+"\", DN=\""+dn+"\", description=\""+description+"\", status=\"approved\", hn_message_id=\""+msg['Message-ID']+"\", useridyear=\""+useridyear+"\", useridmonth=\""+useridmonth+"\", useridday=\""+useridday+"\", useridnum="+str(usernum)+", current_status_start_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\", batch_creation_time=\""+datetime.datetime.now().strftime("%y:%m:%d %H:%M:%S")+"\"")
 
         for line in f:
             workflow = line.rstrip('\n')
-            curs.execute("insert into workflows set batch_id="+str(batchid)+", workflow_name=\""+workflow+"\";")
+            curs.execute("insert into workflows set batch_version_num=0, useridyear=\""+useridyear+"\", useridmonth=\""+useridmonth+"\", useridday=\""+useridday+"\", useridnum="+str(usernum)+", workflow_name=\""+workflow+"\";")
 
         conn.commit()
 
@@ -407,5 +360,5 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
 
 if __name__ == '__main__':
     cherrypy.config.update({'server.socket_port': 8080})
-    cherrypy.config.update({'server.socket_host': 'relvaltest005.cern.ch'})
+    cherrypy.config.update({'server.socket_host': 'cmsrelval002.cern.ch'})
     cherrypy.quickstart(RelvalBatchAssigner())
