@@ -149,7 +149,9 @@ Does this batch include any heavy ion workflows? (This affects where the workflo
         proc_ver=str(1)
 
         if HI == "Yes":
-            site = "T2_CH_CERN_T0"
+            #site = "T2_CH_CERN_T0"
+            #site = "T2_CH_CERN_AI"
+            site = "T1_FR_CCIN2P3"
         elif HI == "No":
             site = "T1_US_FNAL"
         else:
