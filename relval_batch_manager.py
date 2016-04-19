@@ -74,13 +74,13 @@ Enter your username: <br>
 <br>
 <br>
 
-Enter the title of the announcement e-mail here (e.g. standard relval samples for 710pre7):<br> 
+Enter the title of the announcement e-mail (e.g. standard relval samples for 710pre7):<br> 
 <input type="text" name="AnnouncementTitle" size=100 />
 
 <br>
 <br>
 
-Enter the list of workflows here: <br>
+Enter the list of workflows: <br>
 <textarea name="ListOfWorkflows" rows="20" cols="80"></textarea>
 
 <br>
