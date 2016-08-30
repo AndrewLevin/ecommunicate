@@ -126,32 +126,6 @@ border: none;
 
         return register_function()
 
-    @cherrypy.expose
-    def add_message(self, message):
-
-        username1=cherrypy.request.login
-        
-        username2 = cherrypy.session.get("username2")
-        forward= cherrypy.session.get("forward")
-
-        secrets_file=open("/home/ec2-user/secrets.txt")
-
-        passwords=secrets_file.read().rstrip('\n')
-
-        db_password = passwords.split('\n')[0]
-
-        dbname = "open"
-
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-        curs = conn.cursor()
-
-        curs.execute("use "+dbname+";")
-            
-        curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+message+"\";")
-
-        conn.commit()
-
 
 class ShowMessages(object):
     @cherrypy.expose
@@ -496,6 +470,33 @@ class Chat(object):
         #return
 
         return print_messages()
+
+    @cherrypy.expose
+    def add_message(self, message):
+
+        username1=cherrypy.request.login
+        
+        username2 = cherrypy.session.get("username2")
+        forward= cherrypy.session.get("forward")
+
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+            
+        curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+message+"\";")
+
+        conn.commit()
+
     chat._cp_config = {'response.stream': True}
 
 class MakeContactRequest(object):
