@@ -626,6 +626,8 @@ class ContactRequestResponses(object):
     @cherrypy.expose
     def index(self):
 
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
         passwords=secrets_file.read().rstrip('\n')
 
         db_password = passwords.split('\n')[0]
@@ -712,18 +714,9 @@ class ContactRequestResponses(object):
 </ul>
 </nav>
 
-
-
 """ + contact_request_string + """
 
-  <table border=2>
-  <tr>
-  <td><iframe name="console_iframe1" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe2" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe3" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe4" class="terminal" />  </iframe></td>
-  </tr>
-  </table>
+  <iframe name="console_iframe4" class="terminal" />  </iframe>
 
 </body>
         </html>"""
@@ -840,7 +833,7 @@ if __name__ == '__main__':
        'tools.auth_basic.realm': 'localhost',
        'tools.auth_basic.checkpassword': validate_password
     } }  )
-    cherrypy.tree.mount(ContactRequestResponses(),'respond_to_contact_requests',{ '/': {
+    cherrypy.tree.mount(ContactRequestResponses(),'/respond_to_contact_requests',{ '/': {
        'tools.auth_basic.on': True,
        'tools.auth_basic.realm': 'localhost',
        'tools.auth_basic.checkpassword': validate_password
