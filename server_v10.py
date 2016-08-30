@@ -346,9 +346,9 @@ class Chat(object):
   </form>
 
  <form id="add_message_form" target="console_iframe2" method="post" action="add_message">
-  <input type="text" id="message" name="message" size="18" />
+  <input type="text" id="message" name="message" size="100" /> <br> <br>
   <button id="chat" class="fg-button ui-state-default ui-corner-all" type="submit">
-  Chat
+  Send Message
   </button>
   </form>
 
@@ -356,8 +356,6 @@ class Chat(object):
   <tr>
   <td><iframe name="console_iframe1" class="terminal" />  </iframe></td>
   <td><iframe name="console_iframe2" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe3" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe4" class="terminal" />  </iframe></td>
   </tr>
   </table>
 
@@ -517,9 +515,9 @@ class MakeContactRequest(object):
 
 <nav>
 <ul>
-<li><a href="chat.html">Chat</a></li>
-<li><a href="chat.html">Make Contact Requests</a></li>
-<li><a href="chat.html">Respond to Contact Requests</a></li>
+<li><a href="/chat">Chat</a></li>
+<li><a href="/make_contact_requests">Make Contact Requests</a></li>
+<li><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
 </ul>
 </nav>
 
@@ -536,15 +534,7 @@ Message: <br><br>
   </button>
   </form>
 
-
-  <table border=2>
-  <tr>
-  <td><iframe name="console_iframe1" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe2" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe3" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe4" class="terminal" />  </iframe></td>
-  </tr>
-  </table>
+  <iframe name="console_iframe2" class="terminal" /> </iframe>
 
 </body>
         </html>"""
@@ -817,7 +807,7 @@ if __name__ == '__main__':
        'tools.auth_basic.realm': 'localhost',
        'tools.auth_basic.checkpassword': validate_password
     } }  )
-    cherrypy.tree.mount(MakeContactRequest(),'/make_contact_request',{ '/': {
+    cherrypy.tree.mount(MakeContactRequest(),'/make_contact_requests',{ '/': {
        'tools.auth_basic.on': True,
        'tools.auth_basic.realm': 'localhost',
        'tools.auth_basic.checkpassword': validate_password
