@@ -141,9 +141,9 @@ function get_messages(){
    $.ajax({
       type: "GET",
       url: "get_messages",
-      success: function(data){
-         setTimeout('get_messages()',15000);
-        document.write("hello 90<br>")
+      success: function(arg1){
+//         setTimeout('get_messages()',15000);
+        document.write(arg1)
       },
       error: function(arg1, arg2, arg3){
          alert("There was an error. Some information about it is: "+arg2+" "+arg3)
@@ -168,7 +168,43 @@ $(document).ready(function(){
     def get_messages(self):
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
-        return "message 49"
+        username1="andrew"
+
+        username2="kevin"
+
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
+        curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" order by time;")
+
+        colnames = [desc[0] for desc in curs.description]
+
+        messages=curs.fetchall()
+
+        return_string=""
+
+        for message in messages:
+
+            message_dict=dict(zip(colnames, message))
+
+            if message_dict["forward"] == 1:
+                return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
+            elif message_dict["forward"] == 0:
+                return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
+
+        return return_string
+
 
     get_messages._cp_config = {'response.stream': True}     
 
