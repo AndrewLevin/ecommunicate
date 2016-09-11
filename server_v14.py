@@ -202,6 +202,8 @@ function get_messages(){
     def get_messages(self,username1,username2):
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
+
+
         sorted_usernames= sorted([username1,username2])
 
         username1=sorted_usernames[0]
@@ -319,6 +321,8 @@ class Chat(object):
         margin-top: 2px;
         font-family: Verdana;
         font-weight: bold;
+        cursor: default;
+
     }
     .terminal {
     width: 100%;
@@ -338,56 +342,83 @@ class Chat(object):
 </ul>
 </nav>
 
-<form id="show_messages_form" target="console_iframe1" method="post" action="chat">
-  Enter the username of the user that you want to chat with: <br><br>
-  <input type="text" id="username2" name="username2" size="18" /> <br><br>
-  <button id="chat" class="fg-button ui-state-default ui-corner-all" type="submit">
-  Display Messages
-  </button>
-  </form>
 
- <form id="add_message_form" target="console_iframe2" method="post" action="add_message">
-  <input type="text" id="message" name="message" size="100" /> <br> <br>
-  <button id="chat" class="fg-button ui-state-default ui-corner-all" type="submit">
-  Send Message
-  </button>
-  </form>
-
-<ul>
-<li id="kevin" class="contact">kevin</li>
-<li id="katie" class="contact">katie</li>
-</ul>
 
   <table border=2>
   <tr>
-  <td><iframe name="console_iframe1" class="terminal" />  </iframe></td>
-  <td><iframe name="console_iframe2" class="terminal" />  </iframe></td>
+  <td><ul>
+<li id="kevin" name="kevin" class="contact">kevin</li>
+<li id="katie" name="katie" class="contact">katie</li>
+</ul></td>
+  <td><iframe id="console_iframe2" name="console_iframe2" class="terminal" />  </iframe></td>
   </tr>
   </table>
 
 </body>
 
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
 <script>
 
-function chat_with_katie(e){
+function chat(e){
 
-alert("chat with katie");
+   $.ajax({
+      type: "GET",
+      url: "get_messages?username2="+e.target.id,
+      success: function(arg1){
+//         setTimeout('get_messages()',15000);
+
+var console_iframe2 = document.getElementById('console_iframe2');
+
+
+//clear the iframe
+console_iframe2.contentWindow.document.open();
+console_iframe2.contentWindow.document.close();
+
+console_iframe2.contentWindow.document.write(arg1);
+
+      },
+      error: function(arg1, arg2, arg3){
+         alert("There was an error. Some information about it is: "+arg2+" "+arg3)
+      }
+
+   });
 
 }
 
-function chat_with_kevin(e){
 
-alert("chat with kevin");
+function contact_mouseover(e){
+
+var target = e.target;
+
+$('#'+target.id).css('background-color','orange');
 
 }
+
+function contact_mouseout(e){
+
+var target = e.target;
+
+$('#'+target.id).css('background-color','green');
+
+}
+
 
 var katie = document.getElementById('katie')
 
-katie.addEventListener('click', function(e) { chat_with_katie(e); } , false )
+katie.addEventListener('click', function(e) { chat(e); } , false )
+
+katie.addEventListener('mouseover',function(e) {contact_mouseover(e); } ,  false)
+
+katie.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  false)
 
 var kevin = document.getElementById('kevin')
 
-kevin.addEventListener('click', function(e) { chat_with_kevin(e); } , false )
+kevin.addEventListener('click', function(e) { chat(e); } , false )
+
+kevin.addEventListener('mouseover',function(e) { contact_mouseover(e); } ,  false)
+
+kevin.addEventListener('mouseout',function(e) { contact_mouseout(e); } ,  false)
 
 </script>
 
@@ -498,6 +529,50 @@ kevin.addEventListener('click', function(e) { chat_with_kevin(e); } , false )
         #return
 
         return print_messages()
+
+    @cherrypy.expose
+    def get_messages(self,username2):
+        #dn=cherrypy.request.headers['Cms-Authn-Dn']
+
+        username1=cherrypy.request.login
+
+        sorted_usernames= sorted([username1,username2])
+
+        username1=sorted_usernames[0]
+        username2=sorted_usernames[1]
+
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
+        curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" order by time;")
+
+        colnames = [desc[0] for desc in curs.description]
+
+        messages=curs.fetchall()
+
+        return_string=""
+
+        for message in messages:
+
+            message_dict=dict(zip(colnames, message))
+
+            if message_dict["forward"] == 1:
+                return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
+            elif message_dict["forward"] == 0:
+                return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
+
+        return return_string
 
     @cherrypy.expose
     def add_message(self, message):
