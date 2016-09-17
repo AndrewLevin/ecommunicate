@@ -327,6 +327,13 @@ class Chat(object):
     .terminal {
     width: 100%;
     height: 30em;
+    border: none;
+
+}
+    .messageerrorbox {
+    width: 100%;
+    height: 1em;
+    border: none;
 
 }
 </style>
@@ -350,7 +357,17 @@ class Chat(object):
 <li id="kevin" name="kevin" class="contact">kevin</li>
 <li id="katie" name="katie" class="contact">katie</li>
 </ul></td>
-  <td><iframe id="console_iframe2" name="console_iframe2" class="terminal" />  </iframe></td>
+  <td>
+
+ <iframe id="console_iframe2" name="console_iframe2" class="terminal" />  </iframe>
+
+ <form id="add_message_form" target="console_iframe1" method="post" action="add_message">
+ <input type="text" id="message" name="message" size="100" /> <br> <br>
+ </form>
+
+ <iframe id="console_iframe1" name="console_iframe1" class="messageerrorbox" />  </iframe>
+
+</td>
   </tr>
   </table>
 
@@ -402,6 +419,26 @@ var target = e.target;
 $('#'+target.id).css('background-color','green');
 
 }
+
+console_iframe1=document.getElementById('console_iframe1')
+
+
+var add_message_form = document.getElementById('add_message_form')
+var message = document.getElementById('message')
+
+add_message_form.addEventListener('submit', function (e) { 
+
+e.preventDefault();
+
+add_message_form.submit();
+
+}, false)
+
+console_iframe1.addEventListener('load', function(e) {
+
+add_message_form.reset();
+
+}, false)
 
 
 var katie = document.getElementById('katie')
@@ -535,8 +572,16 @@ kevin.addEventListener('mouseout',function(e) { contact_mouseout(e); } ,  false)
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
         username1=cherrypy.request.login
+        cherrypy.session['username2'] = username2
 
         sorted_usernames= sorted([username1,username2])
+
+        if sorted_usernames == [username1,username2]:
+            forward=str(1)
+        else:
+            forward=str(0)
+
+        cherrypy.session['forward'] = forward
 
         username1=sorted_usernames[0]
         username2=sorted_usernames[1]
