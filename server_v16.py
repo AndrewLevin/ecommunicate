@@ -18,6 +18,8 @@ import time
 
 from HTMLParser import HTMLParser
 
+import json
+
 class Register(object):
     @cherrypy.expose
     def index(self):
@@ -158,6 +160,9 @@ function get_messages(){
       success: function(arg1){
 //         setTimeout('get_messages()',15000);
         document.write(arg1)
+
+
+
       },
       error: function(arg1, arg2, arg3){
          alert("There was an error. Some information about it is: "+arg2+" "+arg3)
@@ -399,8 +404,12 @@ class Chat(object):
 
  <iframe id="console_iframe2" name="console_iframe2" class="terminal" />  </iframe>
 
- <form id="add_message_form" target="console_iframe1" method="post" action="add_message">
- <input type="text" id="message" name="message" size="100" /> <br> <br>
+<form id="add_message_form" name = "add_messages_form" target="console_iframe1" method="POST" action="add_message">
+
+ <input type="text" id="add_message_text" name="add_message_text" size="100" /> <br> <br>
+
+ <input type="hidden" id="username2" name="username2"/>
+
  </form>
 
  <iframe id="console_iframe1" name="console_iframe1" class="messageerrorbox" />  </iframe>
@@ -415,38 +424,84 @@ class Chat(object):
 
 <script>
 
-function chat(e){
+messages_json = "";
+username2  = "";
 
-var target = e.target
+function show_messages(e){
 
-if( target.id != "contactslist"){
+   var target = e.target;
+
+   if( target.id != "contactslist"){
+
+    var console_iframe2 = document.getElementById('console_iframe2');
+    //clear the iframe
+    console_iframe2.contentWindow.document.open();
+    console_iframe2.contentWindow.document.close();
+    console_iframe2.contentWindow.document.write(messages_json[e.target.id]);
+    username2=e.target.id;
+
+   }
+}
+
+
+$(document).ready(function() {
+
+   chat();
+
+});
+
+function chat() {
 
    $.ajax({
-      type: "GET",
-      url: "get_messages?username2="+e.target.id,
-      success: function(arg1){
-//         setTimeout('get_messages()',15000);
-
-var console_iframe2 = document.getElementById('console_iframe2');
-
-
-//clear the iframe
-console_iframe2.contentWindow.document.open();
-console_iframe2.contentWindow.document.close();
-
-console_iframe2.contentWindow.document.write(arg1);
-
-      },
-      error: function(arg1, arg2, arg3){
-         alert("There was an error. Some information about it is: "+arg2+" "+arg3)
+      url: 'get_messages',
+      type: 'GET',
+      dataType: 'html',
+      success: function(data) {
+         parsed_data = JSON.parse(data);
+         //alert(parsed_data["phone8"]);
+         messages_json = parsed_data;
+         chat();
       }
-
    });
 
 }
 
-}
+$('#add_message_form').submit(function(event) {
 
+   event.preventDefault();
+
+   $('input[name="username2"]',this).val(username2);
+
+   var $this = $(this);
+
+   //$.get($this.attr('action'),$this.serialize());
+
+   //alert($this.serialize());
+
+   $.ajax({
+      url: $this.attr('action'),
+      type: 'POST',
+      dataType: 'html',
+      data: $this.serialize()
+   
+   });
+
+  add_message_form.reset();
+
+
+});
+
+
+//$('#add_message_text')
+//.keyup(function(event) {
+
+//if (event.keyCode == 13){
+
+//alert(event.keyCode);
+
+//}
+
+//});
 
 function contact_mouseover(e){
 
@@ -471,29 +526,29 @@ if( target.id != "contactslist"){
 
 console_iframe1=document.getElementById('console_iframe1')
 
-var add_message_form = document.getElementById('add_message_form')
-var message = document.getElementById('message')
+//var add_message_form = document.getElementById('add_message_form')
+//var message = document.getElementById('message')
 
-add_message_form.addEventListener('submit', function (e) { 
+//add_message_form.addEventListener('submit', function (e) { 
 
-e.preventDefault();
+//e.preventDefault();
 
-add_message_form.submit();
+//add_message_form.submit();
 
-}, false)
+//}, false)
 
-console_iframe1.addEventListener('load', function(e) {
+//console_iframe1.addEventListener('load', function(e) {
 
-add_message_form.reset();
+//add_message_form.reset();
 
-}, false)
+//}, false)
 
 
 var contactslist = document.getElementById('contactslist')
 
-contactslist.addEventListener('touchstart', function(e) { chat(e); } , false )
+contactslist.addEventListener('touchstart', function(e) { show_messages(e); } , false )
 
-contactslist.addEventListener('click', function(e) { chat(e); } , false )
+contactslist.addEventListener('click', function(e) { show_messages(e); } , false )
 
 contactslist.addEventListener('mouseover',function(e) {contact_mouseover(e); } ,  false)
 
@@ -568,7 +623,6 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
             while True:
 
-
                 time.sleep(1)
 
                 conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
@@ -610,23 +664,10 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         return print_messages()
 
     @cherrypy.expose
-    def get_messages(self,username2):
+    def get_messages(self):
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
         username1=cherrypy.request.login
-        cherrypy.session['username2'] = username2
-
-        sorted_usernames= sorted([username1,username2])
-
-        if sorted_usernames == [username1,username2]:
-            forward=str(1)
-        else:
-            forward=str(0)
-
-        cherrypy.session['forward'] = forward
-
-        username1=sorted_usernames[0]
-        username2=sorted_usernames[1]
 
         secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -642,34 +683,72 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
         curs.execute("use "+dbname+";")
 
-        curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" order by time;")
+        curs.execute("select * from contacts where username1 = \""+cherrypy.request.login+"\"")
 
-        colnames = [desc[0] for desc in curs.description]
+        contacts = curs.fetchall()
 
-        messages=curs.fetchall()
+        curs.execute("select * from contacts where username2 = \""+cherrypy.request.login+"\"")
 
-        return_string=""
+        contacts = contacts+curs.fetchall()
 
-        for message in messages:
+        colnames_contacts = [desc[0] for desc in curs.description]
 
-            message_dict=dict(zip(colnames, message))
+        messages_json = {}
 
-            if message_dict["forward"] == 1:
-                return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
-            elif message_dict["forward"] == 0:
-                return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
+        for contact in contacts:
 
-        return return_string
+            contact_dict=dict(zip(colnames_contacts, contact))
+
+            if contact_dict["username2"] == cherrypy.request.login:
+                username = contact_dict["username1"]
+                curs.execute("select * from messages where username1 = \""+username+"\" and username2 = \""+username1+"\" order by time;")
+            else:
+                assert(contact_dict["username1"] == cherrypy.request.login)
+                username = contact_dict["username2"]
+                curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username+"\" order by time;")
+
+            colnames = [desc[0] for desc in curs.description]
+
+            messages=curs.fetchall()
+
+            return_string=""
+
+            if len(messages) > 0:
+
+                messages_json[username] = []
+
+                for message in messages:
+
+                    message_dict=dict(zip(colnames, message))
+
+                    if message_dict["forward"] == 1:
+                        return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
+                        messages_json[username].append(str(message_dict["username1"] +": " + message_dict["message"]))
+                    elif message_dict["forward"] == 0:
+                        return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
+                        messages_json[username].append(str(message_dict["username2"] + ": " + message_dict["message"]))
+
+        time.sleep(10);
+
+        #return str(messages_json)
+
+        return json.dumps(messages_json)
+
+        #return '{"a1" : "b1"}'
+
+
 
     @cherrypy.expose
-    def add_message(self, message):
+    def add_message(self, add_message_text,username2):
 
         username1=cherrypy.request.login
         
-        username2 = cherrypy.session.get("username2")
-        forward= cherrypy.session.get("forward")
-
         sorted_usernames= sorted([username1,username2])
+
+        if sorted_usernames == [username1,username2]:
+            forward = "1"
+        else:
+            forward = "0"
 
         username1=sorted_usernames[0]
 
@@ -678,8 +757,6 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         secrets_file=open("/home/ec2-user/secrets.txt")
 
         passwords=secrets_file.read().rstrip('\n')
-
-        print message
 
         db_password = passwords.split('\n')[0]
 
@@ -691,7 +768,7 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
         curs.execute("use "+dbname+";")
 
-        curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+message+"\";")
+        curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+add_message_text+"\";")
 
         conn.commit()
 
