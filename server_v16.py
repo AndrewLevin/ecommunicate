@@ -437,7 +437,12 @@ function show_messages(e){
     //clear the iframe
     console_iframe2.contentWindow.document.open();
     console_iframe2.contentWindow.document.close();
-    console_iframe2.contentWindow.document.write(messages_json[e.target.id]);
+    for ( var i = 0, l = messages_json[e.target.id].length; i < l; i++ ) {
+        console_iframe2.contentWindow.document.write(messages_json[e.target.id][i]);
+        console_iframe2.contentWindow.document.write("<br>");
+    }
+
+
     username2=e.target.id;
 
    }
