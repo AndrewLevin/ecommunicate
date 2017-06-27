@@ -438,11 +438,16 @@ function show_messages(e){
     //clear the iframe
     console_iframe2.contentWindow.document.open();
     console_iframe2.contentWindow.document.close();
-    for ( var i = 0, l = messages_json[e.target.id].length; i < l; i++ ) {
-        console_iframe2.contentWindow.document.write(messages_json[e.target.id][i][0]+": "+messages_json[e.target.id][i][1]);
-        console_iframe2.contentWindow.document.write("<br>");
-    }
 
+
+
+    if (messages_json != "") {
+
+        for ( var i = 0, l = messages_json[e.target.id].length; i < l; i++ ) {
+            console_iframe2.contentWindow.document.write(messages_json[e.target.id][i][0]+": "+messages_json[e.target.id][i][1]);
+            console_iframe2.contentWindow.document.write("<br>");
+        }
+    }
 
     username2=e.target.id;
 
@@ -470,7 +475,13 @@ function chat() {
          if (messages_json_old != ""){
              for (var item in messages_json) {
                  if ( messages_json[item].length > messages_json_old[item].length ) {
-                    $('#'+item).css('background-color','blue');
+                    for ( var i = messages_json_old[item].length, l = messages_json[item].length; i < l; i++ ) { 
+                        alert("debug 1");
+                        if (messages_json[item][i][0] == item){
+                                                    alert("debug 2");
+                            $('#'+item).css('background-color','blue');
+                        }
+                    }  
 
                  }
              }
