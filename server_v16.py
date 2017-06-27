@@ -425,6 +425,7 @@ class Chat(object):
 <script>
 
 messages_json = "";
+messages_json_old = "";
 username2  = "";
 
 function show_messages(e){
@@ -438,7 +439,7 @@ function show_messages(e){
     console_iframe2.contentWindow.document.open();
     console_iframe2.contentWindow.document.close();
     for ( var i = 0, l = messages_json[e.target.id].length; i < l; i++ ) {
-        console_iframe2.contentWindow.document.write(messages_json[e.target.id][i]);
+        console_iframe2.contentWindow.document.write(messages_json[e.target.id][i][0]+": "+messages_json[e.target.id][i][1]);
         console_iframe2.contentWindow.document.write("<br>");
     }
 
@@ -465,6 +466,17 @@ function chat() {
          parsed_data = JSON.parse(data);
          //alert(parsed_data["phone8"]);
          messages_json = parsed_data;
+
+         if (messages_json_old != ""){
+             for (var item in messages_json) {
+                 if ( messages_json[item].length > messages_json_old[item].length ) {
+                    $('#'+item).css('background-color','blue');
+
+                 }
+             }
+         }
+         messages_json_old = messages_json;
+
          chat();
       }
    });
@@ -728,10 +740,10 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
                     if message_dict["forward"] == 1:
                         return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
-                        messages_json[username].append(str(message_dict["username1"] +": " + message_dict["message"]))
+                        messages_json[username].append([message_dict["username1"], message_dict["message"]])
                     elif message_dict["forward"] == 0:
                         return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
-                        messages_json[username].append(str(message_dict["username2"] + ": " + message_dict["message"]))
+                        messages_json[username].append([message_dict["username2"], message_dict["message"]])
 
         time.sleep(10);
 
