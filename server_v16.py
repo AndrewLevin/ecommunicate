@@ -203,52 +203,6 @@ function get_messages(){
         </html>"""
 
 
-    @cherrypy.expose
-    def get_messages(self,username1,username2):
-        #dn=cherrypy.request.headers['Cms-Authn-Dn']
-
-
-
-        sorted_usernames= sorted([username1,username2])
-
-        username1=sorted_usernames[0]
-        username2=sorted_usernames[1]
-
-        secrets_file=open("/home/ec2-user/secrets.txt")
-
-        passwords=secrets_file.read().rstrip('\n')
-
-        db_password = passwords.split('\n')[0]
-
-        dbname = "open"
-
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-        curs = conn.cursor()
-
-        curs.execute("use "+dbname+";")
-
-        curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" order by time;")
-
-        colnames = [desc[0] for desc in curs.description]
-
-        messages=curs.fetchall()
-
-        return_string=""
-
-        for message in messages:
-
-            message_dict=dict(zip(colnames, message))
-
-            if message_dict["forward"] == 1:
-                return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
-            elif message_dict["forward"] == 0:
-                return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
-
-        return return_string
-
-    #get_messages._cp_config = {'response.stream': True}     
-
 class Main(object):
     @cherrypy.expose
     def index(self):
@@ -331,6 +285,10 @@ class Chat(object):
 
         contacts_string = "<td><ul id=\"contactslist\">\n"
 
+        iframes_string = "";
+
+        iframes_hide_string = "";
+
         for contact in contacts:
 
             colnames = [desc[0] for desc in curs.description]
@@ -344,6 +302,11 @@ class Chat(object):
                 username = contact_dict["username2"]
 
             contacts_string = contacts_string+"<li id=\""+username+"\" name=\""+username+"\" class=\"contact\">"+username+"</li>\n" 
+
+            iframes_string = iframes_string+ "<iframe id=\"console_"+username+"\" name=\"console_"+username+"\" class=\"terminal\" />  </iframe>\n"
+
+
+            iframes_hide_string = iframes_hide_string+"$(\'#console_" + username + "\').hide();\n"
 
         contacts_string=contacts_string+"</ul></td>\n</td>"
 
@@ -402,7 +365,7 @@ class Chat(object):
 """ + contacts_string + """ 
   <td>
 
- <iframe id="console_iframe2" name="console_iframe2" class="terminal" />  </iframe>
+"""+ iframes_string + """
 
 <form id="add_message_form" name = "add_messages_form" target="console_iframe1" method="POST" action="add_message">
 
@@ -434,37 +397,87 @@ function show_messages(e){
 
    if( target.id != "contactslist"){
 
-    var console_iframe2 = document.getElementById('console_iframe2');
-    //clear the iframe
-    console_iframe2.contentWindow.document.open();
-    console_iframe2.contentWindow.document.close();
+    var console_iframe2 = document.getElementById('console_'+e.target.id);
 
+    if (username2 != ""){
+    
+        $('#console_'+username2).hide();
 
-
-    if (messages_json != "") {
-
-        for ( var i = 0, l = messages_json[e.target.id].length; i < l; i++ ) {
-            console_iframe2.contentWindow.document.write(messages_json[e.target.id][i][0]+": "+messages_json[e.target.id][i][1]);
-            console_iframe2.contentWindow.document.write("<br>");
-        }
     }
+
+
+//    console_iframe2.slideDown('slow');
+
+ 
 
     username2=e.target.id;
 
+    $('#console_'+username2).show();
+
    }
+}
+
+function update_messages(){
+
+    if (messages_json != "") {
+
+
+
+        for (var item in messages_json) {  
+
+            var console_iframe2 = document.getElementById('console_'+item);
+
+            //clear the iframe
+            console_iframe2.contentWindow.document.open();
+            console_iframe2.contentWindow.document.close();
+
+            for ( var i = 0, l = messages_json[item].length; i < l; i++ ) {
+                console_iframe2.contentWindow.document.write(messages_json[item][i][0]+": "+messages_json[item][i][1]);
+                console_iframe2.contentWindow.document.write("<br>");
+            }
+        }
+    }
+
 }
 
 
 $(document).ready(function() {
 
+
+"""+iframes_hide_string+"""
+
+   chat_initial();
    chat();
 
 });
 
-function chat() {
+
+function chat_initial() {
 
    $.ajax({
       url: 'get_messages',
+      type: 'GET',
+      dataType: 'html',
+      success: function(data) {
+         parsed_data = JSON.parse(data);
+         //alert(parsed_data["phone8"]);
+         messages_json = parsed_data;
+         messages_json_old = messages_json;
+
+         update_messages();   
+
+      }
+   });
+
+
+
+
+}
+
+function chat() {
+
+   $.ajax({
+      url: 'get_messages?upon_update=True',
       type: 'GET',
       dataType: 'html',
       success: function(data) {
@@ -476,9 +489,7 @@ function chat() {
              for (var item in messages_json) {
                  if ( messages_json[item].length > messages_json_old[item].length ) {
                     for ( var i = messages_json_old[item].length, l = messages_json[item].length; i < l; i++ ) { 
-                        alert("debug 1");
                         if (messages_json[item][i][0] == item){
-                                                    alert("debug 2");
                             $('#'+item).css('background-color','blue');
                         }
                     }  
@@ -487,6 +498,8 @@ function chat() {
              }
          }
          messages_json_old = messages_json;
+
+         update_messages();  
 
          chat();
       }
@@ -576,7 +589,11 @@ var contactslist = document.getElementById('contactslist')
 
 contactslist.addEventListener('touchstart', function(e) { show_messages(e); } , false )
 
-contactslist.addEventListener('click', function(e) { show_messages(e); } , false )
+contactslist.addEventListener('click', function(e) { 
+
+    show_messages(e); 
+
+} , false )
 
 contactslist.addEventListener('mouseover',function(e) {contact_mouseover(e); } ,  false)
 
@@ -692,7 +709,7 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         return print_messages()
 
     @cherrypy.expose
-    def get_messages(self):
+    def get_messages(self,upon_update=False):
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
         username1=cherrypy.request.login
@@ -756,7 +773,8 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
                         return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
                         messages_json[username].append([message_dict["username2"], message_dict["message"]])
 
-        time.sleep(10);
+        if upon_update:
+            time.sleep(10);
 
         #return str(messages_json)
 
