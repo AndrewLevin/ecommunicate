@@ -390,6 +390,7 @@ class Chat(object):
 messages_json = "";
 messages_json_old = "";
 username2  = "";
+max_time = ""
 
 function show_messages(e){
 
@@ -447,7 +448,6 @@ $(document).ready(function() {
 """+iframes_hide_string+"""
 
    chat_initial();
-   chat();
 
 });
 
@@ -461,10 +461,14 @@ function chat_initial() {
       success: function(data) {
          parsed_data = JSON.parse(data);
          //alert(parsed_data["phone8"]);
-         messages_json = parsed_data;
+         messages_json = parsed_data[0];
+         max_time=parsed_data[1]; 
+
          messages_json_old = messages_json;
 
-         update_messages();   
+         update_messages(); 
+
+         chat_recursive();
 
       }
    });
@@ -474,16 +478,20 @@ function chat_initial() {
 
 }
 
-function chat() {
+function chat_recursive() {
+
+get_messages_url = 'get_messages?upon_update=True&client_max_time='+max_time;
 
    $.ajax({
-      url: 'get_messages?upon_update=True',
+      url: get_messages_url,
       type: 'GET',
       dataType: 'html',
       success: function(data) {
+
          parsed_data = JSON.parse(data);
          //alert(parsed_data["phone8"]);
-         messages_json = parsed_data;
+         messages_json = parsed_data[0];
+         max_time = parsed_data[1];
 
          if (messages_json_old != ""){
              for (var item in messages_json) {
@@ -501,7 +509,7 @@ function chat() {
 
          update_messages();  
 
-         chat();
+         chat_recursive();
       }
    });
 
@@ -709,8 +717,10 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         return print_messages()
 
     @cherrypy.expose
-    def get_messages(self,upon_update=False):
+    def get_messages(self,upon_update=False,client_max_time=""):
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
+
+        #client_max_time="2017-06-30 08:01:06.562369";
 
         username1=cherrypy.request.login
 
@@ -723,6 +733,37 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         dbname = "open"
 
         conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        if upon_update:
+
+            while True:
+
+                conn.commit()
+                
+                curs = conn.cursor()
+
+                curs.execute("use "+dbname+";")
+
+                curs.execute("select MAX(time) from messages where username1=\""+username1+"\";")
+
+                server_max_time = curs.fetchall()[0][0]
+
+                if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
+                    break
+
+                curs.execute("select MAX(time) from messages where username2=\""+username1+"\";")
+
+                server_max_time = curs.fetchall()[0][0]
+
+                if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
+                    break
+
+                curs.close()    
+                
+                time.sleep(0.1)
+
+
+        #conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
 
         curs = conn.cursor()
 
@@ -739,6 +780,7 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         colnames_contacts = [desc[0] for desc in curs.description]
 
         messages_json = {}
+
 
         for contact in contacts:
 
@@ -773,12 +815,32 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
                         return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
                         messages_json[username].append([message_dict["username2"], message_dict["message"]])
 
-        if upon_update:
-            time.sleep(10);
 
         #return str(messages_json)
 
-        return json.dumps(messages_json)
+        curs.execute("select MAX(time) from messages where username1=\""+username1+"\";")
+
+        max_time1 = curs.fetchall()[0][0]
+
+        curs.execute("select MAX(time) from messages where username2=\""+username1+"\";")
+
+        max_time2 = curs.fetchall()[0][0]
+
+        curs.close()
+
+        if max_time1 == None and max_time2 != None:
+            max_time = str(max_time2)
+
+        elif max_time2 == None and max_time1 != None:
+            max_time = str(max_time1)
+
+        elif max_time1 == None and max_time2 == None:
+            max_time = None
+
+        else:
+            max_time = str(max(max_time1,max_time2))
+
+        return json.dumps([messages_json,max_time])
 
         #return '{"a1" : "b1"}'
 
