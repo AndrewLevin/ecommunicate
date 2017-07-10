@@ -1,3 +1,4 @@
+
 import MySQLdb
 import sys
 import datetime
@@ -130,7 +131,7 @@ border: none;
         return register_function()
 
 
-class ShowMessages(object):
+class View(object):
     @cherrypy.expose
     def index(self):
         return """<html>
@@ -151,17 +152,54 @@ height: 30em;
 
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
 
+</head>
+
+<body>
+
+<center>
+
+
+
+<form id="view_messages_form" target="console_iframe" method="post" action="view_messages">
+  username1: <br><br>
+  <input type="text" id="username1" name="username1" size="18" /><br><br>
+  username2: <br><br>
+  <input type="text" id="username2" name="username2" size="18" /> <br><br>
+  <button id="ping" class="fg-button ui-state-default ui-corner-all" type="submit">
+  View
+  </button>
+</form>
+
+<iframe name="console_iframe" class="terminal" /> </iframe>
+
+</center>
+
+</body>
+
 <script>
 
-function get_messages(){
+$('#view_messages_form').submit(function(event) {
+
+
+
+   event.preventDefault(); 
+
+   var $this = $(this);
+
    $.ajax({
-      type: "GET",
-      url: "get_messages",
-      success: function(arg1){
-//         setTimeout('get_messages()',15000);
-        document.write(arg1)
+      type: "POST",
+      url: $this.attr('action'),
+      dataType: 'html',
+      data: $this.serialize(),
+      success: function(data){
 
 
+        parsed_data = JSON.parse(data);
+        messages_list = parsed_data[0];
+        for ( var i = 0, l = messages_list.length; i < l; i++ ) {
+           document.write(messages_list[i][0]+": "+messages_list[i][1]);
+           document.write("<br>");
+        }
 
       },
       error: function(arg1, arg2, arg3){
@@ -169,38 +207,108 @@ function get_messages(){
       }
 
    });
-}
 
+});
 
-//$(document).ready(function(){
-//    get_messages();
-//});
 
 </script>
 
-</head>
+</html>"""
 
-<body>
 
-<center>
+    @cherrypy.expose
+    def view_messages(self,username1,username2,upon_update=False,client_max_time=""):
+        #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
-<form id="ping_form" target="console_iframe" method="post" action="get_messages">
-  username1: <br><br>
-  <input type="text" id="username1" name="username1" size="18" /><br><br>
-  username2: <br><br>
-  <input type="text" id="username2" name="username2" size="18" /> <br><br>
-  <button id="ping" class="fg-button ui-state-default ui-corner-all" type="submit">
-  Display Messages
-  </button>
-  </form>
+        #client_max_time="2017-06-30 08:01:06.562369";
 
-<iframe name="console_iframe" class="terminal" />
+        sorted_usernames= sorted([username1,username2])
 
-</center>
+        username1=sorted_usernames[0]
 
-</body>
+        username2=sorted_usernames[1]
 
-        </html>"""
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        if upon_update:
+
+            while True:
+
+                conn.commit()
+                
+                curs = conn.cursor()
+
+                curs.execute("use "+dbname+";")
+
+                curs.execute("select MAX(time) from messages where username1=\""+username1+"\";")
+
+                server_max_time = curs.fetchall()[0][0]
+
+                if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
+                    break
+
+                curs.execute("select MAX(time) from messages where username2=\""+username1+"\";")
+
+                server_max_time = curs.fetchall()[0][0]
+
+                if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
+                    break
+
+                curs.close()    
+                
+                time.sleep(0.1)
+
+
+        #conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
+        messages_list = []
+
+        curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" order by time;")
+
+        colnames = [desc[0] for desc in curs.description]
+
+        messages=curs.fetchall()
+
+        return_string=""
+
+        if len(messages) > 0:
+
+            for message in messages:
+
+                message_dict=dict(zip(colnames, message))
+
+                if message_dict["forward"] == 1:
+                    return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
+                    messages_list.append([message_dict["username1"], message_dict["message"]])
+                elif message_dict["forward"] == 0:
+                    return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
+                    messages_list.append([message_dict["username2"], message_dict["message"]])
+
+
+        #return str(messages_json)
+
+        curs.execute("select MAX(time) from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
+
+        max_time = str(curs.fetchall()[0][0])
+
+        curs.close()
+
+        return json.dumps([messages_list,max_time])
+
+        #return '{"a1" : "b1"}'
+
 
 
 class Main(object):
@@ -305,7 +413,6 @@ class Chat(object):
 
             iframes_string = iframes_string+ "<iframe id=\"console_"+username+"\" name=\"console_"+username+"\" class=\"terminal\" />  </iframe>\n"
 
-
             iframes_hide_string = iframes_hide_string+"$(\'#console_" + username + "\').hide();\n"
 
         contacts_string=contacts_string+"</ul></td>\n</td>"
@@ -315,22 +422,27 @@ class Chat(object):
 <head><title>open</title>
 
 <style>
+
+ul {
+    list-style:none;
+    padding-left:0;
+}
+
     .contact {
         color : black;
         background-color: green;
-        list-style-type: none;
         height: 50px;
         font-size: 24px;
-        border-top: 2px solid black;
-        border-bottom: 2px solid black;
         font-size: 24px;
-        width: 100px;
-        padding-left: 20px;
+        width: 98.5%;
+//        padding-left: 20px;
         padding-top: 20px;
         margin-top: 2px;
         font-family: Verdana;
         font-weight: bold;
         cursor: default;
+        border-top: 2px solid black;
+        border-bottom: 2px solid black;
 
     }
     .terminal {
@@ -537,7 +649,6 @@ $('#add_message_form').submit(function(event) {
 
   add_message_form.reset();
 
-
 });
 
 
@@ -610,111 +721,6 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 </script>
 
         </html>"""
-
-    @cherrypy.expose
-    def chat(self, username2):
-
-        username1=cherrypy.request.login
-
-        sorted_usernames= sorted([username1,username2])
-
-        if sorted_usernames == [username1,username2]:
-            forward=str(1)
-        else:
-            forward=str(0)
-
-        username1 = sorted_usernames[0]
-        username2 = sorted_usernames[1]
-
-        cherrypy.session['username1'] = username1
-        cherrypy.session['username2'] = username2
-        cherrypy.session['forward'] = forward
-
-        cherrypy.session.save()
-
-        #dn=cherrypy.request.headers['Cms-Authn-Dn']
-
-        secrets_file=open("/home/ec2-user/secrets.txt")
-
-        passwords=secrets_file.read().rstrip('\n')
-
-        db_password = passwords.split('\n')[0]
-
-        dbname = "open"
-
-        #conn = MySQLdb.connect(host=' tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com:3306', user='open', passwd="openserver")
-
-        def print_messages():
-
-            #for some reason, if there no messages inserted already, without this yield statement, the session does not get saved
-            yield "<br>"
-
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-            curs = conn.cursor()
-
-            curs.execute("use "+dbname+";")
-
-            #curs.execute("select * from messages order by time where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
-
-            current_time=datetime.datetime.now()
-
-            curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" order by time;")
-
-            colnames = [desc[0] for desc in curs.description]
-
-            messages=curs.fetchall()
-
-            for message in messages:
-
-                message_dict=dict(zip(colnames, message))
-
-                if message_dict["forward"] == 1:
-                    yield str(message_dict["username1"] +": " + message_dict["message"]+"<br>")
-                elif message_dict["forward"] == 0:
-                    yield str(message_dict["username2"] + ": " + message_dict["message"]+"<br>")
-
-            while True:
-
-                time.sleep(1)
-
-                conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-                curs = conn.cursor()
-
-                curs.execute("use "+dbname+";")
-
-                current_time_old=current_time
-                current_time=datetime.datetime.now()
-
-                print current_time_old.strftime("%y:%m:%d %H:%M:%S.%f")
-
-                #curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" order by time;")
-                curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\" and time > \""+current_time_old.strftime("%y:%m:%d %H:%M:%S.%f")+"\" order by time;")
-
-                colnames = [desc[0] for desc in curs.description]
-
-                messages=curs.fetchall()
-
-                #current_time=datetime.datetime.now()
-
-                #if len(messages) > 0:
-                #    current_time=datetime.datetime.now()
-
-                for message in messages:
-
-                    message_dict=dict(zip(colnames, message))
-
-                    print message_dict["time"]
-
-                    if message_dict["forward"] == 1:
-                        yield str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
-                    elif message_dict["forward"] == 0:
-                        yield str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
-
-        #return
-
-        return print_messages()
 
     @cherrypy.expose
     def get_messages(self,upon_update=False,client_max_time=""):
@@ -879,8 +885,6 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+add_message_text+"\";")
 
         conn.commit()
-
-    chat._cp_config = {'response.stream': True}
 
 class MakeContactRequest(object):
     @cherrypy.expose
@@ -1211,7 +1215,7 @@ if __name__ == '__main__':
     cherrypy.config.update({'server.socket_host': 'ec2-52-42-148-78.us-west-2.compute.amazonaws.com'})
     cherrypy.config.update({'tools.sessions.on': True})
 
-    cherrypy.tree.mount(ShowMessages(),'/show_messages')
+    cherrypy.tree.mount(View(),'/view')
     cherrypy.tree.mount(Chat(),'/chat',{ '/': {
        'tools.auth_basic.on': True,
        'tools.auth_basic.realm': 'localhost',
