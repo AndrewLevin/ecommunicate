@@ -42,6 +42,12 @@ border: none;
 </head>
 <body>
 
+   This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable on the open internet. Register here for your free account. 
+
+<br><br>
+
+<center>
+
    <form id="register" target="console_iframe" method="post" action="register">
 
    username: <br><br>
@@ -57,6 +63,7 @@ border: none;
 
   <iframe name="console_iframe" class="terminal" />
 
+</center>
   
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
@@ -949,7 +956,7 @@ Message: <br><br>
   </button>
   </form>
 
-  <iframe name="console_iframe2" class="terminal" /> </iframe>
+  <iframe name="console_iframe3" class="terminal" /> </iframe>
 
 </body>
         </html>"""
