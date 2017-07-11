@@ -1,4 +1,3 @@
-
 import MySQLdb
 import sys
 import datetime
@@ -555,6 +554,15 @@ function update_messages(){
                 console_iframe2.contentWindow.document.write(messages_json[item][i][0]+": "+messages_json[item][i][1]);
                 console_iframe2.contentWindow.document.write("<br>");
             }
+
+            var console_iframe2_contentWindow_document = console_iframe2.contentWindow.document;
+
+
+            //this will "over-scroll", but it works i.e. it moves to the bottom    
+
+            $(console_iframe2_contentWindow_document).scrollTop($(console_iframe2_contentWindow_document).height());  
+
+
         }
     }
 
