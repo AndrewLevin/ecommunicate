@@ -360,10 +360,10 @@ class Main(object):
 <body>
 
 <nav>
-<ul>
-<li><a href="/chat">Chat</a></li>
-<li><a href="/make_contact_request">Make Contact Requests</a></li>
-<li><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
+<ul class="menubar">
+<li class="menubar"><a href="/chat">Chat</a></li>
+<li class="menubar"><a href="/make_contact_request">Make Contact Requests</a></li>
+<li class="menubar"><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
 </ul>
 </nav>
 
@@ -429,6 +429,17 @@ class Chat(object):
 
 <style>
 
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 5px;
+}
+
 ul {
     list-style:none;
     padding-left:0;
@@ -468,14 +479,28 @@ ul {
 </head>
 <body>
 
-<nav>
-<ul>
-<li><a href="/chat">Chat</a></li>
-<li><a href="/make_contact_requests">Make Contact Requests</a></li>
-<li><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
-</ul>
-</nav>
 
+<!--
+<nav>
+-->
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/chat">Chat</a></li>
+<li class="menubar"><a href="/make_contact_requests">Make Contact Requests</a></li>
+<li class="menubar"><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
+</ul>
+
+</div>
+
+</div>
+
+<!--
+</nav>
+-->
 
 
   <table border=2>
@@ -909,6 +934,18 @@ class MakeContactRequest(object):
 <head><title>open</title>
 
 <style>
+
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 5px;
+}
+
     .fg-button {
     outline: 0;
     clear: left;
@@ -944,10 +981,10 @@ class MakeContactRequest(object):
 <body>
 
 <nav>
-<ul>
-<li><a href="/chat">Chat</a></li>
-<li><a href="/make_contact_requests">Make Contact Requests</a></li>
-<li><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
+<ul class="menubar">
+<li class="menubar"><a href="/chat">Chat</a></li>
+<li class="menubar"><a href="/make_contact_requests">Make Contact Requests</a></li>
+<li class="menubar"><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
 </ul>
 </nav>
 
@@ -1085,6 +1122,18 @@ class ContactRequestResponses(object):
 <head><title>open</title>
 
 <style>
+
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 5px;
+}
+
     .fg-button {
     outline: 0;
     clear: left;
@@ -1120,10 +1169,10 @@ class ContactRequestResponses(object):
 <body>
 
 <nav>
-<ul>
-<li><a href="/chat">Chat</a></li>
-<li><a href="/contact_request_responses">Make Contact Requests</a></li>
-<li><a href="/contact_requests">Respond to Contact Requests</a></li>
+<ul class="menubar">
+<li class="menubar"><a href="/chat">Chat</a></li>
+<li class="menubar"><a href="/contact_request_responses">Make Contact Requests</a></li>
+<li class="menubar"><a href="/contact_requests">Respond to Contact Requests</a></li>
 </ul>
 </nav>
 
