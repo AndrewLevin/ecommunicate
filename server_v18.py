@@ -22,15 +22,29 @@ import json
 
 def is_session_authenticated(*args, **kwargs):
 
+    conditions = cherrypy.request.config.get('auth.require', None)
+    if conditions is not None:
 
-    username = cherrypy.session.get('_cp_username')
+        username = cherrypy.session.get('_cp_username')
 
-    if username:
-        cherrypy.request.login = username
-    else:
-        raise cherrypy.HTTPRedirect("/loginlogout/login")
+        if username:
+            cherrypy.request.login = username
+        else:
+            raise cherrypy.HTTPRedirect("/loginlogout/login")
 
 cherrypy.tools.auth = cherrypy.Tool('before_handler', is_session_authenticated)
+
+def require(*conditions):
+    """A decorator that appends conditions to the auth.require config
+    variable."""
+    def decorate(f):
+        if not hasattr(f, '_cp_config'):
+            f._cp_config = dict()
+        if 'auth.require' not in f._cp_config:
+            f._cp_config['auth.require'] = []
+        f._cp_config['auth.require'].extend(conditions)
+        return f
+    return decorate
 
 class LogInLogOut(object):
 
@@ -56,7 +70,7 @@ class LogInLogOut(object):
         
 
     @cherrypy.expose
-    def login(self, username=None, password=None, from_page="/chat/"):
+    def login(self, username=None, password=None, from_page="/"):
 
         if username is None or password is None:
             return self.login_html(from_page=from_page)
@@ -67,16 +81,12 @@ class LogInLogOut(object):
         else:
             cherrypy.request.login = username
             cherrypy.session['_cp_username'] = username
-
             raise cherrypy.HTTPRedirect(from_page)
     
     @cherrypy.expose
     def logout(self, from_page="/"):
-        sess = cherrypy.session
-        username = sess.get('_cp_username', None)
-        sess['_cp_username'] = None
-        if username:
-            cherrypy.request.login = None
+        cherrypy.session['_cp_username'] = None
+        cherrypy.request.login = None
         raise cherrypy.HTTPRedirect(from_page)
 
 class Register(object):
@@ -377,10 +387,16 @@ $('#view_messages_form').submit(function(event) {
 
 class Chat(object):
 
-#    loginlogout = LogInLogOut()
+    _cp_config = {
+        'tools.sessions.on': True,
+        'tools.auth.on': True
+    }
+
+    loginlogout = LogInLogOut()
 
 
     @cherrypy.expose
+    @require()
     def index(self):
 
         secrets_file=open("/home/ec2-user/secrets.txt")
@@ -497,9 +513,10 @@ ul {
 <div id="nav">
 
 <ul class="menubar">
-<li class="menubar"><a href="/chat">Chat</a></li>
-<li class="menubar"><a href="/make_contact_requests">Make Contact Requests</a></li>
-<li class="menubar"><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
+<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/make_contact_requests/">Make Contact Requests</a></li>
+<li class="menubar"><a href="/respond_to_contact_requests/">Respond to Contact Requests</a></li>
+<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
 </ul>
 
 </div>
@@ -1244,8 +1261,6 @@ li.menubar {
 
         return "Your responses have been registered."
 
-USERS = {'jon': 'secret'}
-
 def is_right_password(username, password):
 
     secrets_file=open("/home/ec2-user/secrets.txt")
@@ -1291,21 +1306,15 @@ def is_right_password(username, password):
 if __name__ == '__main__':
     cherrypy.config.update({'server.socket_port': 8080})
     cherrypy.config.update({'server.socket_host': 'ec2-52-42-148-78.us-west-2.compute.amazonaws.com'})
-    cherrypy.config.update({'tools.sessions.on': True})
+    #cherrypy.config.update({'tools.sessions.on': True})
     #cherrypy.config.update({'tools.auth.on': True})
 
-    cherrypy.tree.mount(View(),'/view')
-    cherrypy.tree.mount(Chat(),'/chat', { '/': {
-       'tools.auth.on': True,
-    } }  )
-    cherrypy.tree.mount(MakeContactRequest(),'/make_contact_requests', { '/': {
-       'tools.auth.on': True,
-    } }    )
-    cherrypy.tree.mount(ContactRequestResponses(),'/respond_to_contact_requests', { '/': {
-       'tools.auth.on': True,
-    } }    )
-    cherrypy.tree.mount(Register(),'/register')
-    cherrypy.tree.mount(LogInLogOut(),'/loginlogout')
+    #cherrypy.tree.mount(View(),'/view')
+    cherrypy.tree.mount(Chat())
+    #cherrypy.tree.mount(MakeContactRequest(),'/make_contact_requests')
+    #cherrypy.tree.mount(ContactRequestResponses(),'/respond_to_contact_requests')
+    #cherrypy.tree.mount(Register(),'/register')
+#    cherrypy.tree.mount(LogInLogOut(),'/loginlogout')
 
     cherrypy.server.ssl_module = 'builtin'
     cherrypy.server.ssl_certificate = "cert.pem"
