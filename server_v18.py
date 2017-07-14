@@ -20,6 +20,65 @@ from HTMLParser import HTMLParser
 
 import json
 
+def is_session_authenticated(*args, **kwargs):
+
+
+    username = cherrypy.session.get('_cp_username')
+
+    if username:
+        cherrypy.request.login = username
+    else:
+        raise cherrypy.HTTPRedirect("/loginlogout/login")
+
+cherrypy.tools.auth = cherrypy.Tool('before_handler', is_session_authenticated)
+
+class LogInLogOut(object):
+
+    def login_html(self,  message="", from_page="/"):
+
+        login_html_string = "<html>"
+        login_html_string = login_html_string+"<center>"
+        login_html_string = login_html_string+"<form method=\"post\" action=\"/loginlogout/login\">"
+        login_html_string = login_html_string+"<input type=\"hidden\" name=\"from_page\" value=\""+from_page+"\" />"
+        login_html_string = login_html_string+"username: <br><br>"
+        login_html_string = login_html_string+"<input type=\"text\" id=\"username\" name=\"username\" size=\"18\" /><br><br>"
+        login_html_string = login_html_string+"password: <br><br>"
+        login_html_string = login_html_string+"<input type=\"password\" id=\"password\" name=\"password\" size=\"18\" /> <br><br>"
+        login_html_string = login_html_string+"<button type=\"submit\">"
+        login_html_string = login_html_string+"Login"
+        login_html_string = login_html_string+"</button>"
+        if message != "":
+            login_html_string = login_html_string+"<br><br>"
+            login_html_string = login_html_string+message
+        login_html_string = login_html_string+"</center>"
+        return login_html_string    
+        
+        
+
+    @cherrypy.expose
+    def login(self, username=None, password=None, from_page="/chat/"):
+
+        if username is None or password is None:
+            return self.login_html(from_page=from_page)
+        
+        [pass_password_check,error_msg] = is_right_password(username, password)
+        if not pass_password_check:
+            return self.login_html(error_msg, from_page)
+        else:
+            cherrypy.request.login = username
+            cherrypy.session['_cp_username'] = username
+
+            raise cherrypy.HTTPRedirect(from_page)
+    
+    @cherrypy.expose
+    def logout(self, from_page="/"):
+        sess = cherrypy.session
+        username = sess.get('_cp_username', None)
+        sess['_cp_username'] = None
+        if username:
+            cherrypy.request.login = None
+        raise cherrypy.HTTPRedirect(from_page)
+
 class Register(object):
     @cherrypy.expose
     def index(self):
@@ -316,62 +375,11 @@ $('#view_messages_form').submit(function(event) {
         #return '{"a1" : "b1"}'
 
 
-
-class Main(object):
-    @cherrypy.expose
-    def index(self):
-
-        return """<html>
-<head><title>open</title>
-
-<style>
-    .fg-button {
-    outline: 0;
-    clear: left;
-    margin:0 4px 0 0;
-    padding: .1em .5em;
-    text-decoration:none !important;
-    cursor:pointer;
-    position: relative;
-    text-align: center;
-    zoom: 1;
-    }
-    .fg-button .ui-icon {
-    position: absolute;
-    top: 50%;
-    margin-top: -8px;
-    left: 50%;
-    margin-left: -8px;
-    }
-    a.fg-button { float:left;  }
-    .terminal {
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    width: 100%; height: 30em;
-    border: none;
-    }
-</style>
-
-</head>
-<body>
-
-<nav>
-<ul class="menubar">
-<li class="menubar"><a href="/chat">Chat</a></li>
-<li class="menubar"><a href="/make_contact_request">Make Contact Requests</a></li>
-<li class="menubar"><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
-</ul>
-</nav>
-
-
-</body>
-        </html>"""
-
 class Chat(object):
+
+#    loginlogout = LogInLogOut()
+
+
     @cherrypy.expose
     def index(self):
 
@@ -1238,7 +1246,7 @@ li.menubar {
 
 USERS = {'jon': 'secret'}
 
-def validate_password(realm, username, password):
+def is_right_password(username, password):
 
     secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -1261,7 +1269,7 @@ def validate_password(realm, username, password):
     user_infos=curs.fetchall()
 
     if len(user_infos) == 0:
-        return False
+        return [False,"Login failed. The username that you entered was not found."]
     else:
         assert(len(user_infos) == 1)
 
@@ -1276,49 +1284,32 @@ def validate_password(realm, username, password):
     h.update(password)
 
     if h.hexdigest() == hashed_password:
-        return True
+        return [True,""]
     else:
-        return False
+        return [False,"Login failed. The password that you entered is not the one associated with the username that you entered."]
 
 if __name__ == '__main__':
     cherrypy.config.update({'server.socket_port': 8080})
     cherrypy.config.update({'server.socket_host': 'ec2-52-42-148-78.us-west-2.compute.amazonaws.com'})
     cherrypy.config.update({'tools.sessions.on': True})
+    #cherrypy.config.update({'tools.auth.on': True})
 
     cherrypy.tree.mount(View(),'/view')
-    cherrypy.tree.mount(Chat(),'/chat',{ '/': {
-       'tools.auth_basic.on': True,
-       'tools.auth_basic.realm': 'localhost',
-       'tools.auth_basic.checkpassword': validate_password
+    cherrypy.tree.mount(Chat(),'/chat', { '/': {
+       'tools.auth.on': True,
     } }  )
-    cherrypy.tree.mount(MakeContactRequest(),'/make_contact_requests',{ '/': {
-       'tools.auth_basic.on': True,
-       'tools.auth_basic.realm': 'localhost',
-       'tools.auth_basic.checkpassword': validate_password
-    } }  )
-    cherrypy.tree.mount(ContactRequestResponses(),'/respond_to_contact_requests',{ '/': {
-       'tools.auth_basic.on': True,
-       'tools.auth_basic.realm': 'localhost',
-       'tools.auth_basic.checkpassword': validate_password
-    } }  )
-    cherrypy.tree.mount(Main(),'/main',{ '/': {
-       'tools.auth_basic.on': True,
-       'tools.auth_basic.realm': 'localhost',
-       'tools.auth_basic.checkpassword': validate_password
-    }} )
-    cherrypy.tree.mount(Main(),'/',{ 
-    '/style.css' : {
-       'tools.staticfile.on': True,
-       'tools.staticfile.filename' : "/home/ec2-user/server/style.css"
- } } )
+    cherrypy.tree.mount(MakeContactRequest(),'/make_contact_requests', { '/': {
+       'tools.auth.on': True,
+    } }    )
+    cherrypy.tree.mount(ContactRequestResponses(),'/respond_to_contact_requests', { '/': {
+       'tools.auth.on': True,
+    } }    )
     cherrypy.tree.mount(Register(),'/register')
-    #cherrypy.quickstart(Open())
+    cherrypy.tree.mount(LogInLogOut(),'/loginlogout')
 
     cherrypy.server.ssl_module = 'builtin'
-
     cherrypy.server.ssl_certificate = "cert.pem"
     cherrypy.server.ssl_private_key = "privkey.pem"
-    #cherrypy.server.ssl_certificate_chain = "/etc/pki/tls/certs/ca-bundle.crt"
 
     cherrypy.engine.start()
     cherrypy.engine.block()
