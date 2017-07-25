@@ -28,7 +28,9 @@ def is_session_authenticated(*args, **kwargs):
         username = cherrypy.session.get('_cp_username')
 
         if username:
+
             cherrypy.request.login = username
+
         else:
             raise cherrypy.HTTPRedirect("/loginlogout/login")
 
@@ -68,7 +70,6 @@ class LogInLogOut(object):
         return login_html_string    
         
         
-
     @cherrypy.expose
     def login(self, username=None, password=None, from_page="/"):
 
@@ -79,13 +80,16 @@ class LogInLogOut(object):
         if not pass_password_check:
             return self.login_html(error_msg, from_page)
         else:
+
             cherrypy.request.login = username
+
             cherrypy.session['_cp_username'] = username
             raise cherrypy.HTTPRedirect(from_page)
     
     @cherrypy.expose
     def logout(self, from_page="/"):
         cherrypy.session['_cp_username'] = None
+
         cherrypy.request.login = None
         raise cherrypy.HTTPRedirect(from_page)
 
@@ -384,16 +388,330 @@ $('#view_messages_form').submit(function(event) {
 
         #return '{"a1" : "b1"}'
 
-
-class Chat(object):
+class MakeContactRequest(object):
 
     _cp_config = {
         'tools.sessions.on': True,
         'tools.auth.on': True
     }
 
-    loginlogout = LogInLogOut()
+    @cherrypy.expose
+    @require()
+    def index(self):
 
+        return """<html>
+<head><title>open</title>
+
+<style>
+
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 5px;
+}
+
+    .fg-button {
+    outline: 0;
+    clear: left;
+    margin:0 4px 0 0;
+    padding: .1em .5em;
+    text-decoration:none !important;
+    cursor:pointer;
+    position: relative;
+    text-align: center;
+    zoom: 1;
+    }
+    .fg-button .ui-icon {
+    position: absolute;
+    top: 50%;
+    margin-top: -8px;
+    left: 50%;
+    margin-left: -8px;
+    }
+    a.fg-button { float:left;  }
+    .terminal {
+    position: relative;
+    top: 0;
+    left: 0;
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    width: 100%; height: 30em;
+    border: none;
+    }
+</style>
+
+</head>
+<body>
+
+<nav>
+<ul class="menubar">
+<li class="menubar"><a href="/chat">Chat</a></li>
+<li class="menubar"><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
+<li class="menubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
+</ul>
+</nav>
+
+<h2>Make a contact request </h2>
+
+<form id="contact_request_form" target="console_iframe3" method="post" action="contact_request">
+  Username: <br><br>
+  <input type="text" id="username2" name="username2" size="18" /> <br><br>
+
+Message: <br><br>
+  <input type="text" id="message" name="message" size="100" /> <br><br>
+  <button id="contact_request" class="fg-button ui-state-default ui-corner-all" type="submit">
+  Submit
+  </button>
+  </form>
+
+  <iframe name="console_iframe3" class="terminal" /> </iframe>
+
+</body>
+        </html>"""
+
+
+    @cherrypy.expose
+    def contact_request(self, username2, message):
+
+        if username2 == cherrypy.session.get('_cp_username'):
+            return "You cannot make a contact request for yourself."
+        
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+            
+        curs.execute("select * from user_info where username = \""+username2+"\";")
+
+        if len(curs.fetchall()) == 0:
+            return "Username "+username2+" does not exist."
+
+        username1=cherrypy.request.login
+
+        sorted_usernames= sorted([username1,username2])
+
+        if sorted_usernames == [username1,username2]:
+            forward=str(1)
+        else:
+            forward=str(0)
+
+        original_username2 = username2    
+
+        username1 = sorted_usernames[0]
+    
+        username2 = sorted_usernames[1]    
+
+        curs.execute("select * from contact_requests where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
+
+        contact_requests = curs.fetchall()
+
+        if len(contact_requests) > 0:
+            return "Contact request already made between these two users."
+
+        curs.execute("select * from contacts where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
+
+        contacts = curs.fetchall()
+
+        if len(contacts) > 0:
+            return "Contact request already made between these two users."
+
+        curs.execute("insert into contact_requests set username1 = \""+username1+"\", username2 = \""+username2+"\", message = \""+message+"\", forward="+forward+";")
+
+        conn.commit()
+
+        return "A contact request has been sent to user "+original_username2+"."
+
+class ContactRequestResponses(object):
+    @cherrypy.expose
+    @require()
+    def index(self):
+
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
+        curs.execute("select * from contact_requests where username1 = \""+cherrypy.session.get('_cp_username')+"\" and forward=0;")
+
+        contact_requests = curs.fetchall()
+
+        curs.execute("select * from contact_requests where username2 = \""+cherrypy.session.get('_cp_username')+"\" and forward=1;")
+
+        contact_requests = contact_requests+curs.fetchall()
+
+        contact_request_string = "<form action=\"contact_request_responses\" method=\"post\" id =\"contact_request_responses\" target=\"console_iframe4\">\n"
+
+        for contact_request in contact_requests:
+
+            colnames = [desc[0] for desc in curs.description]
+
+            contact_request_dict=dict(zip(colnames, contact_request))
+
+            if contact_request_dict["username2"] == cherrypy.session.get('_cp_username'):
+                username = contact_request_dict["username1"]
+            else:
+                assert(contact_request_dict["username1"] == cherrypy.session.get('_cp_username'))
+                username = contact_request_dict["username2"]
+
+
+            contact_request_string = contact_request_string+username+": <select name=\""+username+"\">\n<option value=\"Wait\"></option>\n<option value=\"Accept\">Accept</option>\n<option value=\"Reject\">Reject</option></select>\n<br><br>"
+
+        contact_request_string=contact_request_string+"<br><button type=\"submit\" id = \"contact_request_responses\">Respond to contact requests</button>\n</form>"
+
+
+        return """<html>
+<head><title>open</title>
+
+<style>
+
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 5px;
+}
+
+    .fg-button {
+    outline: 0;
+    clear: left;
+    margin:0 4px 0 0;
+    padding: .1em .5em;
+    text-decoration:none !important;
+    cursor:pointer;
+    position: relative;
+    text-align: center;
+    zoom: 1;
+    }
+    .fg-button .ui-icon {
+    position: absolute;
+    top: 50%;
+    margin-top: -8px;
+    left: 50%;
+    margin-left: -8px;
+    }
+    a.fg-button { float:left;  }
+    .terminal {
+    position: relative;
+    top: 0;
+    left: 0;
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    width: 100%; height: 30em;
+    border: none;
+    }
+</style>
+
+</head>
+<body>
+
+<nav>
+<ul class="menubar">
+<li class="menubar"><a href="/chat">Chat</a></li>
+<li class="menubar"><a href="/chat/contact_request_responses">Make Contact Requests</a></li>
+<li class="menubar"><a href="/chat/contact_requests">Respond to Contact Requests</a></li>
+</ul>
+</nav>
+
+""" + contact_request_string + """
+
+  <iframe name="console_iframe4" class="terminal" />  </iframe>
+
+</body>
+        </html>"""
+
+    @cherrypy.expose
+    def contact_request_responses(self,**responses):
+
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
+        for username in responses.keys():
+            if responses[username] == "Wait":
+                continue
+            elif responses[username] == "Reject":
+
+                curs.execute("delete from contact_requests where username1 = \""+username+"\" and username2 = \""+cherrypy.session.get('_cp_username')+"\";")
+                curs.execute("delete from contact_requests where username2 = \""+username+"\" and username1 = \""+cherrypy.session.get('_cp_username')+"\";")
+            elif responses[username] == "Accept":
+
+                curs.execute("select * from contacts where username1 = \""+cherrypy.request.login+"\" and username2 = \""+username+"\";")
+
+                contacts_tuple1=curs.fetchall()
+                
+                curs.execute("select * from contacts where username1 = \""+username+"\" and username2 = \""+cherrypy.session.get('_cp_username')+"\";")
+
+                contacts_tuple2=curs.fetchall()
+
+                contacts_tuple = contacts_tuple1+contacts_tuple2
+
+                if len(contacts_tuple) > 0:
+                    continue
+
+                curs.execute("delete from contact_requests where username1 = \""+username+"\" and username2 = \""+cherrypy.session.get('_cp_username')+"\";")
+                curs.execute("delete from contact_requests where username2 = \""+username+"\" and username1 = \""+cherrypy.session.get('_cp_username')+"\";")
+                
+                sorted_usernames= sorted([cherrypy.request.login,username])
+
+                username1=sorted_usernames[0]
+                username2=sorted_usernames[1]
+
+                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\";")
+            
+        conn.commit()
+
+        return "Your responses have been registered."
+
+
+
+
+class Chat(object):
+
+
+    register = Register()
+
+    makecontactrequests=MakeContactRequest()
+
+    respondtocontactrequests=ContactRequestResponses()
 
     @cherrypy.expose
     @require()
@@ -514,8 +832,8 @@ ul {
 
 <ul class="menubar">
 <li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/make_contact_requests/">Make Contact Requests</a></li>
-<li class="menubar"><a href="/respond_to_contact_requests/">Respond to Contact Requests</a></li>
+<li class="menubar"><a href="/chat/makecontactrequests/">Make Contact Requests</a></li>
+<li class="menubar"><a href="/chat/respondtocontactrequests/">Respond to Contact Requests</a></li>
 <li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
 </ul>
 
@@ -789,11 +1107,12 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
     @cherrypy.expose
     def get_messages(self,upon_update=False,client_max_time=""):
+
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
         #client_max_time="2017-06-30 08:01:06.562369";
 
-        username1=cherrypy.request.login
+        username1=cherrypy.session.get('_cp_username')
 
         secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -840,11 +1159,11 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
         curs.execute("use "+dbname+";")
 
-        curs.execute("select * from contacts where username1 = \""+cherrypy.request.login+"\"")
+        curs.execute("select * from contacts where username1 = \""+cherrypy.session.get('_cp_username')+"\"")
 
         contacts = curs.fetchall()
 
-        curs.execute("select * from contacts where username2 = \""+cherrypy.request.login+"\"")
+        curs.execute("select * from contacts where username2 = \""+cherrypy.session.get('_cp_username')+"\"")
 
         contacts = contacts+curs.fetchall()
 
@@ -857,11 +1176,11 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
             contact_dict=dict(zip(colnames_contacts, contact))
 
-            if contact_dict["username2"] == cherrypy.request.login:
+            if contact_dict["username2"] == cherrypy.session.get('_cp_username'):
                 username = contact_dict["username1"]
                 curs.execute("select * from messages where username1 = \""+username+"\" and username2 = \""+username1+"\" order by time;")
             else:
-                assert(contact_dict["username1"] == cherrypy.request.login)
+                assert(contact_dict["username1"] == cherrypy.session.get('_cp_username'))
                 username = contact_dict["username2"]
                 curs.execute("select * from messages where username1 = \""+username1+"\" and username2 = \""+username+"\" order by time;")
 
@@ -920,7 +1239,7 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
     @cherrypy.expose
     def add_message(self, add_message_text,username2):
 
-        username1=cherrypy.request.login
+        username1=cherrypy.session.get('_cp_username')
         
         sorted_usernames= sorted([username1,username2])
 
@@ -952,7 +1271,14 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         conn.commit()
 
 class MakeContactRequest(object):
+
+#    _cp_config = {
+#        'tools.sessions.on': True,
+#        'tools.auth.on': True
+#    }
+
     @cherrypy.expose
+    @require()
     def index(self):
 
         return """<html>
@@ -1008,8 +1334,8 @@ li.menubar {
 <nav>
 <ul class="menubar">
 <li class="menubar"><a href="/chat">Chat</a></li>
-<li class="menubar"><a href="/make_contact_requests">Make Contact Requests</a></li>
-<li class="menubar"><a href="/respond_to_contact_requests">Respond to Contact Requests</a></li>
+<li class="menubar"><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
+<li class="menubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
 </ul>
 </nav>
 
@@ -1035,7 +1361,7 @@ Message: <br><br>
     @cherrypy.expose
     def contact_request(self, username2, message):
 
-        if username2 == cherrypy.request.login:
+        if username2 == cherrypy.session.get('_cp_username'):
             return "You cannot make a contact request for yourself."
         
         secrets_file=open("/home/ec2-user/secrets.txt")
@@ -1093,173 +1419,25 @@ Message: <br><br>
         return "A contact request has been sent to user "+original_username2+"."
 
 class Root(object):
+
+    _cp_config = {
+        'tools.sessions.on': True,
+        'tools.auth.on': True
+    }
+
+    view = View()
+
+    chat = Chat()
+
+    loginlogout = LogInLogOut()
+
     @cherrypy.expose
     def index(self):
-        return ""
 
-class ContactRequestResponses(object):
-    @cherrypy.expose
-    def index(self):
-
-        secrets_file=open("/home/ec2-user/secrets.txt")
-
-        passwords=secrets_file.read().rstrip('\n')
-
-        db_password = passwords.split('\n')[0]
-
-        dbname = "open"
-
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-        curs = conn.cursor()
-
-        curs.execute("use "+dbname+";")
-
-        curs.execute("select * from contact_requests where username1 = \""+cherrypy.request.login+"\" and forward=0;")
-
-        contact_requests = curs.fetchall()
-
-        curs.execute("select * from contact_requests where username2 = \""+cherrypy.request.login+"\" and forward=1;")
-
-        contact_requests = contact_requests+curs.fetchall()
-
-        contact_request_string = "<form action=\"contact_request_responses\" method=\"post\" id =\"contact_request_responses\" target=\"console_iframe4\">\n"
-
-        for contact_request in contact_requests:
-
-            colnames = [desc[0] for desc in curs.description]
-
-            contact_request_dict=dict(zip(colnames, contact_request))
-
-            if contact_request_dict["username2"] == cherrypy.request.login:
-                username = contact_request_dict["username1"]
-            else:
-                assert(contact_request_dict["username1"] == cherrypy.request.login)
-                username = contact_request_dict["username2"]
-
-
-            contact_request_string = contact_request_string+username+": <select name=\""+username+"\">\n<option value=\"Wait\"></option>\n<option value=\"Accept\">Accept</option>\n<option value=\"Reject\">Reject</option></select>\n<br><br>"
-
-        contact_request_string=contact_request_string+"<br><button type=\"submit\" id = \"contact_request_responses\">Respond to contact requests</button>\n</form>"
-
-
-        return """<html>
-<head><title>open</title>
-
-<style>
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 5px;
-}
-
-    .fg-button {
-    outline: 0;
-    clear: left;
-    margin:0 4px 0 0;
-    padding: .1em .5em;
-    text-decoration:none !important;
-    cursor:pointer;
-    position: relative;
-    text-align: center;
-    zoom: 1;
-    }
-    .fg-button .ui-icon {
-    position: absolute;
-    top: 50%;
-    margin-top: -8px;
-    left: 50%;
-    margin-left: -8px;
-    }
-    a.fg-button { float:left;  }
-    .terminal {
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    width: 100%; height: 30em;
-    border: none;
-    }
-</style>
-
-</head>
-<body>
-
-<nav>
-<ul class="menubar">
-<li class="menubar"><a href="/chat">Chat</a></li>
-<li class="menubar"><a href="/contact_request_responses">Make Contact Requests</a></li>
-<li class="menubar"><a href="/contact_requests">Respond to Contact Requests</a></li>
-</ul>
-</nav>
-
-""" + contact_request_string + """
-
-  <iframe name="console_iframe4" class="terminal" />  </iframe>
-
-</body>
-        </html>"""
-
-    @cherrypy.expose
-    def contact_request_responses(self,**responses):
-
-        secrets_file=open("/home/ec2-user/secrets.txt")
-
-        passwords=secrets_file.read().rstrip('\n')
-
-        db_password = passwords.split('\n')[0]
-
-        dbname = "open"
-
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-        curs = conn.cursor()
-
-        curs.execute("use "+dbname+";")
-
-        for username in responses.keys():
-            if responses[username] == "Wait":
-                continue
-            elif responses[username] == "Reject":
-
-                curs.execute("delete from contact_requests where username1 = \""+username+"\" and username2 = \""+cherrypy.request.login+"\";")
-                curs.execute("delete from contact_requests where username2 = \""+username+"\" and username1 = \""+cherrypy.request.login+"\";")
-            elif responses[username] == "Accept":
-
-                curs.execute("select * from contacts where username1 = \""+cherrypy.request.login+"\" and username2 = \""+username+"\";")
-
-                contacts_tuple1=curs.fetchall()
-                
-                curs.execute("select * from contacts where username1 = \""+username+"\" and username2 = \""+cherrypy.request.login+"\";")
-
-                contacts_tuple2=curs.fetchall()
-
-                contacts_tuple = contacts_tuple1+contacts_tuple2
-
-                if len(contacts_tuple) > 0:
-                    continue
-
-                curs.execute("delete from contact_requests where username1 = \""+username+"\" and username2 = \""+cherrypy.request.login+"\";")
-                curs.execute("delete from contact_requests where username2 = \""+username+"\" and username1 = \""+cherrypy.request.login+"\";")
-                
-                sorted_usernames= sorted([cherrypy.request.login,username])
-
-                username1=sorted_usernames[0]
-                username2=sorted_usernames[1]
-
-                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\";")
-            
-        conn.commit()
-
-        return "Your responses have been registered."
+        html_string="<center><h1>ecommunicate</h1>"
+        html_string = html_string+"<h3>a free online communication service</h3></center>"
+        html_string = html_string+"ecommunicate is an free online communication service in which all communication is viewable on the open internet. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+        return html_string
 
 def is_right_password(username, password):
 
@@ -1304,13 +1482,14 @@ def is_right_password(username, password):
         return [False,"Login failed. The password that you entered is not the one associated with the username that you entered."]
 
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_port': 8080})
+    cherrypy.config.update({'server.socket_port': 443}) #port 443 for https or port 80 for http
+#    cherrypy.config.update({'server.socket_port': 80})
     cherrypy.config.update({'server.socket_host': 'ec2-52-42-148-78.us-west-2.compute.amazonaws.com'})
     #cherrypy.config.update({'tools.sessions.on': True})
     #cherrypy.config.update({'tools.auth.on': True})
 
     #cherrypy.tree.mount(View(),'/view')
-    cherrypy.tree.mount(Chat())
+    cherrypy.tree.mount(Root())
     #cherrypy.tree.mount(MakeContactRequest(),'/make_contact_requests')
     #cherrypy.tree.mount(ContactRequestResponses(),'/respond_to_contact_requests')
     #cherrypy.tree.mount(Register(),'/register')
