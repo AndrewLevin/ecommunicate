@@ -914,10 +914,9 @@ ul {
 </head>
 <body>
 
+<center><h1>Ecommunicate</h1>
 
-<!--
-<nav>
--->
+<h3>A free online communication service</h3></center>
 
 <div id="header">
 
