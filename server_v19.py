@@ -83,12 +83,22 @@ class LogInLogOut(object):
 
             cherrypy.request.login = username
 
+            cherrypy.session.acquire_lock() 
+
             cherrypy.session['_cp_username'] = username
+
+            cherrypy.session.release_lock()
+
             raise cherrypy.HTTPRedirect(from_page)
     
     @cherrypy.expose
     def logout(self, from_page="/"):
+
+        cherrypy.session.acquire_lock()
+
         cherrypy.session['_cp_username'] = None
+
+        cherrypy.session.release_lock()
 
         cherrypy.request.login = None
         raise cherrypy.HTTPRedirect(from_page)
@@ -114,7 +124,7 @@ border: none;
 </head>
 <body>
 
-   This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable on the open internet. Register here for your free account. 
+   This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. Register here for your free account. 
 
 <br><br>
 
@@ -211,95 +221,184 @@ border: none;
 
 
 class View(object):
+
     @cherrypy.expose
-    def index(self):
+    def index(self,username1=None,username2=None):
+
+        html_string_usernames="username1="+username1+"\n"
+        html_string_usernames=html_string_usernames+"username2="+username2
+
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
         return """<html>
+<head><title>open</title>
 
 <style>
 
-.terminal {
+ul.menubar {
 
-border: none; 
-width: 100%; 
-height: 30em;
+text-align: center;
 
+}
+
+li.menubar {
+        display: inline;
+        padding: 5px;
+}
+
+ul {
+    list-style:none;
+    padding-left:0;
+}
+
+    .terminal {
+    width: 100%;
+    height: 30em;
+    border: none;
+
+}
+    .messageerrorbox {
+    width: 100%;
+    height: 1em;
+    border: none;
 
 }
 </style>
 
-<head><title>open</title>
-
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
-
 </head>
-
 <body>
-
-<center>
-
-
-
-<form id="view_messages_form" target="console_iframe" method="post" action="view_messages">
-  username1: <br><br>
-  <input type="text" id="username1" name="username1" size="18" /><br><br>
-  username2: <br><br>
-  <input type="text" id="username2" name="username2" size="18" /> <br><br>
-  <button id="ping" class="fg-button ui-state-default ui-corner-all" type="submit">
-  View
-  </button>
-</form>
-
-<iframe name="console_iframe" class="terminal" /> </iframe>
-
-</center>
 
 </body>
 
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3></center>
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/chat/">Chat</a></li>
+</ul>
+
+</div>
+
+</div>
+
+<iframe id="console_iframe2" name="console_iframe2" class="terminal" /></iframe>
+
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
 <script>
 
-$('#view_messages_form').submit(function(event) {
+messages_list = "";
+messages_list_old = "";
+"""+html_string_usernames+"""
+max_time = ""
 
+function update_messages(){
 
+    if (messages_list != "") {
 
-   event.preventDefault(); 
+            var console_iframe2 = document.getElementById('console_iframe2');
 
-   var $this = $(this);
+            //clear the iframe
+            console_iframe2.contentWindow.document.open();
+            console_iframe2.contentWindow.document.close();
+
+            for ( var i = 0, l = messages_list.length; i < l; i++ ) {
+                console_iframe2.contentWindow.document.write(messages_list[i][0]+": "+messages_list[i][1]);
+                console_iframe2.contentWindow.document.write("<br>");
+            }
+
+            var console_iframe2_contentWindow_document = console_iframe2.contentWindow.document;
+
+            //this will "over-scroll", but it works i.e. it moves to the bottom    
+
+            $(console_iframe2_contentWindow_document).scrollTop($(console_iframe2_contentWindow_document).height());  
+       
+    }
+
+}
+
+function view_recursive() {
+
+get_messages_url = "get_messages?username1="+username1+"&username2="+username2+"&upon_update=True&client_max_time="+max_time;
 
    $.ajax({
-      type: "POST",
-      url: $this.attr('action'),
+      url: get_messages_url,
+      type: 'GET',
       dataType: 'html',
-      data: $this.serialize(),
-      success: function(data){
+      success: function(data) {
 
+         parsed_data = JSON.parse(data);
+         messages_list = parsed_data[0];
+         max_time = parsed_data[1];
 
-        parsed_data = JSON.parse(data);
-        messages_list = parsed_data[0];
-        for ( var i = 0, l = messages_list.length; i < l; i++ ) {
-           document.write(messages_list[i][0]+": "+messages_list[i][1]);
-           document.write("<br>");
-        }
+         messages_list_old = messages_list;
 
-      },
-      error: function(arg1, arg2, arg3){
-         alert("There was an error. Some information about it is: "+arg2+" "+arg3)
+         update_messages();  
+
+         view_recursive();
       }
-
    });
+
+}
+
+function view_initial() {
+
+get_messages_url = 'get_messages?username1='+username1+'&username2='+username2;
+
+   $.ajax({
+      url: get_messages_url,
+      type: 'GET',
+      dataType: 'html',
+      success: function(data) {
+
+         parsed_data = JSON.parse(data);
+
+         messages_list = parsed_data[0];
+
+         max_time=parsed_data[1]; 
+
+         messages_list_old = messages_list;
+
+         update_messages(); 
+
+         view_recursive();
+
+      }
+   });
+
+}
+
+$(document).ready(function() {
+
+   view_initial();
 
 });
 
 
 </script>
 
-</html>"""
-
+        </html>"""
 
     @cherrypy.expose
-    def view_messages(self,username1,username2,upon_update=False,client_max_time=""):
-        #dn=cherrypy.request.headers['Cms-Authn-Dn']
-
-        #client_max_time="2017-06-30 08:01:06.562369";
+    def get_messages(self,username1,username2,upon_update=False,client_max_time=""):
 
         sorted_usernames= sorted([username1,username2])
 
@@ -375,7 +474,6 @@ $('#view_messages_form').submit(function(event) {
                     return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
                     messages_list.append([message_dict["username2"], message_dict["message"]])
 
-
         #return str(messages_json)
 
         curs.execute("select MAX(time) from messages where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
@@ -385,8 +483,6 @@ $('#view_messages_form').submit(function(event) {
         curs.close()
 
         return json.dumps([messages_list,max_time])
-
-        #return '{"a1" : "b1"}'
 
 class MakeContactRequest(object):
 
@@ -706,9 +802,6 @@ li.menubar {
 
 class Chat(object):
 
-
-    register = Register()
-
     makecontactrequests=MakeContactRequest()
 
     respondtocontactrequests=ContactRequestResponses()
@@ -841,11 +934,6 @@ ul {
 
 </div>
 
-<!--
-</nav>
--->
-
-
   <table border=2>
   <tr>
 """ + contacts_string + """ 
@@ -955,7 +1043,6 @@ function chat_initial() {
       dataType: 'html',
       success: function(data) {
          parsed_data = JSON.parse(data);
-         //alert(parsed_data["phone8"]);
          messages_json = parsed_data[0];
          max_time=parsed_data[1]; 
 
@@ -967,9 +1054,6 @@ function chat_initial() {
 
       }
    });
-
-
-
 
 }
 
@@ -1030,7 +1114,7 @@ $('#add_message_form').submit(function(event) {
    
    });
 
-  add_message_form.reset();
+   add_message_form.reset();
 
 });
 
@@ -1106,6 +1190,7 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         </html>"""
 
     @cherrypy.expose
+    @require()
     def get_messages(self,upon_update=False,client_max_time=""):
 
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
@@ -1237,6 +1322,7 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
 
     @cherrypy.expose
+    @require()
     def add_message(self, add_message_text,username2):
 
         username1=cherrypy.session.get('_cp_username')
@@ -1269,6 +1355,8 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
         curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+add_message_text+"\";")
 
         conn.commit()
+
+
 
 class MakeContactRequest(object):
 
@@ -1422,7 +1510,8 @@ class Root(object):
 
     _cp_config = {
         'tools.sessions.on': True,
-        'tools.auth.on': True
+        'tools.auth.on': True,
+        'tools.sessions.locking': 'explicit' #this and the acquire_lock and the release_lock statements in the login and logout functions are necessary so that multiple ajax requests can be processed in parallel in a single session
     }
 
     view = View()
@@ -1431,12 +1520,14 @@ class Root(object):
 
     loginlogout = LogInLogOut()
 
+    register = Register()
+
     @cherrypy.expose
     def index(self):
 
-        html_string="<center><h1>ecommunicate</h1>"
+        html_string="<center><h1>Ecommunicate</h1>"
         html_string = html_string+"<h3>a free online communication service</h3></center>"
-        html_string = html_string+"ecommunicate is an free online communication service in which all communication is viewable on the open internet. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+        html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
         return html_string
 
 def is_right_password(username, password):
