@@ -426,7 +426,7 @@ $(document).ready(function() {
 
                 curs.execute("use "+dbname+";")
 
-                curs.execute("select MAX(time) from messages where username1=\""+username1+"\";")
+                curs.execute("select MAX(time) from messages where username1=\""+username1+"\" and username2=\""+username2+"\";")
 
                 server_max_time = curs.fetchall()[0][0]
 
@@ -1527,6 +1527,39 @@ class Root(object):
         html_string="<center><h1>Ecommunicate</h1>"
         html_string = html_string+"<h3>a free online communication service</h3></center>"
         html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+
+        html_string=html_string+"<h4>Conversations</h4>"
+
+        html_string=html_string+"<ol>"
+
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
+        curs.execute("select DISTINCT username1,username2 from messages;")
+
+        conversations = curs.fetchall()
+
+        colnames = [desc[0] for desc in curs.description]
+
+        for conversation in conversations:
+
+            conversation_dict=dict(zip(colnames, conversation))
+            
+            html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+
+        html_string=html_string+"</ol>"
+
         return html_string
 
 def is_right_password(username, password):
