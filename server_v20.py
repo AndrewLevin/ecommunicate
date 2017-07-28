@@ -52,7 +52,30 @@ class LogInLogOut(object):
 
     def login_html(self,  message="", from_page="/"):
 
-        login_html_string = "<html>"
+        login_html_string = """
+<html>
+
+<head>
+
+<title>
+Ecommunicate
+</title>
+
+</head>   
+
+<body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+<h4>Login</h4>
+
+</center>
+
+
+"""
+
         login_html_string = login_html_string+"<center>"
         login_html_string = login_html_string+"<form method=\"post\" action=\"/loginlogout/login\">"
         login_html_string = login_html_string+"<input type=\"hidden\" name=\"from_page\" value=\""+from_page+"\" />"
@@ -67,6 +90,9 @@ class LogInLogOut(object):
             login_html_string = login_html_string+"<br><br>"
             login_html_string = login_html_string+message
         login_html_string = login_html_string+"</center>"
+        login_html_string = login_html_string+"</body>"
+        login_html_string = login_html_string+"</html>"
+
         return login_html_string    
         
         
@@ -118,11 +144,15 @@ border: none;
 }
 </style>
 
-<title>open</title>
+<title>Ecommunicate</title>
 
 
 </head>
 <body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3></center>
 
    This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. Register here for your free account. 
 
@@ -418,7 +448,8 @@ $(document).ready(function() {
 
         if upon_update:
 
-            while True:
+            #the connection will timeout eventually
+            for i in range(0,1000):
 
                 conn.commit()
                 
@@ -797,6 +828,33 @@ li.menubar {
 
         return "Your responses have been registered."
 
+
+class AboutThisWebsite(object):
+
+    @cherrypy.expose
+    def index(self):
+        html_string = """
+<html>
+<head>
+
+</head>
+<body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+<h4>About This Website</h4>
+
+</center>
+
+   This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private.
+
+</body>
+</html>
+"""
+
+        return html_string
 
 
 
@@ -1210,7 +1268,8 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
         if upon_update:
 
-            while True:
+            #the connection will timeout eventually
+            for i in range(0,1000):
 
                 conn.commit()
                 
@@ -1521,11 +1580,55 @@ class Root(object):
 
     register = Register()
 
+    about = AboutThisWebsite()
+
     @cherrypy.expose
     def index(self):
 
-        html_string="<center><h1>Ecommunicate</h1>"
+        html_string = """
+
+<html>
+
+<head>
+
+<title>
+Ecommunicate
+</title>
+
+<style>
+
+li.menubar {
+        display: inline;
+        padding: 5px;
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+"""
+
+        html_string = html_string+"<center><h1>Ecommunicate</h1>"
         html_string = html_string+"<h3>a free online communication service</h3></center>"
+        html_string = html_string+"""
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+"""
         html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
 
         html_string=html_string+"<h4>Conversations</h4>"
@@ -1559,6 +1662,12 @@ class Root(object):
             html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
 
         html_string=html_string+"</ol>"
+
+        html_string = html_string+"""
+</body>
+</html>
+
+"""
 
         return html_string
 
