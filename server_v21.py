@@ -20,21 +20,23 @@ from HTMLParser import HTMLParser
 
 import json
 
-def is_session_authenticated(*args, **kwargs):
+def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
     conditions = cherrypy.request.config.get('auth.require', None)
     if conditions is not None:
-
         username = cherrypy.session.get('_cp_username')
-
-        if username:
-
-            cherrypy.request.login = username
-
-        else:
+        if not username:
             raise cherrypy.HTTPRedirect("/loginlogout/login")
 
-cherrypy.tools.auth = cherrypy.Tool('before_handler', is_session_authenticated)
+def is_session_authenticated(*args, **kwargs):
+
+    username = cherrypy.session.get('_cp_username')
+    if username:
+        return True
+    else:
+        return False
+
+cherrypy.tools.auth = cherrypy.Tool('before_handler', redirect_if_authentication_is_required_and_session_is_not_authenticated)
 
 def require(*conditions):
     """A decorator that appends conditions to the auth.require config
@@ -61,6 +63,15 @@ class LogInLogOut(object):
 Ecommunicate
 </title>
 
+<style>
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+</style
+
 </head>   
 
 <body>
@@ -68,6 +79,23 @@ Ecommunicate
 <center><h1>Ecommunicate</h1>
 
 <h3>A free online communication service</h3>
+
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
 
 <h4>Login</h4>
 
@@ -142,6 +170,12 @@ class Register(object):
 border: none; 
 
 }
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
 </style>
 
 <title>Ecommunicate</title>
@@ -152,7 +186,25 @@ border: none;
 
 <center><h1>Ecommunicate</h1>
 
-<h3>A free online communication service</h3></center>
+<h3>A free online communication service</h3>
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+</center>
 
    This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. Register here for your free account. 
 
@@ -255,24 +307,211 @@ class View(object):
     @cherrypy.expose
     def index(self,username1=None,username2=None):
 
-        html_string_usernames="username1="+username1+"\n"
-        html_string_usernames=html_string_usernames+"username2="+username2
+        issessionauthenticated=is_session_authenticated()
 
-        secrets_file=open("/home/ec2-user/secrets.txt")
+        if username1 == None and username2 == None and not issessionauthenticated:
+        
+            html_string = """
 
-        passwords=secrets_file.read().rstrip('\n')
+<html>
 
-        db_password = passwords.split('\n')[0]
+<head>
 
-        dbname = "open"
+<title>
+Ecommunicate
+</title>
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+<style>
 
-        curs = conn.cursor()
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
 
-        curs.execute("use "+dbname+";")
 
-        return """<html>
+</style>
+
+</head>
+
+<body>
+
+"""
+
+            html_string = html_string+"<center><h1>Ecommunicate</h1>"
+            html_string = html_string+"<h3>A free online communication service</h3>"
+            html_string = html_string+"""
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+</center>
+
+"""
+            html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+
+            html_string=html_string+"<h4>Conversations</h4>"
+
+            html_string=html_string+"<ol>"
+
+            secrets_file=open("/home/ec2-user/secrets.txt")
+
+            passwords=secrets_file.read().rstrip('\n')
+
+            db_password = passwords.split('\n')[0]
+
+            dbname = "open"
+
+            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+            curs = conn.cursor()
+
+            curs.execute("use "+dbname+";")
+
+            curs.execute("select DISTINCT username1,username2 from messages;")
+
+            conversations = curs.fetchall()
+
+            colnames = [desc[0] for desc in curs.description]
+
+            for conversation in conversations:
+
+                conversation_dict=dict(zip(colnames, conversation))
+            
+                html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+
+            html_string=html_string+"</ol>"
+
+            html_string = html_string+"""
+</body>
+</html>
+
+"""
+            return html_string
+
+        elif username1 == None and username2 == None and issessionauthenticated:
+
+
+            html_string = """
+
+<html>
+
+<head>
+
+<title>
+Ecommunicate
+</title>
+
+<style>
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+"""
+
+            html_string = html_string+"<center><h1>Ecommunicate</h1>"
+            html_string = html_string+"<h3>A free online communication service</h3>"
+            html_string = html_string+"""
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Logout</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+</center>
+
+"""
+            html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+
+            html_string=html_string+"<h4>Conversations</h4>"
+
+            html_string=html_string+"<ol>"
+
+            secrets_file=open("/home/ec2-user/secrets.txt")
+
+            passwords=secrets_file.read().rstrip('\n')
+
+            db_password = passwords.split('\n')[0]
+
+            dbname = "open"
+
+            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+            curs = conn.cursor()
+
+            curs.execute("use "+dbname+";")
+
+            curs.execute("select DISTINCT username1,username2 from messages;")
+
+            conversations = curs.fetchall()
+
+            colnames = [desc[0] for desc in curs.description]
+
+            for conversation in conversations:
+
+                conversation_dict=dict(zip(colnames, conversation))
+            
+                html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+
+            html_string=html_string+"</ol>"
+
+            html_string = html_string+"""
+</body>
+</html>
+
+"""
+            return html_string
+
+        elif username1 != None and username2 != None and not issessionauthenticated:    
+
+            html_string_usernames="username1="+username1+"\n"
+            html_string_usernames=html_string_usernames+"username2="+username2
+
+            secrets_file=open("/home/ec2-user/secrets.txt")
+            
+            passwords=secrets_file.read().rstrip('\n')
+            
+            db_password = passwords.split('\n')[0]
+
+            dbname = "open"
+    
+            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+            curs = conn.cursor()
+
+            curs.execute("use "+dbname+";")
+
+            return """<html>
 <head><title>open</title>
 
 <style>
@@ -285,7 +524,7 @@ text-align: center;
 
 li.menubar {
         display: inline;
-        padding: 5px;
+        padding: 20px;
 }
 
 ul {
@@ -314,19 +553,206 @@ ul {
 
 <center><h1>Ecommunicate</h1>
 
-<h3>A free online communication service</h3></center>
+<h3>A free online communication service</h3>
 
 <div id="header">
 
 <div id="nav">
 
 <ul class="menubar">
-<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/">Login</a></li>
+<li class="menubar"><a href="/about/">About</a></li>
 </ul>
 
 </div>
 
 </div>
+
+</center>
+
+<iframe id="console_iframe2" name="console_iframe2" class="terminal" /></iframe>
+
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
+<script>
+
+messages_list = "";
+messages_list_old = "";
+"""+html_string_usernames+"""
+max_time = ""
+
+function update_messages(){
+
+    if (messages_list != "") {
+
+            var console_iframe2 = document.getElementById('console_iframe2');
+
+            //clear the iframe
+            console_iframe2.contentWindow.document.open();
+            console_iframe2.contentWindow.document.close();
+
+            for ( var i = 0, l = messages_list.length; i < l; i++ ) {
+                console_iframe2.contentWindow.document.write(messages_list[i][0]+": "+messages_list[i][1]);
+                console_iframe2.contentWindow.document.write("<br>");
+            }
+
+            var console_iframe2_contentWindow_document = console_iframe2.contentWindow.document;
+
+            //this will "over-scroll", but it works i.e. it moves to the bottom    
+
+            $(console_iframe2_contentWindow_document).scrollTop($(console_iframe2_contentWindow_document).height());  
+       
+    }
+
+}
+
+function view_recursive() {
+
+get_messages_url = "get_messages?username1="+username1+"&username2="+username2+"&upon_update=True&client_max_time="+max_time;
+
+   $.ajax({
+      url: get_messages_url,
+      type: 'GET',
+      dataType: 'html',
+      success: function(data) {
+
+         parsed_data = JSON.parse(data);
+         messages_list = parsed_data[0];
+         max_time = parsed_data[1];
+
+         messages_list_old = messages_list;
+
+         update_messages();  
+
+         view_recursive();
+      }
+   });
+
+}
+
+function view_initial() {
+
+get_messages_url = 'get_messages?username1='+username1+'&username2='+username2;
+
+   $.ajax({
+      url: get_messages_url,
+      type: 'GET',
+      dataType: 'html',
+      success: function(data) {
+
+         parsed_data = JSON.parse(data);
+
+         messages_list = parsed_data[0];
+
+         max_time=parsed_data[1]; 
+
+         messages_list_old = messages_list;
+
+         update_messages(); 
+
+         view_recursive();
+
+      }
+   });
+
+}
+
+$(document).ready(function() {
+
+   view_initial();
+
+});
+
+
+</script>
+
+        </html>"""
+
+
+        elif username1 != None and username2 != None and issessionauthenticated:    
+
+            html_string_usernames="username1="+username1+"\n"
+            html_string_usernames=html_string_usernames+"username2="+username2
+
+            secrets_file=open("/home/ec2-user/secrets.txt")
+            
+            passwords=secrets_file.read().rstrip('\n')
+            
+            db_password = passwords.split('\n')[0]
+
+            dbname = "open"
+    
+            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+            curs = conn.cursor()
+
+            curs.execute("use "+dbname+";")
+
+            return """<html>
+<head><title>open</title>
+
+<style>
+
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+ul {
+    list-style:none;
+    padding-left:0;
+}
+
+    .terminal {
+    width: 100%;
+    height: 30em;
+    border: none;
+
+}
+    .messageerrorbox {
+    width: 100%;
+    height: 1em;
+    border: none;
+
+}
+</style>
+
+</head>
+<body>
+
+</body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/loginlogout/logout">Logout</a></li>
+<li class="menubar"><a href="/about/">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+</center>
 
 <iframe id="console_iframe2" name="console_iframe2" class="terminal" /></iframe>
 
@@ -527,9 +953,51 @@ class MakeContactRequest(object):
     def index(self):
 
         return """<html>
-<head><title>open</title>
+<head><title>Ecommunicate</title>
 
 <style>
+
+ul.subsubmenubar {
+
+text-align: left;
+padding: 0;
+
+}
+
+li.subsubmenubarleftmost {
+display: inline;
+padding-left: 0px;
+padding-right: 20px;
+}
+
+li.subsubmenubarrightmost {
+display: inline;
+padding-left: 20px;
+padding-right: 0px;
+}
+
+li.subsubmenubar {
+display: inline;
+padding: 20px;
+
+}
+
+ul.submenubar {
+
+list-style-type:none;
+display: inline-block;
+vertical-align:top;
+text-align: left;
+padding: 0;
+
+}
+
+li.submenubar {
+
+display: block;
+
+}
+
 
 ul.menubar {
 
@@ -539,8 +1007,9 @@ text-align: center;
 
 li.menubar {
         display: inline;
-        padding: 5px;
+        padding: 20px;
 }
+
 
     .fg-button {
     outline: 0;
@@ -576,13 +1045,41 @@ li.menubar {
 </head>
 <body>
 
-<nav>
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+
+<div id="header">
+
+<div id="nav">
+
 <ul class="menubar">
-<li class="menubar"><a href="/chat">Chat</a></li>
-<li class="menubar"><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class="menubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar">
+
+<ul class = "submenubar">
+<li class = "submenubar">
+
+<ul class = "subsubmenubar">
+<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
+<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
+<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
 </ul>
-</nav>
+
+</li>
+
+<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
+<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
+</ul>
+</ul>
+
+</div>
+
+</div>
+
+</center>
 
 <h2>Make a contact request </h2>
 
@@ -715,6 +1212,48 @@ class ContactRequestResponses(object):
 
 <style>
 
+ul.subsubmenubar {
+
+text-align: left;
+padding: 0;
+
+}
+
+li.subsubmenubarleftmost {
+display: inline;
+padding-left: 0px;
+padding-right: 20px;
+}
+
+li.subsubmenubarrightmost {
+display: inline;
+padding-left: 20px;
+padding-right: 0px;
+}
+
+li.subsubmenubar {
+display: inline;
+padding: 20px;
+
+}
+
+ul.submenubar {
+
+list-style-type:none;
+display: inline-block;
+vertical-align:top;
+text-align: left;
+padding: 0;
+
+}
+
+li.submenubar {
+
+display: block;
+
+}
+
+
 ul.menubar {
 
 text-align: center;
@@ -723,8 +1262,9 @@ text-align: center;
 
 li.menubar {
         display: inline;
-        padding: 5px;
+        padding: 20px;
 }
+
 
     .fg-button {
     outline: 0;
@@ -760,13 +1300,44 @@ li.menubar {
 </head>
 <body>
 
-<nav>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+
+<div id="header">
+
+<div id="nav">
+
 <ul class="menubar">
-<li class="menubar"><a href="/chat">Chat</a></li>
-<li class="menubar"><a href="/chat/contact_request_responses">Make Contact Requests</a></li>
-<li class="menubar"><a href="/chat/contact_requests">Respond to Contact Requests</a></li>
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar">
+
+<ul class = "submenubar">
+<li class = "submenubar">
+
+<ul class = "subsubmenubar">
+<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
+<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
+<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
 </ul>
-</nav>
+
+</li>
+
+<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
+<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
+</ul>
+</ul>
+
+
+</div>
+
+</div>
+
+</center>
+
 
 """ + contact_request_string + """
 
@@ -829,13 +1400,31 @@ li.menubar {
         return "Your responses have been registered."
 
 
-class AboutThisWebsite(object):
+class About(object):
 
     @cherrypy.expose
     def index(self):
-        html_string = """
+
+        issessionauthenticated = is_session_authenticated()
+
+        if not issessionauthenticated:
+
+            html_string = """
 <html>
 <head>
+
+<title>
+Ecommunicate
+</title>
+
+<style>
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+</style>
 
 </head>
 <body>
@@ -844,11 +1433,79 @@ class AboutThisWebsite(object):
 
 <h3>A free online communication service</h3>
 
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/login">Login</a></li>
+<li class="menubar"><a href="/about/">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
 <h4>About This Website</h4>
 
 </center>
 
-   This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private.
+   It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. This service is intended to help people understand each other and help each other.
+
+</body>
+</html>
+"""
+
+        else:
+
+            html_string = """
+<html>
+<head>
+
+<title>
+Ecommunicate
+</title>
+
+<style>
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+</style>
+
+</head>
+<body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/loginlogout/logout">Logout</a></li>
+<li class="menubar"><a href="/about/">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+<h4>About This Website</h4>
+
+</center>
+
+   It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. This service is intended to help people understand each other and help each other.
 
 </body>
 </html>
@@ -882,15 +1539,15 @@ class Chat(object):
 
         curs.execute("use "+dbname+";")
 
-        curs.execute("select * from contacts where username1 = \""+cherrypy.request.login+"\"")
+        curs.execute("select * from contacts where username1 = \""+cherrypy.session.get('_cp_username')+"\"")
 
         contacts = curs.fetchall()
 
-        curs.execute("select * from contacts where username2 = \""+cherrypy.request.login+"\"")
+        curs.execute("select * from contacts where username2 = \""+cherrypy.session.get('_cp_username')+"\"")
 
         contacts = contacts+curs.fetchall()
 
-        contacts_string = "<td><ul id=\"contactslist\">\n"
+        contacts_string = "<td><ul class=\"contactlistclass\" id=\"contactslist\">\n"
 
         iframes_string = "";
 
@@ -902,10 +1559,10 @@ class Chat(object):
 
             contact_dict=dict(zip(colnames, contact))
 
-            if contact_dict["username2"] == cherrypy.request.login:
+            if contact_dict["username2"] == cherrypy.session.get('_cp_username'):
                 username = contact_dict["username1"]
             else:
-                assert(contact_dict["username1"] == cherrypy.request.login)
+                assert(contact_dict["username1"] == cherrypy.session.get('_cp_username'))
                 username = contact_dict["username2"]
 
             contacts_string = contacts_string+"<li id=\""+username+"\" name=\""+username+"\" class=\"contact\">"+username+"</li>\n" 
@@ -918,9 +1575,51 @@ class Chat(object):
 
 
         return """<html>
-<head><title>open</title>
+<head><title>Ecommunicate</title>
 
 <style>
+
+ul.subsubmenubar {
+
+text-align: left;
+padding: 0;
+
+}
+
+li.subsubmenubarleftmost {
+display: inline;
+padding-left: 0px;
+padding-right: 20px;
+}
+
+li.subsubmenubarrightmost {
+display: inline;
+padding-left: 20px;
+padding-right: 0px;
+}
+
+li.subsubmenubar {
+display: inline;
+padding: 20px;
+
+}
+
+ul.submenubar {
+
+list-style-type:none;
+display: inline-block;
+vertical-align:top;
+text-align: left;
+padding: 0;
+
+}
+
+li.submenubar {
+
+display: block;
+
+}
+
 
 ul.menubar {
 
@@ -930,12 +1629,15 @@ text-align: center;
 
 li.menubar {
         display: inline;
-        padding: 5px;
+        padding: 20px;
 }
 
-ul {
+ul.contactlistclass {
+
     list-style:none;
     padding-left:0;
+
+
 }
 
     .contact {
@@ -953,147 +1655,114 @@ ul {
         cursor: default;
         border-top: 2px solid black;
         border-bottom: 2px solid black;
-
     }
     .terminal {
     width: 100%;
     height: 30em;
     border: none;
-
 }
     .messageerrorbox {
     width: 100%;
     height: 1em;
     border: none;
-
 }
+
+
 </style>
 
 </head>
 <body>
 
 <center><h1>Ecommunicate</h1>
-
-<h3>A free online communication service</h3></center>
+<h3>A free online communication service</h3>
 
 <div id="header">
 
 <div id="nav">
 
 <ul class="menubar">
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/chat/makecontactrequests/">Make Contact Requests</a></li>
-<li class="menubar"><a href="/chat/respondtocontactrequests/">Respond to Contact Requests</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar">
+
+<ul class = "submenubar">
+<li class = "submenubar">
+
+<ul class = "subsubmenubar">
+<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
+<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
+<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
+</ul>
+
+</li>
+
+<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
+<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
+</ul>
 </ul>
 
 </div>
 
 </div>
 
+</center>
+
   <table border=2>
   <tr>
 """ + contacts_string + """ 
   <td>
-
 """+ iframes_string + """
-
 <form id="add_message_form" name = "add_messages_form" target="console_iframe1" method="POST" action="add_message">
-
  <input type="text" id="add_message_text" name="add_message_text" size="100" /> <br> <br>
-
  <input type="hidden" id="username2" name="username2"/>
-
  </form>
-
  <iframe id="console_iframe1" name="console_iframe1" class="messageerrorbox" />  </iframe>
-
 </td>
   </tr>
   </table>
-
 </body>
-
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
-
 <script>
-
 messages_json = "";
 messages_json_old = "";
 username2  = "";
 max_time = ""
-
 function show_messages(e){
-
    var target = e.target;
-
    if( target.id != "contactslist"){
-
     var console_iframe2 = document.getElementById('console_'+e.target.id);
-
     if (username2 != ""){
     
         $('#console_'+username2).hide();
-
     }
-
-
 //    console_iframe2.slideDown('slow');
-
  
-
     username2=e.target.id;
-
     $('#console_'+username2).show();
-
    }
 }
-
 function update_messages(){
-
     if (messages_json != "") {
-
-
-
         for (var item in messages_json) {  
-
             var console_iframe2 = document.getElementById('console_'+item);
-
             //clear the iframe
             console_iframe2.contentWindow.document.open();
             console_iframe2.contentWindow.document.close();
-
             for ( var i = 0, l = messages_json[item].length; i < l; i++ ) {
                 console_iframe2.contentWindow.document.write(messages_json[item][i][0]+": "+messages_json[item][i][1]);
                 console_iframe2.contentWindow.document.write("<br>");
             }
-
             var console_iframe2_contentWindow_document = console_iframe2.contentWindow.document;
-
-
             //this will "over-scroll", but it works i.e. it moves to the bottom    
-
             $(console_iframe2_contentWindow_document).scrollTop($(console_iframe2_contentWindow_document).height());  
-
-
         }
     }
-
 }
-
-
 $(document).ready(function() {
-
-
 """+iframes_hide_string+"""
-
    chat_initial();
-
 });
-
-
 function chat_initial() {
-
    $.ajax({
       url: 'get_messages',
       type: 'GET',
@@ -1102,33 +1771,23 @@ function chat_initial() {
          parsed_data = JSON.parse(data);
          messages_json = parsed_data[0];
          max_time=parsed_data[1]; 
-
          messages_json_old = messages_json;
-
          update_messages(); 
-
          chat_recursive();
-
       }
    });
-
 }
-
 function chat_recursive() {
-
 get_messages_url = 'get_messages?upon_update=True&client_max_time='+max_time;
-
    $.ajax({
       url: get_messages_url,
       type: 'GET',
       dataType: 'html',
       success: function(data) {
-
          parsed_data = JSON.parse(data);
          //alert(parsed_data["phone8"]);
          messages_json = parsed_data[0];
          max_time = parsed_data[1];
-
          if (messages_json_old != ""){
              for (var item in messages_json) {
                  if ( messages_json[item].length > messages_json_old[item].length ) {
@@ -1137,32 +1796,21 @@ get_messages_url = 'get_messages?upon_update=True&client_max_time='+max_time;
                             $('#'+item).css('background-color','blue');
                         }
                     }  
-
                  }
              }
          }
          messages_json_old = messages_json;
-
          update_messages();  
-
          chat_recursive();
       }
    });
-
 }
-
 $('#add_message_form').submit(function(event) {
-
    event.preventDefault();
-
    $('input[name="username2"]',this).val(username2);
-
    var $this = $(this);
-
    //$.get($this.attr('action'),$this.serialize());
-
    //alert($this.serialize());
-
    $.ajax({
       url: $this.attr('action'),
       type: 'POST',
@@ -1170,80 +1818,44 @@ $('#add_message_form').submit(function(event) {
       data: $this.serialize()
    
    });
-
    add_message_form.reset();
-
 });
-
-
 //$('#add_message_text')
 //.keyup(function(event) {
-
 //if (event.keyCode == 13){
-
 //alert(event.keyCode);
-
 //}
-
 //});
-
 function contact_mouseover(e){
-
 var target = e.target;
-
 if( target.id != "contactslist"){
     $('#'+target.id).css('background-color','orange');
 }
-
 }
-
 function contact_mouseout(e){
-
 var target = e.target;
-
 if( target.id != "contactslist"){
     $('#'+target.id).css('background-color','green');
 }
-
-
 }
-
 console_iframe1=document.getElementById('console_iframe1')
-
 //var add_message_form = document.getElementById('add_message_form')
 //var message = document.getElementById('message')
-
 //add_message_form.addEventListener('submit', function (e) { 
-
 //e.preventDefault();
-
 //add_message_form.submit();
-
 //}, false)
-
 //console_iframe1.addEventListener('load', function(e) {
-
 //add_message_form.reset();
-
 //}, false)
-
-
 var contactslist = document.getElementById('contactslist')
-
 contactslist.addEventListener('touchstart', function(e) { show_messages(e); } , false )
-
 contactslist.addEventListener('click', function(e) { 
-
     show_messages(e); 
-
 } , false )
-
 contactslist.addEventListener('mouseover',function(e) {contact_mouseover(e); } ,  false)
-
 contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  false)
-
 </script>
-
         </html>"""
 
     @cherrypy.expose
@@ -1414,156 +2026,6 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
         conn.commit()
 
-
-
-class MakeContactRequest(object):
-
-#    _cp_config = {
-#        'tools.sessions.on': True,
-#        'tools.auth.on': True
-#    }
-
-    @cherrypy.expose
-    @require()
-    def index(self):
-
-        return """<html>
-<head><title>open</title>
-
-<style>
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 5px;
-}
-
-    .fg-button {
-    outline: 0;
-    clear: left;
-    margin:0 4px 0 0;
-    padding: .1em .5em;
-    text-decoration:none !important;
-    cursor:pointer;
-    position: relative;
-    text-align: center;
-    zoom: 1;
-    }
-    .fg-button .ui-icon {
-    position: absolute;
-    top: 50%;
-    margin-top: -8px;
-    left: 50%;
-    margin-left: -8px;
-    }
-    a.fg-button { float:left;  }
-    .terminal {
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    width: 100%; height: 30em;
-    border: none;
-    }
-</style>
-
-</head>
-<body>
-
-<nav>
-<ul class="menubar">
-<li class="menubar"><a href="/chat">Chat</a></li>
-<li class="menubar"><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class="menubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</nav>
-
-<h2>Make a contact request </h2>
-
-<form id="contact_request_form" target="console_iframe3" method="post" action="contact_request">
-  Username: <br><br>
-  <input type="text" id="username2" name="username2" size="18" /> <br><br>
-
-Message: <br><br>
-  <input type="text" id="message" name="message" size="100" /> <br><br>
-  <button id="contact_request" class="fg-button ui-state-default ui-corner-all" type="submit">
-  Submit
-  </button>
-  </form>
-
-  <iframe name="console_iframe3" class="terminal" /> </iframe>
-
-</body>
-        </html>"""
-
-
-    @cherrypy.expose
-    def contact_request(self, username2, message):
-
-        if username2 == cherrypy.session.get('_cp_username'):
-            return "You cannot make a contact request for yourself."
-        
-        secrets_file=open("/home/ec2-user/secrets.txt")
-
-        passwords=secrets_file.read().rstrip('\n')
-
-        db_password = passwords.split('\n')[0]
-
-        dbname = "open"
-
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-        curs = conn.cursor()
-
-        curs.execute("use "+dbname+";")
-            
-        curs.execute("select * from user_info where username = \""+username2+"\";")
-
-        if len(curs.fetchall()) == 0:
-            return "Username "+username2+" does not exist."
-
-        username1=cherrypy.request.login
-
-        sorted_usernames= sorted([username1,username2])
-
-        if sorted_usernames == [username1,username2]:
-            forward=str(1)
-        else:
-            forward=str(0)
-
-        original_username2 = username2    
-
-        username1 = sorted_usernames[0]
-    
-        username2 = sorted_usernames[1]    
-
-        curs.execute("select * from contact_requests where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
-
-        contact_requests = curs.fetchall()
-
-        if len(contact_requests) > 0:
-            return "Contact request already made between these two users."
-
-        curs.execute("select * from contacts where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
-
-        contacts = curs.fetchall()
-
-        if len(contacts) > 0:
-            return "Contact request already made between these two users."
-
-        curs.execute("insert into contact_requests set username1 = \""+username1+"\", username2 = \""+username2+"\", message = \""+message+"\", forward="+forward+";")
-
-        conn.commit()
-
-        return "A contact request has been sent to user "+original_username2+"."
-
 class Root(object):
 
     _cp_config = {
@@ -1580,12 +2042,16 @@ class Root(object):
 
     register = Register()
 
-    about = AboutThisWebsite()
+    about = About()
 
     @cherrypy.expose
     def index(self):
 
-        html_string = """
+        issessionauthenticated = is_session_authenticated()
+
+        if not issessionauthenticated:
+
+            html_string = """
 
 <html>
 
@@ -1599,7 +2065,7 @@ Ecommunicate
 
 li.menubar {
         display: inline;
-        padding: 5px;
+        padding: 20px;
 }
 
 
@@ -1611,14 +2077,15 @@ li.menubar {
 
 """
 
-        html_string = html_string+"<center><h1>Ecommunicate</h1>"
-        html_string = html_string+"<h3>a free online communication service</h3></center>"
-        html_string = html_string+"""
+            html_string = html_string+"<center><h1>Ecommunicate</h1>"
+            html_string = html_string+"<h3>A free online communication service</h3>"
+            html_string = html_string+"""
 <div id="header">
 
 <div id="nav">
 
 <ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
 <li class="menubar"><a href="/view/">View</a></li>
 <li class="menubar"><a href="/register/">Register</a></li>
 <li class="menubar"><a href="/loginlogout/login/">Login</a></li>
@@ -1628,42 +2095,132 @@ li.menubar {
 </div>
 
 </div>
+
+</center>
+
 """
-        html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+            html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
 
-        html_string=html_string+"<h4>Conversations</h4>"
+            html_string=html_string+"<h4>Conversations</h4>"
 
-        html_string=html_string+"<ol>"
+            html_string=html_string+"<ol>"
 
-        secrets_file=open("/home/ec2-user/secrets.txt")
+            secrets_file=open("/home/ec2-user/secrets.txt")
 
-        passwords=secrets_file.read().rstrip('\n')
+            passwords=secrets_file.read().rstrip('\n')
 
-        db_password = passwords.split('\n')[0]
+            db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+            dbname = "open"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
 
-        curs = conn.cursor()
+            curs = conn.cursor()
 
-        curs.execute("use "+dbname+";")
+            curs.execute("use "+dbname+";")
 
-        curs.execute("select DISTINCT username1,username2 from messages;")
+            curs.execute("select DISTINCT username1,username2 from messages;")
 
-        conversations = curs.fetchall()
+            conversations = curs.fetchall()
 
-        colnames = [desc[0] for desc in curs.description]
+            colnames = [desc[0] for desc in curs.description]
 
-        for conversation in conversations:
+            for conversation in conversations:
 
-            conversation_dict=dict(zip(colnames, conversation))
+                conversation_dict=dict(zip(colnames, conversation))
             
-            html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
 
-        html_string=html_string+"</ol>"
+            html_string=html_string+"</ol>"
 
-        html_string = html_string+"""
+            html_string = html_string+"""
+</body>
+</html>
+
+"""
+        else: #authenticated    
+            html_string="""
+
+
+<html>
+
+<head>
+
+<title>
+Ecommunicate
+</title>
+
+<style>
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+"""
+
+            html_string = html_string+"<center><h1>Ecommunicate</h1>"
+            html_string = html_string+"<h3>A free online communication service</h3>"
+            html_string = html_string+"""
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></l>
+<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+</center>
+
+"""
+            html_string=html_string+"<h4>Conversations</h4>"
+
+            html_string=html_string+"<ol>"
+
+            secrets_file=open("/home/ec2-user/secrets.txt")
+
+            passwords=secrets_file.read().rstrip('\n')
+
+            db_password = passwords.split('\n')[0]
+
+            dbname = "open"
+
+            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+            curs = conn.cursor()
+
+            curs.execute("use "+dbname+";")
+
+            curs.execute("select DISTINCT username1,username2 from messages;")
+
+            conversations = curs.fetchall()
+
+            colnames = [desc[0] for desc in curs.description]
+
+            for conversation in conversations:
+
+                conversation_dict=dict(zip(colnames, conversation))
+            
+                html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+
+            html_string=html_string+"</ol>"
+
+            html_string = html_string+"""
 </body>
 </html>
 
