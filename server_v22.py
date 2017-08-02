@@ -204,9 +204,13 @@ li.menubar {
 
 </div>
 
+<h4>Registration</h4>
+
 </center>
 
-   This is an <b>open chatting service</b>. It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. Register here for your free account. 
+      Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br> <br>
+
+      Register here for your free account. Please remember your username and password, as there is no way to recover them at this time.
 
 <br><br>
 
@@ -297,7 +301,7 @@ li.menubar {
 
             conn.commit()
 
-            yield "Your registration was succesful. Please remember your password, as there is no way to access the account if you forget."
+            yield "Your registration was succesful. Please remember your username and password, as there is no way to recover them at this time."
 
         return register_function()
 
@@ -356,12 +360,14 @@ li.menubar {
 
 </div>
 
+<h4>View</h4>
+
 </center>
 
 """
-            html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
 
-            html_string=html_string+"<h4>Conversations</h4>"
+            html_string=html_string+"<br>"
 
             html_string=html_string+"<ol>"
 
@@ -448,12 +454,16 @@ li.menubar {
 
 </div>
 
+
+<h4>View</h4>
+
 </center>
 
 """
-            html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
 
-            html_string=html_string+"<h4>Conversations</h4>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
+
+            html_string=html_string+"<br>"
 
             html_string=html_string+"<ol>"
 
@@ -570,6 +580,8 @@ ul {
 </div>
 
 </div>
+
+<h4>View</h4>
 
 </center>
 
@@ -751,6 +763,8 @@ ul {
 </div>
 
 </div>
+
+<h4>View</h4>
 
 </center>
 
@@ -1453,7 +1467,9 @@ li.menubar {
 
 </center>
 
-   It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. This service is intended to help people understand each other and help each other.
+            Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc. <br><br>
+
+   Making online communication public instead of private could help people who are working on similar problems. They would be able to learn from each other, not make the same mistakes, and not waste time doing duplicative work. In addition, making online communication public may help expose people's problems. It could help create a more open, cooperative, and honest world. It could also encourage people to spend less time on their computers.
 
 </body>
 </html>
@@ -1505,7 +1521,9 @@ li.menubar {
 
 </center>
 
-   It is similar to wechat or Google Hangouts, except that all conversations are viewable by anyone on the open internet, instead of being private. This service is intended to help people understand each other and help each other.
+            Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc. <br><br>
+
+   Making online communication public instead of private could help people who are working on similar problems. They would be able to learn from each other, not make the same mistakes, and not waste time doing duplicative work. In addition, making online communication public may help expose people's problems. It could help create a more open, cooperative, and honest world. It could also encourage people to spend less time on their computers.
 
 </body>
 </html>
@@ -1705,7 +1723,12 @@ ul.contactlistclass {
 
 </div>
 
+<h4>Chat</h4>
+
 </center>
+
+
+<center>
 
   <table border=2>
   <tr>
@@ -1720,6 +1743,10 @@ ul.contactlistclass {
 </td>
   </tr>
   </table>
+
+</center>
+
+
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
 <script>
@@ -2099,9 +2126,9 @@ li.menubar {
 </center>
 
 """
-            html_string = html_string+"Ecommunicate is an free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below).<br>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
 
-            html_string=html_string+"<h4>Conversations</h4>"
+            html_string=html_string+"<br>"
 
             html_string=html_string+"<ol>"
 
@@ -2188,7 +2215,9 @@ li.menubar {
 </center>
 
 """
-            html_string=html_string+"<h4>Conversations</h4>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
+
+            html_string=html_string+"<br>"
 
             html_string=html_string+"<ol>"
 
@@ -2285,8 +2314,10 @@ if __name__ == '__main__':
 #    cherrypy.tree.mount(LogInLogOut(),'/loginlogout')
 
     cherrypy.server.ssl_module = 'builtin'
-    cherrypy.server.ssl_certificate = "cert.pem"
-    cherrypy.server.ssl_private_key = "privkey.pem"
+    cherrypy.server.ssl_certificate = "/etc/letsencrypt/live/ecommunicate.ch/fullchain.pem"
+    cherrypy.server.ssl_private_key = "/etc/letsencrypt/live/ecommunicate.ch/privkey.pem"
+    cherrypy.server.ssl_certificate_chain = "/etc/letsencrypt/live/ecommunicate.ch/fullchain.pem"
+
 
     cherrypy.engine.start()
     cherrypy.engine.block()
