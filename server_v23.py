@@ -637,7 +637,7 @@ ul {
 
 <h3>A free online communication service</h3>
 
-"""+not_authenticated_html_string+"""
+"""+not_authenticated_menubar_html_string+"""
 
 
 <h4>View</h4>
