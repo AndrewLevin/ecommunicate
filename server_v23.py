@@ -50,6 +50,139 @@ def require(*conditions):
         return f
     return decorate
 
+
+not_authenticated_menubar_html_string = """
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+
+"""
+
+authenticated_menubar_html_string = """
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Logout</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+"""
+
+chat_menubar_html_string = """
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar">
+
+<ul class = "submenubar">
+<li class = "submenubar">
+
+<ul class = "subsubmenubar">
+<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
+<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
+<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
+</ul>
+
+</li>
+
+<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
+<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
+</ul>
+</ul>
+
+</div>
+
+</div>
+
+"""
+
+chat_menubar_style_html_string = """
+
+ul.subsubmenubar {
+
+text-align: left;
+padding: 0;
+
+}
+
+li.subsubmenubarleftmost {
+display: inline;
+padding-left: 0px;
+padding-right: 20px;
+}
+
+li.subsubmenubarrightmost {
+display: inline;
+padding-left: 20px;
+padding-right: 0px;
+}
+
+li.subsubmenubar {
+display: inline;
+padding: 20px;
+
+}
+
+ul.submenubar {
+
+list-style-type:none;
+display: inline-block;
+vertical-align:top;
+text-align: left;
+padding: 0;
+
+}
+
+li.submenubar {
+
+display: block;
+
+}
+
+
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+"""
+
+
 class LogInLogOut(object):
 
     def login_html(self,  message="", from_page="/"):
@@ -80,22 +213,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+not_authenticated_menubar_html_string+"""
 
 <h4>Login</h4>
 
@@ -188,21 +306,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+not_authenticated_menubar_html_string+"""
 
 <h4>Registration</h4>
 
@@ -343,23 +447,7 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
-
+            html_string = html_string+not_authenticated_menubar_html_string+"""
 <h4>View</h4>
 
 </center>
@@ -437,23 +525,7 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
-
+            html_string = html_string+authenticated_menubar_html_string+"""
 
 <h4>View</h4>
 
@@ -565,21 +637,8 @@ ul {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
+"""+not_authenticated_html_string+"""
 
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/">Login</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
 
 <h4>View</h4>
 
@@ -748,21 +807,7 @@ ul {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+authenticated_menubar_html_string+"""
 
 <h4>View</h4>
 
@@ -971,58 +1016,7 @@ class MakeContactRequest(object):
 
 <style>
 
-ul.subsubmenubar {
-
-text-align: left;
-padding: 0;
-
-}
-
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-
-}
-
-ul.submenubar {
-
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-
-}
-
-li.submenubar {
-
-display: block;
-
-}
-
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+"""+chat_menubar_style_html_string+"""
 
 
     .fg-button {
@@ -1063,35 +1057,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar">
-
-<ul class = "submenubar">
-<li class = "submenubar">
-
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-
-</li>
-
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-
-</div>
-
-</div>
+"""+chat_menubar_html_string +"""
 
 </center>
 
@@ -1226,58 +1192,7 @@ class ContactRequestResponses(object):
 
 <style>
 
-ul.subsubmenubar {
-
-text-align: left;
-padding: 0;
-
-}
-
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-
-}
-
-ul.submenubar {
-
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-
-}
-
-li.submenubar {
-
-display: block;
-
-}
-
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+"""+chat_menubar_style_html_string+"""
 
 
     .fg-button {
@@ -1319,36 +1234,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar">
-
-<ul class = "submenubar">
-<li class = "submenubar">
-
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-
-</li>
-
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-
-
-</div>
-
-</div>
+"""+chat_menubar_html_string+"""
 
 </center>
 
@@ -1447,21 +1333,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login">Login</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+not_authenticated_menubar_html_string+"""
 
 <h4>About This Website</h4>
 
@@ -1501,21 +1373,8 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
+"""+authenticated_menubar_html_string+"""
 
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
 
 <h4>About This Website</h4>
 
@@ -1597,58 +1456,7 @@ class Chat(object):
 
 <style>
 
-ul.subsubmenubar {
-
-text-align: left;
-padding: 0;
-
-}
-
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-
-}
-
-ul.submenubar {
-
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-
-}
-
-li.submenubar {
-
-display: block;
-
-}
-
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+"""+chat_menubar_style_html_string+"""
 
 ul.contactlistclass {
 
@@ -1694,34 +1502,7 @@ ul.contactlistclass {
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar">
-
-<ul class = "submenubar">
-<li class = "submenubar">
-
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-
-</li>
-
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-
-</div>
-
-</div>
+"""+chat_menubar_html_string+"""
 
 <h4>Chat</h4>
 
@@ -2106,22 +1887,7 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
+            html_string = html_string+not_authenticated_menubar_html_string+"""
 
 </center>
 
@@ -2195,23 +1961,7 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></l>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
-
+            html_string = html_string+authenticated_menubar_html_string+"""
 </center>
 
 """
@@ -2300,7 +2050,7 @@ def is_right_password(username, password):
         return [False,"Login failed. The password that you entered is not the one associated with the username that you entered."]
 
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_port': 443}) #port 443 for https or port 80 for http
+    cherrypy.config.update({'server.socket_port': 8443}) #port 443 for https or port 80 for http
 #    cherrypy.config.update({'server.socket_port': 80})
     cherrypy.config.update({'server.socket_host': 'ec2-52-42-148-78.us-west-2.compute.amazonaws.com'})
     #cherrypy.config.update({'tools.sessions.on': True})
