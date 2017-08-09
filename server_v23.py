@@ -1367,9 +1367,15 @@ class Chat(object):
 
         contacts_string = "<td><ul class=\"contactlistclass\" id=\"contactslist\">\n"
 
+        contacts_string = contacts_string+"<li id=\""+cherrypy.session.get('_cp_username')+"\" name=\""+cherrypy.session.get('_cp_username')+"\" class=\"contact\">"+cherrypy.session.get('_cp_username')+"</li>\n"
+
         iframes_string = "";
 
+        iframes_string = iframes_string+ "<iframe id=\"console_"+cherrypy.session.get('_cp_username')+"\" name=\"console_"+cherrypy.session.get('_cp_username')+"\" class=\"terminal\" />  </iframe>\n"
+
         iframes_hide_string = "";
+
+        iframes_hide_string = iframes_hide_string+iframes_hide_string+"$(\'#console_" + cherrypy.session.get('_cp_username') + "\').hide();\n"
 
         for contact in contacts:
 
@@ -1692,8 +1698,6 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
             messages=curs.fetchall()
 
-            return_string=""
-
             if len(messages) > 0:
 
                 messages_json[username] = []
@@ -1703,20 +1707,29 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
                     message_dict=dict(zip(colnames, message))
 
                     if message_dict["forward"] == 1:
-                        return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
                         messages_json[username].append([message_dict["username1"], message_dict["message"]])
                     elif message_dict["forward"] == 0:
-                        return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
                         messages_json[username].append([message_dict["username2"], message_dict["message"]])
 
+        curs.execute("select * from messages where username1 = \""+cherrypy.session.get('_cp_username')+"\" and username2 = \""+cherrypy.session.get('_cp_username')+"\" order by time;")
+
+        colnames = [desc[0] for desc in curs.description]
+
+        messages=curs.fetchall()
+
+        if len(messages) > 0:
+            messages_json[cherrypy.session.get('_cp_username')] = []
+            for message in messages:
+                message_dict=dict(zip(colnames, message))
+                messages_json[cherrypy.session.get('_cp_username')].append([cherrypy.session.get('_cp_username'), message_dict["message"]])
 
         #return str(messages_json)
 
-        curs.execute("select MAX(time) from messages where username1=\""+username1+"\";")
+        curs.execute("select MAX(time) from messages where username1=\""+cherrypy.session.get('_cp_username')+"\";")
 
         max_time1 = curs.fetchall()[0][0]
 
-        curs.execute("select MAX(time) from messages where username2=\""+username1+"\";")
+        curs.execute("select MAX(time) from messages where username2=\""+cherrypy.session.get('_cp_username')+"\";")
 
         max_time2 = curs.fetchall()[0][0]
 
