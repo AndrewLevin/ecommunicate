@@ -1397,6 +1397,8 @@ class Chat(object):
 
         contacts_string=contacts_string+"</ul></td>\n</td>"
 
+        click_on_self_string = "$(\'#"+cherrypy.session.get('_cp_username')+"\').click();"
+
 
         return """<html>
 <head><title>Ecommunicate</title>
@@ -1513,10 +1515,6 @@ function update_messages(){
         }
     }
 }
-$(document).ready(function() {
-"""+iframes_hide_string+"""
-   chat_initial();
-});
 function chat_initial() {
    $.ajax({
       url: 'get_messages',
@@ -1610,6 +1608,16 @@ contactslist.addEventListener('click', function(e) {
 } , false )
 contactslist.addEventListener('mouseover',function(e) {contact_mouseover(e); } ,  false)
 contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  false)
+
+$(document).ready(function() {
+"""+iframes_hide_string+"""
+   chat_initial();
+
+"""+click_on_self_string+"""
+
+});
+
+
 </script>
         </html>"""
 
