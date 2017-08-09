@@ -1019,35 +1019,6 @@ class MakeContactRequest(object):
 """+chat_menubar_style_html_string+"""
 
 
-    .fg-button {
-    outline: 0;
-    clear: left;
-    margin:0 4px 0 0;
-    padding: .1em .5em;
-    text-decoration:none !important;
-    cursor:pointer;
-    position: relative;
-    text-align: center;
-    zoom: 1;
-    }
-    .fg-button .ui-icon {
-    position: absolute;
-    top: 50%;
-    margin-top: -8px;
-    left: 50%;
-    margin-left: -8px;
-    }
-    a.fg-button { float:left;  }
-    .terminal {
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    width: 100%; height: 30em;
-    border: none;
-    }
 </style>
 
 </head>
@@ -1194,36 +1165,6 @@ class ContactRequestResponses(object):
 
 """+chat_menubar_style_html_string+"""
 
-
-    .fg-button {
-    outline: 0;
-    clear: left;
-    margin:0 4px 0 0;
-    padding: .1em .5em;
-    text-decoration:none !important;
-    cursor:pointer;
-    position: relative;
-    text-align: center;
-    zoom: 1;
-    }
-    .fg-button .ui-icon {
-    position: absolute;
-    top: 50%;
-    margin-top: -8px;
-    left: 50%;
-    margin-left: -8px;
-    }
-    a.fg-button { float:left;  }
-    .terminal {
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    width: 100%; height: 30em;
-    border: none;
-    }
 </style>
 
 </head>
