@@ -385,6 +385,9 @@ li.menubar {
    <input type="text" id="username" name="username" size="18" /><br><br>
    password: <br><br>
    <input type="password" id="password" name="password" size="18" /> <br><br>
+   name: <br><br>
+   <input type="text" id="name" name="name" size="18" /><br><br>
+
 
   <button id="register" type="submit">
   Register
@@ -425,7 +428,7 @@ li.menubar {
 </body>
         </html>"""
     @cherrypy.expose
-    def register(self, username, password):
+    def register(self, username, password,name):
 
 #        $( "iframe" ).clear()
         def register_function():
@@ -460,7 +463,7 @@ li.menubar {
                 yield "Please choose a password that is at least 6 characters."
                 return
             
-            curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\"")
+            curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\", name = \""+name+"\"")
 
             conn.commit()
 
@@ -1293,7 +1296,7 @@ class ContactRequestResponses(object):
                 username1=sorted_usernames[0]
                 username2=sorted_usernames[1]
 
-                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\";")
+                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\", new_message_username1 = 0, new_message_username2 = 0;")
             
         conn.commit()
 
@@ -1878,6 +1881,11 @@ $(document).ready(function() {
         curs.execute("use "+dbname+";")
 
         curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+add_message_text+"\";")
+
+        if forward == "1":
+            curs.execute("update contacts set new_message_username2 = 1 where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
+        else: 
+            curs.execute("update contacts set new_message_username1 = 1 where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
 
         conn.commit()
 
