@@ -20,6 +20,10 @@ from HTMLParser import HTMLParser
 
 import json
 
+import urllib
+
+import httplib
+
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
     conditions = cherrypy.request.config.get('auth.require', None)
@@ -1888,6 +1892,18 @@ $(document).ready(function() {
             curs.execute("update contacts set new_message_username1 = 1 where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
 
         conn.commit()
+
+        params_json = {'username1': username1, 'username2': username2}
+
+        
+
+        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+
+        conn  =  httplib.HTTPSConnection("test.ecommunicate.ch")
+        conn.request('POST','/new_message_browser/', headers = headers, body = json.dumps(params_json))
+        r=conn.getresponse()
+        print r.status
+        print r.reason
 
 class Root(object):
 
