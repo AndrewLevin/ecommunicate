@@ -20,6 +20,10 @@ from HTMLParser import HTMLParser
 
 import json
 
+import urllib
+
+import httplib
+
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
     conditions = cherrypy.request.config.get('auth.require', None)
@@ -49,6 +53,198 @@ def require(*conditions):
         f._cp_config['auth.require'].extend(conditions)
         return f
     return decorate
+
+
+
+about_html_string = """
+            Ecommunicate is intended to meet the need for electronic communication that is the opposite of private. Making online communication public instead of private could lead to increased levels of honesty, transparency, cooperation and decreased levels of deception, misunderstanding between people, and duplicative work. It is not clear whether this concept will catch on, but it is worth a try.<br><br>
+
+           We hope to eventually provide chat, e-mail, and audio/video calling services, but currently only chat, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc. <br><br>
+
+  Below is a list of all of the services that we would like to provide. The ones that are operational are in bold.
+
+<ol>
+<li>Chat
+<ol>
+<li>Create
+<ol>
+<li><b>Browser</b>
+<li>Android
+<li>iOS
+</ol>
+<li>View
+<ol>
+<li><b>Browser</b>
+<li>Android
+<li>iOS
+</ol>
+</ol>
+<li>E-mail
+<ol>
+<li>Create
+<ol>
+<li>Browser
+<li>Android
+<li>iOS
+</ol>
+<li>View
+<ol>
+<li>Browser
+<li>Android
+<li>iOS
+</ol>
+</ol>
+<li>Audio/Video Call
+<ol>
+<li>Create
+<ol>
+<li>Windows
+<li>MacOS
+<li>Android
+<li>iOS
+</ol>
+<li>View/Listen
+<ol>
+<li>Windows
+<li>MacOS
+<li>Android
+<li>iOS
+</ol>
+</ol>
+</ol>
+"""
+
+not_authenticated_menubar_html_string = """
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/register/">Register</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+
+"""
+
+authenticated_menubar_html_string = """
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/chat/">Chat</a></li>
+<li class="menubar"><a href="/loginlogout/login/">Logout</a></li>
+<li class="menubar"><a href="/about">About</a></li>
+</ul>
+
+</div>
+
+</div>
+
+"""
+
+chat_menubar_html_string = """
+
+<div id="header">
+
+<div id="nav">
+
+<ul class="menubar">
+<li class="menubar"><a href="/">Home</a></li>
+<li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar">
+
+<ul class = "submenubar">
+<li class = "submenubar">
+
+<ul class = "subsubmenubar">
+<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
+<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
+<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
+</ul>
+
+</li>
+
+<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
+<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
+</ul>
+</ul>
+
+</div>
+
+</div>
+
+"""
+
+chat_menubar_style_html_string = """
+
+ul.subsubmenubar {
+
+text-align: left;
+padding: 0;
+
+}
+
+li.subsubmenubarleftmost {
+display: inline;
+padding-left: 0px;
+padding-right: 20px;
+}
+
+li.subsubmenubarrightmost {
+display: inline;
+padding-left: 20px;
+padding-right: 0px;
+}
+
+li.subsubmenubar {
+display: inline;
+padding: 20px;
+
+}
+
+ul.submenubar {
+
+list-style-type:none;
+display: inline-block;
+vertical-align:top;
+text-align: left;
+padding: 0;
+
+}
+
+li.submenubar {
+
+display: block;
+
+}
+
+
+ul.menubar {
+
+text-align: center;
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+"""
+
 
 class LogInLogOut(object):
 
@@ -80,22 +276,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+not_authenticated_menubar_html_string+"""
 
 <h4>Login</h4>
 
@@ -188,27 +369,13 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+not_authenticated_menubar_html_string+"""
 
 <h4>Registration</h4>
 
 </center>
 
-      Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br> <br>
+      Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc.<br> <br>
 
       Register here for your free account. Please remember your username and password, as there is no way to recover them at this time.
 
@@ -222,6 +389,9 @@ li.menubar {
    <input type="text" id="username" name="username" size="18" /><br><br>
    password: <br><br>
    <input type="password" id="password" name="password" size="18" /> <br><br>
+   name: <br><br>
+   <input type="text" id="name" name="name" size="18" /><br><br>
+
 
   <button id="register" type="submit">
   Register
@@ -262,7 +432,7 @@ li.menubar {
 </body>
         </html>"""
     @cherrypy.expose
-    def register(self, username, password):
+    def register(self, username, password,name):
 
 #        $( "iframe" ).clear()
         def register_function():
@@ -297,7 +467,7 @@ li.menubar {
                 yield "Please choose a password that is at least 6 characters."
                 return
             
-            curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\"")
+            curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\", name = \""+name+"\"")
 
             conn.commit()
 
@@ -343,29 +513,13 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
-
+            html_string = html_string+not_authenticated_menubar_html_string+"""
 <h4>View</h4>
 
 </center>
 
 """
-            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc.<br>"
 
             html_string=html_string+"<br>"
 
@@ -437,23 +591,7 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
-
+            html_string = html_string+authenticated_menubar_html_string+"""
 
 <h4>View</h4>
 
@@ -461,7 +599,7 @@ li.menubar {
 
 """
 
-            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc.<br>"
 
             html_string=html_string+"<br>"
 
@@ -565,21 +703,8 @@ ul {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
+"""+not_authenticated_menubar_html_string+"""
 
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/">Login</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
 
 <h4>View</h4>
 
@@ -748,21 +873,7 @@ ul {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+authenticated_menubar_html_string+"""
 
 <h4>View</h4>
 
@@ -971,89 +1082,9 @@ class MakeContactRequest(object):
 
 <style>
 
-ul.subsubmenubar {
-
-text-align: left;
-padding: 0;
-
-}
-
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-
-}
-
-ul.submenubar {
-
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-
-}
-
-li.submenubar {
-
-display: block;
-
-}
+"""+chat_menubar_style_html_string+"""
 
 
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
-
-
-    .fg-button {
-    outline: 0;
-    clear: left;
-    margin:0 4px 0 0;
-    padding: .1em .5em;
-    text-decoration:none !important;
-    cursor:pointer;
-    position: relative;
-    text-align: center;
-    zoom: 1;
-    }
-    .fg-button .ui-icon {
-    position: absolute;
-    top: 50%;
-    margin-top: -8px;
-    left: 50%;
-    margin-left: -8px;
-    }
-    a.fg-button { float:left;  }
-    .terminal {
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    width: 100%; height: 30em;
-    border: none;
-    }
 </style>
 
 </head>
@@ -1063,35 +1094,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar">
-
-<ul class = "submenubar">
-<li class = "submenubar">
-
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-
-</li>
-
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-
-</div>
-
-</div>
+"""+chat_menubar_html_string +"""
 
 </center>
 
@@ -1226,89 +1229,8 @@ class ContactRequestResponses(object):
 
 <style>
 
-ul.subsubmenubar {
+"""+chat_menubar_style_html_string+"""
 
-text-align: left;
-padding: 0;
-
-}
-
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-
-}
-
-ul.submenubar {
-
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-
-}
-
-li.submenubar {
-
-display: block;
-
-}
-
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
-
-
-    .fg-button {
-    outline: 0;
-    clear: left;
-    margin:0 4px 0 0;
-    padding: .1em .5em;
-    text-decoration:none !important;
-    cursor:pointer;
-    position: relative;
-    text-align: center;
-    zoom: 1;
-    }
-    .fg-button .ui-icon {
-    position: absolute;
-    top: 50%;
-    margin-top: -8px;
-    left: 50%;
-    margin-left: -8px;
-    }
-    a.fg-button { float:left;  }
-    .terminal {
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    width: 100%; height: 30em;
-    border: none;
-    }
 </style>
 
 </head>
@@ -1319,36 +1241,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar">
-
-<ul class = "submenubar">
-<li class = "submenubar">
-
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-
-</li>
-
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-
-
-</div>
-
-</div>
+"""+chat_menubar_html_string+"""
 
 </center>
 
@@ -1407,7 +1300,7 @@ li.menubar {
                 username1=sorted_usernames[0]
                 username2=sorted_usernames[1]
 
-                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\";")
+                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\", new_message_username1 = 0, new_message_username2 = 0;")
             
         conn.commit()
 
@@ -1447,29 +1340,13 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login">Login</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
+"""+not_authenticated_menubar_html_string+"""
 
 <h4>About This Website</h4>
 
 </center>
 
-            Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc. <br><br>
-
-   Making online communication public instead of private could help people who are working on similar problems. They would be able to learn from each other, not make the same mistakes, and not waste time doing duplicative work. In addition, making online communication public may help expose people's problems. It could help create a more open, cooperative, and honest world. It could also encourage people to spend less time on their computers.
+"""+about_html_string+"""
 
 </body>
 </html>
@@ -1501,29 +1378,14 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-<div id="header">
+"""+authenticated_menubar_html_string+"""
 
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class="menubar"><a href="/about/">About</a></li>
-</ul>
-
-</div>
-
-</div>
 
 <h4>About This Website</h4>
 
 </center>
 
-            Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc. <br><br>
-
-   Making online communication public instead of private could help people who are working on similar problems. They would be able to learn from each other, not make the same mistakes, and not waste time doing duplicative work. In addition, making online communication public may help expose people's problems. It could help create a more open, cooperative, and honest world. It could also encourage people to spend less time on their computers.
+"""+about_html_string+"""
 
 </body>
 </html>
@@ -1531,6 +1393,36 @@ li.menubar {
 
         return html_string
 
+
+class Email(object):
+
+    @cherrypy.expose
+    @require()
+    def index(self):
+        secrets_file=open("/home/ec2-user/secrets.txt")
+
+        passwords=secrets_file.read().rstrip('\n')
+
+        db_password = passwords.split('\n')[0]
+
+        dbname = "open"
+
+        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+
+        curs = conn.cursor()
+
+        curs.execute("use "+dbname+";")
+
+        curs.execute("select * from emails where recipient = \""+cherrypy.session.get('_cp_username')+"\"")
+
+        emails = curs.fetchall();
+        
+        for email in emails:
+            colnames = [desc[0] for desc in curs.description]
+
+            email_dict=dict(zip(colnames, email))
+
+            return email_dict["message"] 
 
 
 class Chat(object):
@@ -1567,9 +1459,15 @@ class Chat(object):
 
         contacts_string = "<td><ul class=\"contactlistclass\" id=\"contactslist\">\n"
 
+        contacts_string = contacts_string+"<li id=\""+cherrypy.session.get('_cp_username')+"\" name=\""+cherrypy.session.get('_cp_username')+"\" class=\"contact\">"+cherrypy.session.get('_cp_username')+"</li>\n"
+
         iframes_string = "";
 
+        iframes_string = iframes_string+ "<iframe id=\"console_"+cherrypy.session.get('_cp_username')+"\" name=\"console_"+cherrypy.session.get('_cp_username')+"\" class=\"terminal\" />  </iframe>\n"
+
         iframes_hide_string = "";
+
+        iframes_hide_string = iframes_hide_string+iframes_hide_string+"$(\'#console_" + cherrypy.session.get('_cp_username') + "\').hide();\n"
 
         for contact in contacts:
 
@@ -1591,64 +1489,15 @@ class Chat(object):
 
         contacts_string=contacts_string+"</ul></td>\n</td>"
 
+        click_on_self_string = "$(\'#"+cherrypy.session.get('_cp_username')+"\').click();"
+
 
         return """<html>
 <head><title>Ecommunicate</title>
 
 <style>
 
-ul.subsubmenubar {
-
-text-align: left;
-padding: 0;
-
-}
-
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-
-}
-
-ul.submenubar {
-
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-
-}
-
-li.submenubar {
-
-display: block;
-
-}
-
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+"""+chat_menubar_style_html_string+"""
 
 ul.contactlistclass {
 
@@ -1694,34 +1543,7 @@ ul.contactlistclass {
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
 
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar">
-
-<ul class = "submenubar">
-<li class = "submenubar">
-
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-
-</li>
-
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-
-</div>
-
-</div>
+"""+chat_menubar_html_string+"""
 
 <h4>Chat</h4>
 
@@ -1785,10 +1607,6 @@ function update_messages(){
         }
     }
 }
-$(document).ready(function() {
-"""+iframes_hide_string+"""
-   chat_initial();
-});
 function chat_initial() {
    $.ajax({
       url: 'get_messages',
@@ -1882,6 +1700,16 @@ contactslist.addEventListener('click', function(e) {
 } , false )
 contactslist.addEventListener('mouseover',function(e) {contact_mouseover(e); } ,  false)
 contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  false)
+
+$(document).ready(function() {
+"""+iframes_hide_string+"""
+   chat_initial();
+
+"""+click_on_self_string+"""
+
+});
+
+
 </script>
         </html>"""
 
@@ -1970,8 +1798,6 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
             messages=curs.fetchall()
 
-            return_string=""
-
             if len(messages) > 0:
 
                 messages_json[username] = []
@@ -1981,20 +1807,29 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
                     message_dict=dict(zip(colnames, message))
 
                     if message_dict["forward"] == 1:
-                        return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
                         messages_json[username].append([message_dict["username1"], message_dict["message"]])
                     elif message_dict["forward"] == 0:
-                        return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
                         messages_json[username].append([message_dict["username2"], message_dict["message"]])
 
+        curs.execute("select * from messages where username1 = \""+cherrypy.session.get('_cp_username')+"\" and username2 = \""+cherrypy.session.get('_cp_username')+"\" order by time;")
+
+        colnames = [desc[0] for desc in curs.description]
+
+        messages=curs.fetchall()
+
+        if len(messages) > 0:
+            messages_json[cherrypy.session.get('_cp_username')] = []
+            for message in messages:
+                message_dict=dict(zip(colnames, message))
+                messages_json[cherrypy.session.get('_cp_username')].append([cherrypy.session.get('_cp_username'), message_dict["message"]])
 
         #return str(messages_json)
 
-        curs.execute("select MAX(time) from messages where username1=\""+username1+"\";")
+        curs.execute("select MAX(time) from messages where username1=\""+cherrypy.session.get('_cp_username')+"\";")
 
         max_time1 = curs.fetchall()[0][0]
 
-        curs.execute("select MAX(time) from messages where username2=\""+username1+"\";")
+        curs.execute("select MAX(time) from messages where username2=\""+cherrypy.session.get('_cp_username')+"\";")
 
         max_time2 = curs.fetchall()[0][0]
 
@@ -2051,7 +1886,24 @@ contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  
 
         curs.execute("insert into messages set username1 = \""+username1+"\", username2 = \""+username2+"\", forward="+forward+", time=now(6), message = \""+add_message_text+"\";")
 
+        if forward == "1":
+            curs.execute("update contacts set new_message_username2 = 1 where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
+        else: 
+            curs.execute("update contacts set new_message_username1 = 1 where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
+
         conn.commit()
+
+        params_json = {'username1': username1, 'username2': username2}
+
+        
+
+        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+
+        conn  =  httplib.HTTPSConnection("test.ecommunicate.ch")
+        conn.request('POST','/new_message_browser/', headers = headers, body = json.dumps(params_json))
+        r=conn.getresponse()
+        print r.status
+        print r.reason
 
 class Root(object):
 
@@ -2070,6 +1922,8 @@ class Root(object):
     register = Register()
 
     about = About()
+
+    email = Email()
 
     @cherrypy.expose
     def index(self):
@@ -2106,27 +1960,12 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
+            html_string = html_string+not_authenticated_menubar_html_string+"""
 
 </center>
 
 """
-            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc.<br>"
 
             html_string=html_string+"<br>"
 
@@ -2195,27 +2034,11 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+"""
-<div id="header">
-
-<div id="nav">
-
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></l>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-
-</div>
-
-</div>
-
+            html_string = html_string+authenticated_menubar_html_string+"""
 </center>
 
 """
-            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact amlevin@mit.edu for comments, feature requests, etc.<br>"
+            html_string = html_string+"Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Currently, only text messaging, similar to Google Hangout or WeChat, is implemented. You can chat yourself (after registering and logging in) or you can view other people's conversations (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc.<br>"
 
             html_string=html_string+"<br>"
 
