@@ -1084,6 +1084,11 @@ class MakeContactRequest(object):
 
 """+chat_menubar_style_html_string+"""
 
+.messageerrorbox {
+    width: 100%;
+    height: 5em;
+    border: none;
+}
 
 </style>
 
@@ -1095,6 +1100,8 @@ class MakeContactRequest(object):
 <h3>A free online communication service</h3>
 
 """+chat_menubar_html_string +"""
+
+
 
 </center>
 
@@ -1111,7 +1118,7 @@ Message: <br><br>
   </button>
   </form>
 
-  <iframe name="console_iframe3" class="terminal" /> </iframe>
+  <iframe name="console_iframe3" class="messageerrorbox" /> </iframe>
 
 </body>
         </html>"""
@@ -1231,6 +1238,12 @@ class ContactRequestResponses(object):
 
 """+chat_menubar_style_html_string+"""
 
+    .messageerrorbox {
+    width: 100%;
+    height: 5em;
+    border: none;
+}
+
 </style>
 
 </head>
@@ -1248,7 +1261,7 @@ class ContactRequestResponses(object):
 
 """ + contact_request_string + """
 
-  <iframe name="console_iframe4" class="terminal" />  </iframe>
+  <iframe name="console_iframe4" class="messageerrorbox" />  </iframe>
 
 </body>
         </html>"""
