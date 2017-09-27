@@ -1266,7 +1266,7 @@ li.menubar {
 
                 conversation_dict=dict(zip(colnames, conversation))
             
-                html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
 
             html_string=html_string+"</ol>"
 
@@ -2188,7 +2188,7 @@ li.menubar {
 
                 conversation_dict=dict(zip(colnames, conversation))
             
-                html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
 
             html_string=html_string+"</ol>"
 
@@ -2261,7 +2261,7 @@ li.menubar {
 
                 conversation_dict=dict(zip(colnames, conversation))
             
-                html_string=html_string+"<li><a href=\"/view/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
 
             html_string=html_string+"</ol>"
 
