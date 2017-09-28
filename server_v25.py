@@ -488,7 +488,123 @@ def msgfactory(fp):
         # stop the mailbox iterator
         return ''
 
+class Compose(object):
+    @cherrypy.expose
+    @require()
+    def index(self):
+        return """<html>
+<head>
+
+<style>
+
+.terminal {
+
+border: none; 
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+</style>
+
+<title>Ecommunicate</title>
+
+
+</head>
+<body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+"""+not_authenticated_menubar_html_string+"""
+
+<h4>Compose</h4>
+
+</center>
+
+<br><br>
+
+<center>
+
+   <form id="compose_email" target="console_iframe" method="post" action="compose">
+
+   to: <br><br>
+   <input type="text" id="to" name="to" size="100" /><br><br>
+   cc: <br><br>
+   <input type="text" id="cc" name="cc" size="100" /><br><br>
+   subject: <br><br>
+   <input type="text" id="subject" name="subject" size="100" /><br><br>
+   body: <br><br>
+   <textarea name="body" rows="50" cols="200"></textarea> <br><br>
+
+
+  <button id="send" type="submit">
+  Send
+  </button>
+
+  </form>
+
+  <iframe name="console_iframe" class="terminal" />
+
+</center>
+  
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+  <script type="text/javascript">
+
+  $( document ).ready(function() {
+
+    $( "button" ).click(function( event ) {
+
+
+ $("iframe").attr('src', '');
+
+
+    });
+
+  });
+
+  </script>        
+
+
+
+  
+  <br>
+  <br>
+
+  </center>
+
+</body>
+        </html>"""
+    @cherrypy.expose
+    def compose(self, to, cc, subject, body):
+
+        def compose_function():
+            msg = MIMEMultipart()
+            send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
+            #msg['From'] = 
+            send_to = [to]
+            msg['To'] = COMMASPACE.join(send_to)
+            msg['Date'] = formatdate(localtime=True)
+            msg['Subject'] = subject
+            try:
+                msg.attach(MIMEText(body))
+                smtpObj = smtplib.SMTP(port=25)
+                smtpObj.connect()
+                smtpObj.sendmail(send_from, send_to, msg.as_string())
+                smtpObj.close()
+            except Exception as e:
+                print "Error: unable to send email", e.__class__
+              
+        return compose_function()
+
 class Email(object):
+
+    compose = Compose()
 
     @cherrypy.expose
     @require()
