@@ -147,7 +147,7 @@ authenticated_menubar_html_string = """
 <li class="menubar"><a href="/">Home</a></li>
 <li class="menubar"><a href="/view/">View</a></li>
 <li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Logout</a></li>
+<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
 <li class="menubar"><a href="/about">About</a></li>
 </ul>
 
