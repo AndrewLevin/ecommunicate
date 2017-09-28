@@ -381,7 +381,7 @@ li.menubar {
 
 </center>
 
-      Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. E-mail (like Gmail) and text messaging (like Google Hangouts or WeChat) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc.<br> <br>
+      Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. E-mail (like Gmail) and text messaging (like Google Hangouts or WeChat) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact feedback@ecommunicate.ch for comments, feature requests, etc.<br> <br>
 
       Register here for your free account. Please remember your username and password, as there is no way to recover them at this time.
 
@@ -1321,7 +1321,7 @@ li.menubar {
 
             html_string = html_string + "</tr>\n"
 
-            html_string = html_string + "<table>"
+            html_string = html_string + "</table>"
 
 
             html_string = html_string+"""
@@ -2296,9 +2296,18 @@ li.menubar {
 
             html_string=html_string+"<br>"
 
-            html_string=html_string+"<ol>"
+            html_string = html_string + "<table>"
+
+            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th></tr>"
+
+            html_string = html_string + "<tr>\n"
+
+            html_string = html_string + "<td valign=\"top\">\n"
+
+            html_string=html_string+"<ol>\n"
 
             secrets_file=open("/home/ec2-user/secrets.txt")
+
             passwords=secrets_file.read().rstrip('\n')
 
             db_password = passwords.split('\n')[0]
@@ -2323,9 +2332,36 @@ li.menubar {
             
                 html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
 
-            html_string=html_string+"</ol>"
+            html_string=html_string+"</ol>\n"
 
-            html_string = html_string+"""
+            html_string = html_string +"</td>\n"
+
+            html_string = html_string +"<td valign=\"top\">\n"
+
+            curs.execute("select username from user_info;")
+
+            colnames = [desc[0] for desc in curs.description]
+
+            usernames = curs.fetchall()
+
+            html_string=html_string+"<ol>\n"
+
+            for username in usernames:
+
+                username_dict=dict(zip(colnames, username))
+
+                html_string=html_string+"<li><a href=\"/view/email?username=%22"+username_dict["username"]+"%22\">"+username_dict["username"]+"</a><br></li>\n"
+
+            html_string=html_string+"</ol>\n"
+
+            html_string = html_string +"</td>\n"
+
+            html_string = html_string + "</tr>\n"
+
+            html_string = html_string + "</table>"
+
+            html_string = html_string + """
+
 </body>
 </html>
 
@@ -2368,6 +2404,14 @@ li.menubar {
 
             html_string=html_string+"<br>"
 
+            html_string = html_string + "<table>"
+
+            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th></tr>"
+
+            html_string = html_string + "<tr>\n"
+
+            html_string = html_string + "<td valign=\"top\">\n"
+
             html_string=html_string+"<ol>\n"
 
             secrets_file=open("/home/ec2-user/secrets.txt")
@@ -2397,6 +2441,32 @@ li.menubar {
                 html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
 
             html_string=html_string+"</ol>\n"
+
+            html_string = html_string +"</td>\n"
+
+            html_string = html_string +"<td valign=\"top\">\n"
+
+            curs.execute("select username from user_info;")
+
+            colnames = [desc[0] for desc in curs.description]
+
+            usernames = curs.fetchall()
+
+            html_string=html_string+"<ol>\n"
+
+            for username in usernames:
+
+                username_dict=dict(zip(colnames, username))
+
+                html_string=html_string+"<li><a href=\"/view/email?username=%22"+username_dict["username"]+"%22\">"+username_dict["username"]+"</a><br></li>\n"
+
+            html_string=html_string+"</ol>\n"
+
+            html_string = html_string +"</td>\n"
+
+            html_string = html_string + "</tr>\n"
+
+            html_string = html_string + "</table>"
 
             html_string = html_string+"""
 </body>
