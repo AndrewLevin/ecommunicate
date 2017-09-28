@@ -26,6 +26,8 @@ import urllib
 
 import httplib
 
+import re
+
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
     conditions = cherrypy.request.config.get('auth.require', None)
@@ -146,6 +148,7 @@ authenticated_menubar_html_string = """
 <ul class="menubar">
 <li class="menubar"><a href="/">Home</a></li>
 <li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/email/">Email</a></li>
 <li class="menubar"><a href="/chat/">Chat</a></li>
 <li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
 <li class="menubar"><a href="/about">About</a></li>
@@ -166,6 +169,7 @@ chat_menubar_html_string = """
 <ul class="menubar">
 <li class="menubar"><a href="/">Home</a></li>
 <li class="menubar"><a href="/view/">View</a></li>
+<li class="menubar"><a href="/email/">Email</a></li>
 <li class="menubar">
 
 <ul class = "submenubar">
@@ -587,15 +591,17 @@ li.menubar {
             msg = MIMEMultipart()
             send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
             #msg['From'] = 
-            send_to = [to]
+            send_to = re.findall(r'[^\;\,\s]+',to)
+            send_cc = re.findall(r'[^\;\,\s]+',cc)
             msg['To'] = COMMASPACE.join(send_to)
+            msg['CC'] = COMMASPACE.join(send_cc)
             msg['Date'] = formatdate(localtime=True)
             msg['Subject'] = subject
             try:
                 msg.attach(MIMEText(body))
                 smtpObj = smtplib.SMTP(port=25)
                 smtpObj.connect()
-                smtpObj.sendmail(send_from, send_to, msg.as_string())
+                smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
                 smtpObj.close()
             except Exception as e:
                 print "Error: unable to send email", e.__class__
@@ -625,10 +631,14 @@ class Email(object):
                 #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
             if 'Subject' in em[1]:    
                 email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
-            if em[1].get_payload()[0].get_payload().rstrip('\n'):
-                email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+
+            if em[1].is_multipart():
+                if em[1].get_payload()[0].get_payload().rstrip('\n'):
+                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                else:
+                    email_string = email_string + "<td></td>"
             else:
-                email_string = email_string + "<td></td>"
+                email_string = email_string + "<td>"+em[1].get_payload()+"</td>"
             if 'Date' in em[1]:
                 email_string = email_string + "<td>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em[1]['Date']))+"</td>"
 
@@ -666,13 +676,15 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-"""+not_authenticated_menubar_html_string+"""
+"""+authenticated_menubar_html_string+"""
 
 <h4>Email</h4>
 
 </center>
 
 <br><br>
+
+<a href="/email/compose/">Compose</a>
 
 """+email_string+"""
 
@@ -702,10 +714,14 @@ class ViewEmail(object):
                 #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
             if 'Subject' in em[1]:    
                 email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
-            if em[1].get_payload()[0].get_payload().rstrip('\n'):
-                email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+
+            if em[1].is_multipart():
+                if em[1].get_payload()[0].get_payload().rstrip('\n'):
+                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                else:
+                    email_string = email_string + "<td></td>"
             else:
-                email_string = email_string + "<td></td>"
+                email_string = email_string + "<td>"+em[1].get_payload()+"</td>"
             if 'Date' in em[1]:
                 email_string = email_string + "<td>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em[1]['Date']))+"</td>"
 
