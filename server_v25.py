@@ -499,7 +499,7 @@ class Email(object):
 
         email_string = ""
 
-        email_string = email_string+"<table>"
+        email_string = email_string+"<table border = \"1\" width = \"100%\">"
 
         for em in sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True):
             email_string = email_string + "<tr>"
@@ -576,7 +576,7 @@ class ViewEmail(object):
 
         email_string = ""
 
-        email_string = email_string+"<table>"
+        email_string = email_string+"<table border=\"1\" width = \"100%\">"
 
         for em in sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True):
             email_string = email_string + "<tr>"
@@ -1129,11 +1129,13 @@ li.menubar {
 
             html_string = html_string + "<table>"
 
-            html_string = html_string + "<tr>"
+            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th></tr>"
 
-            html_string = html_string + "<td>"
+            html_string = html_string + "<tr>\n"
 
-            html_string=html_string+"<ol>"
+            html_string = html_string + "<td valign=\"top\">\n"
+
+            html_string=html_string+"<ol>\n"
 
             secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -1159,13 +1161,13 @@ li.menubar {
 
                 conversation_dict=dict(zip(colnames, conversation))
             
-                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
 
-            html_string=html_string+"</ol>"
+            html_string=html_string+"</ol>\n"
 
-            html_string = html_string +"</td>"
+            html_string = html_string +"</td>\n"
 
-            html_string = html_string +"<td>"
+            html_string = html_string +"<td valign=\"top\">\n"
 
             curs.execute("select username from user_info;")
 
@@ -1173,19 +1175,19 @@ li.menubar {
 
             usernames = curs.fetchall()
 
-            html_string=html_string+"<ol>"
+            html_string=html_string+"<ol>\n"
 
             for username in usernames:
 
                 username_dict=dict(zip(colnames, username))
 
-                html_string=html_string+"<li><a href=\"/view/email?username=%22"+username_dict["username"]+"%22\">"+username_dict["username"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/email?username=%22"+username_dict["username"]+"%22\">"+username_dict["username"]+"</a><br></li>\n"
 
-            html_string=html_string+"</ol>"
+            html_string=html_string+"</ol>\n"
 
-            html_string = html_string +"</td>"
+            html_string = html_string +"</td>\n"
 
-            html_string = html_string + "</tr>"
+            html_string = html_string + "</tr>\n"
 
             html_string = html_string + "<table>"
 
@@ -2165,7 +2167,6 @@ li.menubar {
             html_string=html_string+"<ol>"
 
             secrets_file=open("/home/ec2-user/secrets.txt")
-
             passwords=secrets_file.read().rstrip('\n')
 
             db_password = passwords.split('\n')[0]
@@ -2188,7 +2189,7 @@ li.menubar {
 
                 conversation_dict=dict(zip(colnames, conversation))
             
-                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
 
             html_string=html_string+"</ol>"
 
@@ -2235,7 +2236,7 @@ li.menubar {
 
             html_string=html_string+"<br>"
 
-            html_string=html_string+"<ol>"
+            html_string=html_string+"<ol>\n"
 
             secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -2261,9 +2262,9 @@ li.menubar {
 
                 conversation_dict=dict(zip(colnames, conversation))
             
-                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
 
-            html_string=html_string+"</ol>"
+            html_string=html_string+"</ol>\n"
 
             html_string = html_string+"""
 </body>
