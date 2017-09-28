@@ -443,6 +443,15 @@ li.menubar {
 #        $( "iframe" ).clear()
         def register_function():
 
+            #only allow one person to register at a time
+            ret=os.system("if [ -f /home/ec2-user/registering_someone ]; then exit 0; else exit 1; fi");
+
+            if ret == 0:
+                yield "Registration was not succesful. Please try again later."
+                return
+
+            os.system("touch /home/ec2-user/registering_someone");
+
             secrets_file=open("/home/ec2-user/secrets.txt")
 
             passwords=secrets_file.read().rstrip('\n')
@@ -476,6 +485,12 @@ li.menubar {
             curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\", name = \""+name+"\"")
 
             conn.commit()
+
+            os.system("echo \""+username+"ecommunicate.ch ecommunicate.ch/"+username +"\" >> /etc/postfix/vmailbox")
+
+            os.system("postmap /etc/postfix/vmailbox")
+
+            os.system("rm /home/ec2-user/registering_someone");
 
             yield "Your registration was succesful. Please remember your username and password, as there is no way to recover them at this time."
 
