@@ -28,6 +28,8 @@ import httplib
 
 import re
 
+from cherrypy.lib import static
+
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
     conditions = cherrypy.request.config.get('auth.require', None)
@@ -2247,6 +2249,13 @@ $(document).ready(function() {
         print r.status
         print r.reason
 
+class Downloads(object):
+    @cherrypy.expose
+    def app_apk(self):
+        path = '/home/ec2-user/downloads/app.apk'
+        return static.serve_file(path, 'application/vnd.android.package-archive',
+                                 'attachment', os.path.basename(path))
+
 class Root(object):
 
     _cp_config = {
@@ -2254,6 +2263,8 @@ class Root(object):
         'tools.auth.on': True,
         'tools.sessions.locking': 'explicit' #this and the acquire_lock and the release_lock statements in the login and logout functions are necessary so that multiple ajax requests can be processed in parallel in a single session
     }
+
+    downloads = Downloads()
 
     view = View()
 
@@ -2313,7 +2324,7 @@ li.menubar {
 
             html_string = html_string + "<table>"
 
-            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th></tr>"
+            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"/downloads/app.apk\">Download Android Chat App<a></td></tr>"
 
             html_string = html_string + "<tr>\n"
 
@@ -2421,7 +2432,7 @@ li.menubar {
 
             html_string = html_string + "<table>"
 
-            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th></tr>"
+            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"/downloads/app.apk\">Download Android Chat App<a></td></tr>"
 
             html_string = html_string + "<tr>\n"
 
