@@ -798,8 +798,6 @@ class ViewChat(object):
 
         if username1 != None and username2 != None and not issessionauthenticated:    
 
-            print username1
-
             html_string_usernames="username1="+username1+"\n"
             html_string_usernames=html_string_usernames+"username2="+username2
 
