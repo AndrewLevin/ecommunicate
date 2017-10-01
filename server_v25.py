@@ -2241,7 +2241,7 @@ $(document).ready(function() {
 
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
-        conn  =  httplib.HTTPSConnection("test.ecommunicate.ch")
+        conn  =  httplib.HTTPSConnection("android.ecommunicate.ch")
         conn.request('POST','/new_message_browser/', headers = headers, body = json.dumps(params_json))
         r=conn.getresponse()
         print r.status
