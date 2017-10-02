@@ -81,8 +81,6 @@ about_html_string = """
 <li>View
 <ol>
 <li><b>Browser</b>
-<li>Android
-<li>iOS
 </ol>
 </ol>
 <li>E-mail
@@ -96,8 +94,6 @@ about_html_string = """
 <li>View
 <ol>
 <li><b>Browser</b>
-<li>Android
-<li>iOS
 </ol>
 </ol>
 <li>Audio/Video Call
@@ -111,10 +107,7 @@ about_html_string = """
 </ol>
 <li>View/Listen
 <ol>
-<li>Windows
-<li>MacOS
-<li>Android
-<li>iOS
+<li>Browser
 </ol>
 </ol>
 </ol>

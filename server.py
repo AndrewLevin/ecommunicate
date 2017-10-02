@@ -81,8 +81,6 @@ about_html_string = """
 <li>View
 <ol>
 <li><b>Browser</b>
-<li>Android
-<li>iOS
 </ol>
 </ol>
 <li>E-mail
@@ -96,8 +94,6 @@ about_html_string = """
 <li>View
 <ol>
 <li><b>Browser</b>
-<li>Android
-<li>iOS
 </ol>
 </ol>
 <li>Audio/Video Call
@@ -111,10 +107,7 @@ about_html_string = """
 </ol>
 <li>View/Listen
 <ol>
-<li>Windows
-<li>MacOS
-<li>Android
-<li>iOS
+<li>Browser
 </ol>
 </ol>
 </ol>
@@ -2568,7 +2561,7 @@ def is_right_password(username, password):
         return [False,"Login failed. The password that you entered is not the one associated with the username that you entered."]
 
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_port': 443}) #port 443 for https or port 80 for http
+    cherrypy.config.update({'server.socket_port': 8443}) #port 443 for https or port 80 for http
 #    cherrypy.config.update({'server.socket_port': 80})
     cherrypy.config.update({'server.socket_host': 'ec2-35-163-111-83.us-west-2.compute.amazonaws.com'})
     #cherrypy.config.update({'tools.sessions.on': True})
