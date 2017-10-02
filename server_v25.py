@@ -1171,15 +1171,6 @@ $(document).ready(function() {
                 if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
                     break
 
-                curs.execute("select MAX(time) from messages where username2=\""+username1+"\";")
-
-                server_max_time = curs.fetchall()[0][0]
-
-                if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
-                    break
-
-                curs.close()    
-                
                 time.sleep(0.1)
 
 
