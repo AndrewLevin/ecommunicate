@@ -2564,15 +2564,10 @@ if __name__ == '__main__':
     cherrypy.config.update({'server.socket_port': 8443}) #port 443 for https or port 80 for http
 #    cherrypy.config.update({'server.socket_port': 80})
     cherrypy.config.update({'server.socket_host': 'ec2-35-163-111-83.us-west-2.compute.amazonaws.com'})
-    #cherrypy.config.update({'tools.sessions.on': True})
-    #cherrypy.config.update({'tools.auth.on': True})
+    
 
-    #cherrypy.tree.mount(View(),'/view')
-    cherrypy.tree.mount(Root())
-    #cherrypy.tree.mount(MakeContactRequest(),'/make_contact_requests')
-    #cherrypy.tree.mount(ContactRequestResponses(),'/respond_to_contact_requests')
-    #cherrypy.tree.mount(Register(),'/register')
-#    cherrypy.tree.mount(LogInLogOut(),'/loginlogout')
+    #cherrypy.tree.mount(Root())
+    cherrypy.tree.mount(Root(),'/',{ '/favicon.ico': { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/favicon.ico' } })
 
     cherrypy.server.ssl_module = 'builtin'
     cherrypy.server.ssl_certificate = "/etc/letsencrypt/live/ecommunicate.ch/fullchain.pem"
