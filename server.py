@@ -1221,11 +1221,11 @@ class View(object):
     chat = ViewChat()
 
     @cherrypy.expose
-    def index(self,username1=None,username2=None):
+    def index(self):
 
         issessionauthenticated=is_session_authenticated()
 
-        if username1 == None and username2 == None and not issessionauthenticated:
+        if not issessionauthenticated:
         
             html_string = """
 
@@ -1337,7 +1337,7 @@ li.menubar {
 """
             return html_string
 
-        elif username1 == None and username2 == None and issessionauthenticated:
+        elif issessionauthenticated:
 
 
             html_string = """
@@ -1380,7 +1380,15 @@ li.menubar {
 
             html_string=html_string+"<br>"
 
-            html_string=html_string+"<ol>"
+            html_string = html_string + "<table>"
+
+            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th></tr>"
+
+            html_string = html_string + "<tr>\n"
+
+            html_string = html_string + "<td valign=\"top\">\n"
+
+            html_string=html_string+"<ol>\n"
 
             secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -1406,9 +1414,35 @@ li.menubar {
 
                 conversation_dict=dict(zip(colnames, conversation))
             
-                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>"
+                html_string=html_string+"<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
 
-            html_string=html_string+"</ol>"
+            html_string=html_string+"</ol>\n"
+
+            html_string = html_string +"</td>\n"
+
+            html_string = html_string +"<td valign=\"top\">\n"
+
+            curs.execute("select username from user_info;")
+
+            colnames = [desc[0] for desc in curs.description]
+
+            usernames = curs.fetchall()
+
+            html_string=html_string+"<ol>\n"
+
+            for username in usernames:
+
+                username_dict=dict(zip(colnames, username))
+
+                html_string=html_string+"<li><a href=\"/view/email?username=%22"+username_dict["username"]+"%22\">"+username_dict["username"]+"</a><br></li>\n"
+
+            html_string=html_string+"</ol>\n"
+
+            html_string = html_string +"</td>\n"
+
+            html_string = html_string + "</tr>\n"
+
+            html_string = html_string + "</table>"
 
             html_string = html_string+"""
 </body>
