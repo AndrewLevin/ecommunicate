@@ -75,7 +75,7 @@ about_html_string = """
 <li>Create
 <ol>
 <li><b>Browser</b>
-<li>Android
+<li><b>Android</b>
 <li>iOS
 </ol>
 <li>View
