@@ -669,6 +669,17 @@ class Email(object):
 
 <style>
 
+a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+
+    padding: 7px;    
+
+    text-decoration: none;
+    color: initial;
+}
+
 .terminal {
 
 border: none; 
@@ -700,7 +711,9 @@ li.menubar {
 
 <br><br>
 
-<a href="/email/compose/">Compose</a>
+<a href="/email/compose/" class="button">Compose</a>
+
+<br><br>
 
 """+email_string+"""
 
