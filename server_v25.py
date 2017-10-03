@@ -631,9 +631,13 @@ class Email(object):
 
         email_string = ""
 
-        email_string = email_string+"<table border = \"1\" width = \"100%\">"
+
 
         for em in sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True):
+
+            if email_string == "":
+                email_string = email_string+"<table border = \"1\" width = \"100%\">"
+
             email_string = email_string + "<tr>"
 
             if 'From' in em[1]:
@@ -655,7 +659,9 @@ class Email(object):
 
             email_string = email_string + "</tr>"
 
-        email_string = email_string+"</table>"
+
+        if email_string != "":    
+            email_string = email_string+"</table>"
 
 
         return """<html>
@@ -714,9 +720,12 @@ class ViewEmail(object):
 
         email_string = ""
 
-        email_string = email_string+"<table border=\"1\" width = \"100%\">"
-
         for em in sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True):
+
+            #don't want to do this if there are no e-mails
+            if email_string == "":
+                email_string = email_string+"<table border=\"1\" width = \"100%\">"
+
             email_string = email_string + "<tr>"
             
             if 'From' in em[1]:
@@ -738,7 +747,8 @@ class ViewEmail(object):
 
             email_string = email_string + "</tr>"
 
-        email_string = email_string+"</table>"
+        if email_string != "":
+            email_string = email_string+"</table>"
 
 
         return """<html>
@@ -769,7 +779,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-"""+not_authenticated_menubar_html_string+"""
+"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string) +"""
 
 <h4>Email</h4>
 
