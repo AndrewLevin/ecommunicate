@@ -632,41 +632,39 @@ class ReadOne(object):
 
 
         #the default message factory is the rfc822.Message for historical reasons (see https://docs.python.org/2/library/mailbox.html#maildir)
-        emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage)
+        if sent == False:
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage)
+        else:
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage)
 
         em = emails.get_message(message_id)
 
         email_string = ""
 
-        email_string = email_string+"<table border = \"1\" width = \"100%\">"
+        email_string = email_string+"<table border = \"1\" width = \"100%\"  >"
 
-        email_string = email_string + "<tr>"
-        
         if sent:
             if 'To' in em:
                 if email.utils.parseaddr(em['To'])[0]:
-                    email_string = email_string + "<td><b>"+email.utils.parseaddr(em['To'])[0]+"</b></td>"
-            else:    
-                email_string = email_string + "<td><b>"+email.utils.parseaddr(em['To'])[1]+"</b></td>"
+                    email_string = email_string + "<tr><td><b>To: </b>"+email.utils.parseaddr(em['To'])[0]+"</td></tr>"
+                else:    
+                    email_string = email_string + "<tr><td><b>To: </b>"+email.utils.parseaddr(em['To'])[1]+"</td></tr>"
             #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
         else:
             if 'From' in em:
-                email_string = email_string + "<td><b>"+email.utils.parseaddr(em['From'])[0]+"</b></td>"
+                email_string = email_string + "<tr><td><b>From: </b>"+email.utils.parseaddr(em['From'])[0]+"</td></tr>"
                 #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
         if 'Subject' in em:    
-            email_string = email_string + "<td><i>"+em['Subject']+"</i></td>"
-
+            email_string = email_string + "<tr><td><b>Subject: </b>"+em['Subject']+"</td></tr>"
+        if 'Date' in em:
+            email_string = email_string + "<tr><td><b>Date: </b>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td></tr>"
         if em.is_multipart():
             if em.get_payload()[0].get_payload().rstrip('\n'):
-                email_string = email_string + "<td>"+em.get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                email_string = email_string + "<tr><td>" + em.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
             else:
-                email_string = email_string + "<td></td>"
+                email_string = email_string + "<tr><td></td></tr>"
         else:
-            email_string = email_string + "<td>"+em.get_payload()+"</td>"
-        if 'Date' in em:
-            email_string = email_string + "<td>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td>"
-
-        email_string = email_string + "</tr>"
+            email_string = email_string + "<tr><td>"+em.get_payload()+"</td></tr>"
 
         email_string = email_string+"</table>"
         
@@ -698,7 +696,7 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-"""+not_authenticated_menubar_html_string+"""
+"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string)+"""
 
 </center>
 
@@ -717,36 +715,14 @@ li.menubar {
   </center>
 
 </body>
+<script>
+
+
+</script>
+
+
         </html>"""
-    @cherrypy.expose
-    def compose(self, to, cc, subject, body):
 
-        def compose_function():
-            msg = MIMEMultipart()
-            send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
-            #msg['From'] = 
-            send_to = re.findall(r'[^\;\,\s]+',to)
-            send_cc = re.findall(r'[^\;\,\s]+',cc)
-            msg['To'] = COMMASPACE.join(send_to)
-            msg['CC'] = COMMASPACE.join(send_cc)
-            msg['Date'] = formatdate(localtime=True)
-            msg['Subject'] = subject
-            msg['Message-ID'] = email.Utils.make_msgid()
-            try:
-                msg.attach(MIMEText(body))
-                smtpObj = smtplib.SMTP(port=25)
-                smtpObj.connect()
-                smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
-                smtpObj.close()
-
-                sent_emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
-
-                sent_emails.add(email.message_from_string(msg.as_string()));
-
-            except Exception as e:
-                print "Error: unable to send email", e.__class__
-              
-        return compose_function()
 
 class Email(object):
 
@@ -764,16 +740,27 @@ class Email(object):
         else: 
             emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', factory=mailbox.MaildirMessage)
 
+        email_javascript_string = ""
+
         email_string = ""
 
-        for em in sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True):
+        for i,em in enumerate(sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True)):
 
-            print em[0]
+            email_javascript_string = email_javascript_string +"var email"+str(i)+" = document.getElementById('email"+str(i)+"');\n"
+
+            email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('mouseover',function(e) { $('#email"+str(i)+"').css('background-color','WhiteSmoke');  } ,  false);\n"
+            email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('mouseout',function(e) { $('#email"+str(i)+"').css('background-color','White');  } ,  false);\n"
+            if sent == False:
+                email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('click',function(e) { window.open('/email/readone/?message_id="+em[0]+"','_self')  } ,  false);\n"
+            else:    
+                email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('click',function(e) { window.open('/email/readone/?sent=True&&message_id="+em[0]+"','_self')  } ,  false);\n"
+
+
 
             if email_string == "":
-                email_string = email_string+"<table border = \"1\" width = \"100%\">"
+                email_string = email_string+"<table border = \"1\" width = \"100%\" id=\"emaillist\"  >"
 
-            email_string = email_string + "<tr>"
+            email_string = email_string + "<tr id=\"email"+str(i)+"\">"
 
             if sent:
                 if 'To' in em[1]:
@@ -797,7 +784,7 @@ class Email(object):
             else:
                 email_string = email_string + "<td>"+em[1].get_payload()+"</td>"
             if 'Date' in em[1]:
-                email_string = email_string + "<td>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em[1]['Date']))+"</td>"
+                email_string = email_string + "<td id=\"table_divide\">"+time.strftime("%d %b %H:%M",email.utils.parsedate(em[1]['Date']))+"</td>"
 
 
             email_string = email_string + "</tr>"
@@ -854,7 +841,6 @@ li.menubar {
 
 <br><br>
 
-
 <table>
 
 <tr>
@@ -869,13 +855,11 @@ li.menubar {
 
 <a href="/email/">Received</a>
 
-
 </td>
 
 <td width="150">
 
 <a href="/email/?sent=True">Sent</a>
-
 
 </td>
 
@@ -888,65 +872,61 @@ li.menubar {
 """+email_string+"""
 
 </body>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
+<script>
+
+"""+email_javascript_string+"""
+
+</script>
         </html>"""
 
 
+class ViewReadOne(object):
 
-class ViewEmail(object):
     @cherrypy.expose
-    def index(self,username,sent=False):
+    def index(self,username,message_id,sent=False):
 
         username = username.strip('"')
 
-
+        #the default message factory is the rfc822.Message for historical reasons (see https://docs.python.org/2/library/mailbox.html#maildir)
         if sent == False:
-            #use the message factory so that you get MaildirMessages instead of rfc822.Messages
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage)
-        else: 
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/',factory=mailbox.MaildirMessage)
+        else:
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/',factory=mailbox.MaildirMessage)
+
+        em = emails.get_message(message_id)
 
         email_string = ""
 
-        for em in sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True):
+        email_string = email_string+"<table border = \"1\" width = \"100%\"  >"
 
-            #don't want to do this if there are no e-mails
-            if email_string == "":
-                email_string = email_string+"<table border=\"1\" width = \"100%\">"
-
-            email_string = email_string + "<tr>"
-
-            if sent:
-                if 'To' in em[1]:
-                    if email.utils.parseaddr(em[1]['To'])[0]:
-                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[0]+"</b></td>"
-                    else:    
-                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[1]+"</b></td>"
-                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+        if sent:
+            if 'To' in em:
+                if email.utils.parseaddr(em['To'])[0]:
+                    email_string = email_string + "<tr><td><b>To: </b>"+email.utils.parseaddr(em['To'])[0]+"</td></tr>"
+                else:    
+                    email_string = email_string + "<tr><td><b>To: </b>"+email.utils.parseaddr(em['To'])[1]+"</td></tr>"
+            #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+        else:
+            if 'From' in em:
+                email_string = email_string + "<tr><td><b>From: </b>"+email.utils.parseaddr(em['From'])[0]+"</td></tr>"
+                #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
+        if 'Subject' in em:    
+            email_string = email_string + "<tr><td><b>Subject: </b>"+em['Subject']+"</td></tr>"
+        if 'Date' in em:
+            email_string = email_string + "<tr><td><b>Date: </b>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td></tr>"
+        if em.is_multipart():
+            if em.get_payload()[0].get_payload().rstrip('\n'):
+                email_string = email_string + "<tr><td>" + em.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
             else:
-                if 'From' in em[1]:
-                    email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['From'])[0]+"</b></td>"
-                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
-            
-            if 'Subject' in em[1]:    
-                email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
+                email_string = email_string + "<tr><td></td></tr>"
+        else:
+            email_string = email_string + "<tr><td>"+em.get_payload()+"</td></tr>"
 
-            if em[1].is_multipart():
-                if em[1].get_payload()[0].get_payload().rstrip('\n'):
-                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
-                else:
-                    email_string = email_string + "<td></td>"
-            else:
-                email_string = email_string + "<td>"+em[1].get_payload()+"</td>"
-            if 'Date' in em[1]:
-                email_string = email_string + "<td>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em[1]['Date']))+"</td>"
-
-
-            email_string = email_string + "</tr>"
-
-        if email_string != "":
-            email_string = email_string+"</table>"
-
-
+        email_string = email_string+"</table>"
+        
         return """<html>
 <head>
 
@@ -975,7 +955,140 @@ li.menubar {
 
 <h3>A free online communication service</h3>
 
-"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string) +"""
+"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string)+"""
+
+</center>
+
+<br><br>
+
+<center>
+
+"""+email_string+"""
+
+</center>
+  
+  
+  <br>
+  <br>
+
+  </center>
+
+</body>
+<script>
+
+
+</script>
+
+
+        </html>"""
+
+class ViewEmail(object):
+
+    readone = ViewReadOne()
+
+    @cherrypy.expose
+    def index(self,username,sent=False):
+
+        username = username.strip('"')
+
+        if sent == False:
+            #use the message factory so that you get MaildirMessages instead of rfc822.Messages
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage)
+        else: 
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
+
+        email_javascript_string = ""
+
+        email_string = ""
+
+        for i,em in enumerate(sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True)):
+
+            email_javascript_string = email_javascript_string +"var email"+str(i)+" = document.getElementById('email"+str(i)+"');\n"
+
+            email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('mouseover',function(e) { $('#email"+str(i)+"').css('background-color','WhiteSmoke');  } ,  false);\n"
+            email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('mouseout',function(e) { $('#email"+str(i)+"').css('background-color','White');  } ,  false);\n"
+            if sent == False:
+                email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('click',function(e) { window.open('/view/email/readone/?username=\""+username+"\"&&message_id="+em[0]+"','_self')  } ,  false);\n"
+            else:    
+                email_javascript_string = email_javascript_string +"email"+str(i)+".addEventListener('click',function(e) { window.open('/view/email/readone/?username=\""+username+"\"&&sent=True&&message_id="+em[0]+"','_self')  } ,  false);\n"
+
+            if email_string == "":
+                email_string = email_string+"<table border = \"1\" width = \"100%\" id=\"emaillist\"  >"
+
+            email_string = email_string + "<tr id=\"email"+str(i)+"\">"
+
+            if sent:
+                if 'To' in em[1]:
+                    if email.utils.parseaddr(em[1]['To'])[0]:
+                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[0]+"</b></td>"
+                    else:    
+                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[1]+"</b></td>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+            else:
+                if 'From' in em[1]:
+                    email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['From'])[0]+"</b></td>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
+            if 'Subject' in em[1]:    
+                email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
+
+            if em[1].is_multipart():
+                if em[1].get_payload()[0].get_payload().rstrip('\n'):
+                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                else:
+                    email_string = email_string + "<td></td>"
+            else:
+                email_string = email_string + "<td>"+em[1].get_payload()+"</td>"
+            if 'Date' in em[1]:
+                email_string = email_string + "<td id=\"table_divide\">"+time.strftime("%d %b %H:%M",email.utils.parsedate(em[1]['Date']))+"</td>"
+
+
+            email_string = email_string + "</tr>"
+
+
+        if email_string != "":    
+            email_string = email_string+"</table>"
+
+
+        return """<html>
+<head>
+
+<style>
+
+a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+
+    padding: 7px;    
+
+    text-decoration: none;
+    color: initial;
+}
+
+.terminal {
+
+border: none; 
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+</style>
+
+<title>Ecommunicate</title>
+
+
+</head>
+<body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string)+"""
 
 <h4>Email</h4>
 
@@ -1012,6 +1125,14 @@ li.menubar {
 """+email_string+"""
 
 </body>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
+<script>
+
+"""+email_javascript_string+"""
+
+</script>
         </html>"""
 
 
@@ -1019,9 +1140,7 @@ class ViewChat(object):
     @cherrypy.expose
     def index(self,username1=None,username2=None):
 
-        issessionauthenticated=is_session_authenticated()
-
-        if username1 != None and username2 != None and not issessionauthenticated:    
+        if username1 != None and username2 != None:    
 
             html_string_usernames="username1="+username1+"\n"
             html_string_usernames=html_string_usernames+"username2="+username2
@@ -1084,7 +1203,7 @@ ul {
 
 <h3>A free online communication service</h3>
 
-"""+not_authenticated_menubar_html_string+"""
+"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string)+"""
 
 
 <h4>View</h4>
@@ -1190,174 +1309,6 @@ $(document).ready(function() {
 
         </html>"""
 
-
-        elif username1 != None and username2 != None and issessionauthenticated:    
-
-            html_string_usernames="username1="+username1+"\n"
-            html_string_usernames=html_string_usernames+"username2="+username2
-
-            secrets_file=open("/home/ec2-user/secrets.txt")
-            
-            passwords=secrets_file.read().rstrip('\n')
-            
-            db_password = passwords.split('\n')[0]
-
-            dbname = "open"
-    
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
-
-            curs = conn.cursor()
-
-            curs.execute("use "+dbname+";")
-
-            return """<html>
-<head><title>open</title>
-
-<style>
-
-ul.menubar {
-
-text-align: center;
-
-}
-
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
-
-ul {
-    list-style:none;
-    padding-left:0;
-}
-
-    .terminal {
-    width: 100%;
-    height: 30em;
-    border: none;
-
-}
-    .messageerrorbox {
-    width: 100%;
-    height: 1em;
-    border: none;
-
-}
-</style>
-
-</head>
-<body>
-
-</body>
-
-<center><h1>Ecommunicate</h1>
-
-<h3>A free online communication service</h3>
-
-"""+authenticated_menubar_html_string+"""
-
-<h4>View</h4>
-
-</center>
-
-<iframe id="console_iframe2" name="console_iframe2" class="terminal" /></iframe>
-
-
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
-
-<script>
-
-messages_list = "";
-messages_list_old = "";
-"""+html_string_usernames+"""
-max_time = ""
-
-function update_messages(){
-
-    if (messages_list != "") {
-
-            var console_iframe2 = document.getElementById('console_iframe2');
-
-            //clear the iframe
-            console_iframe2.contentWindow.document.open();
-            console_iframe2.contentWindow.document.close();
-
-            for ( var i = 0, l = messages_list.length; i < l; i++ ) {
-                console_iframe2.contentWindow.document.write(messages_list[i][0]+": "+messages_list[i][1]);
-                console_iframe2.contentWindow.document.write("<br>");
-            }
-
-            var console_iframe2_contentWindow_document = console_iframe2.contentWindow.document;
-
-            //this will "over-scroll", but it works i.e. it moves to the bottom    
-
-            $(console_iframe2_contentWindow_document).scrollTop($(console_iframe2_contentWindow_document).height());  
-       
-    }
-
-}
-
-function view_recursive() {
-
-get_messages_url = "get_messages?username1="+username1+"&username2="+username2+"&upon_update=True&client_max_time="+max_time;
-
-   $.ajax({
-      url: get_messages_url,
-      type: 'GET',
-      dataType: 'html',
-      success: function(data) {
-
-         parsed_data = JSON.parse(data);
-         messages_list = parsed_data[0];
-         max_time = parsed_data[1];
-
-         messages_list_old = messages_list;
-
-         update_messages();  
-
-         view_recursive();
-      }
-   });
-
-}
-
-function view_initial() {
-
-get_messages_url = 'get_messages?username1='+username1+'&username2='+username2;
-
-   $.ajax({
-      url: get_messages_url,
-      type: 'GET',
-      dataType: 'html',
-      success: function(data) {
-
-         parsed_data = JSON.parse(data);
-
-         messages_list = parsed_data[0];
-
-         max_time=parsed_data[1]; 
-
-         messages_list_old = messages_list;
-
-         update_messages(); 
-
-         view_recursive();
-
-      }
-   });
-
-}
-
-$(document).ready(function() {
-
-   view_initial();
-
-});
-
-
-</script>
-
-        </html>"""
 
     @cherrypy.expose
     def get_messages(self,username1,username2,upon_update=False,client_max_time=""):
