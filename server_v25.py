@@ -607,12 +607,18 @@ li.menubar {
             msg['CC'] = COMMASPACE.join(send_cc)
             msg['Date'] = formatdate(localtime=True)
             msg['Subject'] = subject
+            msg['Message-ID'] = email.Utils.make_msgid()
             try:
                 msg.attach(MIMEText(body))
                 smtpObj = smtplib.SMTP(port=25)
                 smtpObj.connect()
                 smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
                 smtpObj.close()
+
+                sent_emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+
+                sent_emails.add(email.message_from_string(msg.as_string()));
+
             except Exception as e:
                 print "Error: unable to send email", e.__class__
               
@@ -624,10 +630,13 @@ class Email(object):
 
     @cherrypy.expose
     @require()
-    def index(self):
+    def index(self,sent=False):
 
-        #use the message factory so that you get Messages instead of rfc822.Messages
-        emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+        if sent == False:
+            #use the message factory so that you get Messages instead of rfc822.Messages
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+        else: 
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
 
         email_string = ""
 
@@ -640,9 +649,17 @@ class Email(object):
 
             email_string = email_string + "<tr>"
 
-            if 'From' in em[1]:
-                email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['From'])[0]+"</b></td>"
-                #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
+            if sent:
+                if 'To' in em[1]:
+                    if email.utils.parseaddr(em[1]['To'])[0]:
+                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[0]+"</b></td>"
+                    else:    
+                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[1]+"</b></td>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+            else:
+                if 'From' in em[1]:
+                    email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['From'])[0]+"</b></td>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
             if 'Subject' in em[1]:    
                 email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
 
@@ -711,7 +728,34 @@ li.menubar {
 
 <br><br>
 
+
+<table>
+
+<tr>
+
+<td width="150">
+
 <a href="/email/compose/" class="button">Compose</a>
+
+</td>
+
+<td width="150">
+
+<a href="/email/">Received</a>
+
+
+</td>
+
+<td width="150">
+
+<a href="/email/?sent=True">Sent</a>
+
+
+</td>
+
+</tr>
+
+</table>
 
 <br><br>
 
@@ -724,12 +768,16 @@ li.menubar {
 
 class ViewEmail(object):
     @cherrypy.expose
-    def index(self,username):
+    def index(self,username,sent=False):
 
         username = username.strip('"')
 
-        #use the message factory so that you get Messages instead of rfc822.Messages
-        emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', msgfactory)
+
+        if sent == False:
+            #use the message factory so that you get Messages instead of rfc822.Messages
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', msgfactory)
+        else: 
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', msgfactory)
 
         email_string = ""
 
@@ -740,10 +788,19 @@ class ViewEmail(object):
                 email_string = email_string+"<table border=\"1\" width = \"100%\">"
 
             email_string = email_string + "<tr>"
+
+            if sent:
+                if 'To' in em[1]:
+                    if email.utils.parseaddr(em[1]['To'])[0]:
+                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[0]+"</b></td>"
+                    else:    
+                        email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['To'])[1]+"</b></td>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+            else:
+                if 'From' in em[1]:
+                    email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['From'])[0]+"</b></td>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
             
-            if 'From' in em[1]:
-                email_string = email_string + "<td><b>"+email.utils.parseaddr(em[1]['From'])[0]+"</b></td>"
-                #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
             if 'Subject' in em[1]:    
                 email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
 
@@ -797,6 +854,32 @@ li.menubar {
 <h4>Email</h4>
 
 </center>
+
+<br><br>
+
+<table>
+
+<tr>
+
+<td width="150">
+
+</td>
+
+<td width="150">
+
+<a href="/email/">Received</a>
+
+</td>
+
+<td width="150">
+
+<a href="/view/email/?sent=True&&username=%22"""+username+"""%22">Sent</a>
+
+</td>
+
+</tr>
+
+</table>
 
 <br><br>
 
