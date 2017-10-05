@@ -867,7 +867,7 @@ li.menubar {
 
 <td width="150">
 
-<a href="/view/email/">Received</a>
+<a href="/view/email/?username=%22"""+username+"""%22">Received</a>
 
 </td>
 
