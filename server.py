@@ -873,7 +873,7 @@ li.menubar {
 
 <td width="150">
 
-<a href="/view/email/?sent=True&&username=%22"""+username+"""%22">Sent</a>
+<a href="/view/email/?username=%22"""+username+"""%22&&sent=True">Sent</a>
 
 </td>
 
