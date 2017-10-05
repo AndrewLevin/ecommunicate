@@ -624,25 +624,151 @@ li.menubar {
               
         return compose_function()
 
+
+class ReadOne(object):
+    @cherrypy.expose
+    @require()
+    def index(self,message_id,sent=False):
+
+
+        #the default message factory is the rfc822.Message for historical reasons (see https://docs.python.org/2/library/mailbox.html#maildir)
+        emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage)
+
+        em = emails.get_message(message_id)
+
+        email_string = ""
+
+        email_string = email_string+"<table border = \"1\" width = \"100%\">"
+
+        email_string = email_string + "<tr>"
+        
+        if sent:
+            if 'To' in em:
+                if email.utils.parseaddr(em['To'])[0]:
+                    email_string = email_string + "<td><b>"+email.utils.parseaddr(em['To'])[0]+"</b></td>"
+            else:    
+                email_string = email_string + "<td><b>"+email.utils.parseaddr(em['To'])[1]+"</b></td>"
+            #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+        else:
+            if 'From' in em:
+                email_string = email_string + "<td><b>"+email.utils.parseaddr(em['From'])[0]+"</b></td>"
+                #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
+        if 'Subject' in em:    
+            email_string = email_string + "<td><i>"+em['Subject']+"</i></td>"
+
+        if em.is_multipart():
+            if em.get_payload()[0].get_payload().rstrip('\n'):
+                email_string = email_string + "<td>"+em.get_payload()[0].get_payload().rstrip('\n')+"</td>"
+            else:
+                email_string = email_string + "<td></td>"
+        else:
+            email_string = email_string + "<td>"+em.get_payload()+"</td>"
+        if 'Date' in em:
+            email_string = email_string + "<td>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td>"
+
+        email_string = email_string + "</tr>"
+
+        email_string = email_string+"</table>"
+        
+        return """<html>
+<head>
+
+<style>
+
+.terminal {
+
+border: none; 
+
+}
+
+li.menubar {
+        display: inline;
+        padding: 20px;
+}
+
+</style>
+
+<title>Ecommunicate</title>
+
+
+</head>
+<body>
+
+<center><h1>Ecommunicate</h1>
+
+<h3>A free online communication service</h3>
+
+"""+not_authenticated_menubar_html_string+"""
+
+</center>
+
+<br><br>
+
+<center>
+
+"""+email_string+"""
+
+</center>
+  
+  
+  <br>
+  <br>
+
+  </center>
+
+</body>
+        </html>"""
+    @cherrypy.expose
+    def compose(self, to, cc, subject, body):
+
+        def compose_function():
+            msg = MIMEMultipart()
+            send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
+            #msg['From'] = 
+            send_to = re.findall(r'[^\;\,\s]+',to)
+            send_cc = re.findall(r'[^\;\,\s]+',cc)
+            msg['To'] = COMMASPACE.join(send_to)
+            msg['CC'] = COMMASPACE.join(send_cc)
+            msg['Date'] = formatdate(localtime=True)
+            msg['Subject'] = subject
+            msg['Message-ID'] = email.Utils.make_msgid()
+            try:
+                msg.attach(MIMEText(body))
+                smtpObj = smtplib.SMTP(port=25)
+                smtpObj.connect()
+                smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
+                smtpObj.close()
+
+                sent_emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+
+                sent_emails.add(email.message_from_string(msg.as_string()));
+
+            except Exception as e:
+                print "Error: unable to send email", e.__class__
+              
+        return compose_function()
+
 class Email(object):
 
     compose = Compose()
+
+    readone = ReadOne()
 
     @cherrypy.expose
     @require()
     def index(self,sent=False):
 
         if sent == False:
-            #use the message factory so that you get Messages instead of rfc822.Messages
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+            #use the message factory so that you get MaildirMessages instead of rfc822.Messages
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/', factory=mailbox.MaildirMessage)
         else: 
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', factory=mailbox.MaildirMessage)
 
         email_string = ""
 
-
-
         for em in sorted(emails.items(), key = lambda tup : email.utils.parsedate(tup[1]['Date']), reverse = True):
+
+            print em[0]
 
             if email_string == "":
                 email_string = email_string+"<table border = \"1\" width = \"100%\">"
@@ -774,10 +900,10 @@ class ViewEmail(object):
 
 
         if sent == False:
-            #use the message factory so that you get Messages instead of rfc822.Messages
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', msgfactory)
+            #use the message factory so that you get MaildirMessages instead of rfc822.Messages
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage)
         else: 
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', msgfactory)
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
 
         email_string = ""
 
