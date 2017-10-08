@@ -28,6 +28,8 @@ import httplib
 
 import re
 
+import StringIO
+
 from cherrypy.lib import static
 
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
@@ -805,7 +807,40 @@ li.menubar {
         return compose_function()
 
 
+class Attachment(object):
+
+    @cherrypy.expose
+    def index(self,message_id,attachment_id,sent=False):
+
+        if sent == False:
+            #use the message factory so that you get MaildirMessages instead of rfc822.Messages
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/', factory=mailbox.MaildirMessage)
+        else: 
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', factory=mailbox.MaildirMessage)
+
+        em = emails.get_message(message_id)
+
+        if not em.is_multipart():
+            raise Exception
+
+        for payload in em.get_payload():
+            if payload.is_multipart():
+                continue
+            if 'X-Attachment-Id' in payload and payload["X-Attachment-Id"] == attachment_id:
+
+                tmp_filename=os.popen("mktemp").read().rstrip('\n')
+
+                open(tmp_filename,'wb').write(payload.get_payload(decode=True))
+
+                #stringio = StringIO.StringIO()
+                #stringio.write(payload.get_payload(decode=True))
+
+                return static.serve_file(tmp_filename, "application/x-download", "attachment", payload['Content-Description'])        
+
 class ReadOne(object):
+
+    attachment = Attachment()
+
     @cherrypy.expose
     @require()
     def index(self,message_id,sent=False):
@@ -837,13 +872,40 @@ class ReadOne(object):
             email_string = email_string + "<tr><td><b>Subject: </b>"+em['Subject']+"</td></tr>"
         if 'Date' in em:
             email_string = email_string + "<tr><td><b>Date: </b>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td></tr>"
+
+        attachment_string = ""
+
+        body_string = ""
+
         if em.is_multipart():
-            if em.get_payload()[0].get_payload().rstrip('\n'):
-                email_string = email_string + "<tr><td>" + em.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
-            else:
-                email_string = email_string + "<tr><td></td></tr>"
+
+            for payload in em.get_payload():
+                if not payload.is_multipart():
+
+                    if 'X-Attachment-Id' in payload and "Content-Description" in payload:
+
+                        attachment_string = attachment_string + '<tr><td><a href="/email/readone/attachment/?message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
+
+                    else:
+                        if 'Content-Type' in payload and 'text/plain' in payload['Content-Type']:
+                            body_string = body_string + "<tr><td>"+payload.get_payload()+"</td></tr>"
+
+
+                else:
+
+                    if payload.is_multipart():
+                        if payload.get_payload()[0].get_payload().rstrip('\n'):
+                            body_string = body_string + "<tr><td>" + payload.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
+                        else:
+                            body_string = body_string + "<tr><td></td></tr>"
+
         else:
-            email_string = email_string + "<tr><td>"+em.get_payload()+"</td></tr>"
+
+            body_string = body_string + "<tr><td>"+em.get_payload()+"</td></tr>"
+
+        email_string = email_string+attachment_string
+
+        email_string = email_string+body_string
 
         email_string = email_string+"</table>"
         
@@ -1003,12 +1065,17 @@ class Email(object):
                 email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
 
             if em[1].is_multipart():
-                if em[1].get_payload()[0].get_payload().rstrip('\n'):
-                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                if em[1].get_payload()[0].is_multipart():
+                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload()[0].get_payload()+"</td>"
                 else:
-                    email_string = email_string + "<td></td>"
+                
+                    if em[1].get_payload()[0].get_payload().rstrip('\n'):
+                        email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                    else:
+                        email_string = email_string + "<td></td>"
             else:
                 email_string = email_string + "<td>"+em[1].get_payload()+"</td>"
+
             if 'Date' in em[1]:
                 email_string = email_string + "<td id=\"table_divide\">"+time.strftime("%d %b %H:%M",email.utils.parsedate(em[1]['Date']))+"</td>"
 
@@ -1108,8 +1175,41 @@ li.menubar {
 </script>
         </html>"""
 
+class ViewAttachment(object):
+
+    @cherrypy.expose
+    def index(self,username,message_id,attachment_id,sent=False):
+
+        username = username.strip('"')
+
+        if sent == False:
+            #use the message factory so that you get MaildirMessages instead of rfc822.Messages
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage)
+        else: 
+            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
+
+        em = emails.get_message(message_id)
+
+        if not em.is_multipart():
+            raise Exception
+
+        for payload in em.get_payload():
+            if payload.is_multipart():
+                continue
+            if 'X-Attachment-Id' in payload and payload["X-Attachment-Id"] == attachment_id:
+
+                tmp_filename=os.popen("mktemp").read().rstrip('\n')
+
+                open(tmp_filename,'wb').write(payload.get_payload(decode=True))
+
+                #stringio = StringIO.StringIO()
+                #stringio.write(payload.get_payload(decode=True))
+
+                return static.serve_file(tmp_filename, "application/x-download", "attachment", payload['Content-Description'])        
 
 class ViewReadOne(object):
+
+    attachment = ViewAttachment()
 
     @cherrypy.expose
     def index(self,username,message_id,sent=False):
@@ -1143,13 +1243,40 @@ class ViewReadOne(object):
             email_string = email_string + "<tr><td><b>Subject: </b>"+em['Subject']+"</td></tr>"
         if 'Date' in em:
             email_string = email_string + "<tr><td><b>Date: </b>"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td></tr>"
+
+        attachment_string = ""
+
+        body_string = ""
+
         if em.is_multipart():
-            if em.get_payload()[0].get_payload().rstrip('\n'):
-                email_string = email_string + "<tr><td>" + em.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
-            else:
-                email_string = email_string + "<tr><td></td></tr>"
+
+            for payload in em.get_payload():
+                if not payload.is_multipart():
+
+                    if 'X-Attachment-Id' in payload and "Content-Description" in payload:
+
+                        attachment_string = attachment_string + '<tr><td><a href="/view/email/readone/attachment/?username='+username+'&&message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
+
+                    else:
+                        if 'Content-Type' in payload and 'text/plain' in payload['Content-Type']:
+                            body_string = body_string + "<tr><td>"+payload.get_payload()+"</td></tr>"
+
+
+                else:
+
+                    if payload.is_multipart():
+                        if payload.get_payload()[0].get_payload().rstrip('\n'):
+                            body_string = body_string + "<tr><td>" + payload.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
+                        else:
+                            body_string = body_string + "<tr><td></td></tr>"
+
         else:
-            email_string = email_string + "<tr><td>"+em.get_payload()+"</td></tr>"
+
+            body_string = body_string + "<tr><td>"+em.get_payload()+"</td></tr>"
+
+        email_string = email_string+attachment_string
+
+        email_string = email_string+body_string
 
         email_string = email_string+"</table>"
         
@@ -1208,6 +1335,8 @@ li.menubar {
 
         </html>"""
 
+
+
 class ViewEmail(object):
 
     readone = ViewReadOne()
@@ -1257,11 +1386,19 @@ class ViewEmail(object):
             if 'Subject' in em[1]:    
                 email_string = email_string + "<td><i>"+em[1]['Subject']+"</i></td>"
 
+            #return em[1].get_payload()[1].get_payload()
+            
+            #print type(em[1].get_payload())
+
             if em[1].is_multipart():
-                if em[1].get_payload()[0].get_payload().rstrip('\n'):
-                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                if em[1].get_payload()[0].is_multipart():
+                    email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload()[0].get_payload()+"</td>"
                 else:
-                    email_string = email_string + "<td></td>"
+                
+                    if em[1].get_payload()[0].get_payload().rstrip('\n'):
+                        email_string = email_string + "<td>"+em[1].get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                    else:
+                        email_string = email_string + "<td></td>"
             else:
                 email_string = email_string + "<td>"+em[1].get_payload()+"</td>"
             if 'Date' in em[1]:
