@@ -11,6 +11,7 @@ import email
 import mailbox
 
 from email.MIMEMultipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 from email.MIMEText import MIMEText
 from email.Utils import COMMASPACE, formatdate
 
@@ -61,8 +62,6 @@ def require(*conditions):
         f._cp_config['auth.require'].extend(conditions)
         return f
     return decorate
-
-
 
 about_html_string = """
             Ecommunicate is intended to meet the need for electronic communication that is the opposite of private. Making online communication public instead of private could lead to increased levels of honesty, transparency, cooperation and decreased levels of deception, misunderstanding between people, and duplicative work. It is not clear whether this concept will catch on, but it is worth a try.<br><br>
@@ -726,7 +725,7 @@ li.menubar {
 
 <center>
 
-   <form id="compose_email" target="console_iframe" method="post" action="compose">
+   <form id="compose_email" target="console_iframe" method="post" action="send" enctype="multipart/form-data">
 
    to: <br><br>
    <input type="text" id="to" name="to" size="100" /><br><br>
@@ -734,9 +733,20 @@ li.menubar {
    <input type="text" id="cc" name="cc" size="100" /><br><br>
    subject: <br><br>
    <input type="text" id="subject" name="subject" size="100" /><br><br>
+   attachments: <br><br>
+   <input type="file" id="attachment1" name="attachment1"/>
+   <input type="file" id="attachment2" name="attachment2" style="display:none;"/>
+   <input type="file" id="attachment3" name="attachment3" style="display:none;"/>
+   <input type="file" id="attachment4" name="attachment4" style="display:none;"/>
+   <input type="file" id="attachment5" name="attachment5" style="display:none;"/>
+   <input type="file" id="attachment6" name="attachment6" style="display:none;"/>
+   <input type="file" id="attachment7" name="attachment7" style="display:none;"/>
+   <input type="file" id="attachment8" name="attachment8" style="display:none;"/>
+   <input type="file" id="attachment9" name="attachment9" style="display:none;"/>
+   <input type="file" id="attachment10" name="attachment10" style="display:none;"/>
+   <br><br>
    body: <br><br>
    <textarea name="body" rows="50" cols="200"></textarea> <br><br>
-
 
   <button id="send" type="submit">
   Send
@@ -744,42 +754,35 @@ li.menubar {
 
   </form>
 
-  <iframe name="console_iframe" class="terminal" />
+  <iframe name="console_iframe" class="terminal" /></iframe>
 
 </center>
-  
+
+</body>
+
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
-  <script type="text/javascript">
+<script type="text/javascript">
 
-  $( document ).ready(function() {
-
-    $( "button" ).click(function( event ) {
-
-
- $("iframe").attr('src', '');
-
-
-    });
-
-  });
+$('#attachment1').click(function(event) { $('#attachment2').css('display','block')  });
+$('#attachment2').click(function(event) { $('#attachment3').css('display','block')  });
+$('#attachment3').click(function(event) { $('#attachment4').css('display','block')  });
+$('#attachment4').click(function(event) { $('#attachment5').css('display','block')  });
+$('#attachment5').click(function(event) { $('#attachment6').css('display','block')  });
+$('#attachment6').click(function(event) { $('#attachment7').css('display','block')  });
+$('#attachment7').click(function(event) { $('#attachment8').css('display','block')  });
+$('#attachment8').click(function(event) { $('#attachment9').css('display','block')  });
+$('#attachment9').click(function(event) { $('#attachment10').css('display','block')  });
 
   </script>        
 
-
-
-  
-  <br>
-  <br>
-
-  </center>
-
-</body>
         </html>"""
     @cherrypy.expose
-    def compose(self, to, cc, subject, body):
+    def send(self, to, cc, subject, attachment1, attachment2, attachment3, attachment4, attachment5, attachment6, attachment7, attachment8, attachment9, attachment10, body):
 
-        def compose_function():
+        attachments = [attachment1, attachment2, attachment3, attachment4, attachment5, attachment6, attachment7, attachment8, attachment9, attachment10]
+
+        def send_function():
             msg = MIMEMultipart()
             send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
             #msg['From'] = 
@@ -790,8 +793,24 @@ li.menubar {
             msg['Date'] = formatdate(localtime=True)
             msg['Subject'] = subject
             msg['Message-ID'] = email.Utils.make_msgid()
+
+            mime_applications = []
+
+            for attachment in attachments:
+                if attachment.file != None and attachment.filename != "":
+                    tmp_filename=os.popen("mktemp").read().rstrip('\n')
+                    open(tmp_filename,'wb').write(attachment.file.read());
+                    
+                    if str(attachment.content_type) == "application/pdf":
+                        mime_application = MIMEApplication(open(tmp_filename,'rb').read(),"pdf")
+                        mime_application['Content-Disposition'] = 'attachment; filename="'+str(attachment.filename)+'"'
+                        mime_applications.append(mime_application)
+
             try:
                 msg.attach(MIMEText(body))
+                for mime_application in mime_applications:
+                    msg.attach(mime_application)
+
                 smtpObj = smtplib.SMTP(port=25)
                 smtpObj.connect()
                 smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
@@ -804,7 +823,7 @@ li.menubar {
             except Exception as e:
                 print "Error: unable to send email", e.__class__
               
-        return compose_function()
+        return send_function()
 
 
 class Attachment(object):
