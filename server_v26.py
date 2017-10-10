@@ -439,6 +439,15 @@ li.menubar {
 #        $( "iframe" ).clear()
         def register_function():
 
+            if len(username) > 30:
+                yield "Username is too long."
+                return
+                
+            for c in username:
+                if c != 'a' and c != 'b' and c != 'c' and c != 'd' and c != 'e' and c != 'f' and c != 'g' and c != 'h' and c != 'i' and c != 'j' and c != 'k' and c != 'l' and c != 'm' and c != 'n' and c != 'o' and c != 'p' and c != 'q' and c != 'r' and c != 's' and c != 't' and c != 'u' and c != 'v' and c != 'w' and c != 'x' and c != 'y' and c != 'z' and c != 'A' and c != 'B' and c != 'C' and c != 'D' and c != 'E' and c != 'F' and c != 'G' and c != 'H' and c != 'I' and c != 'J' and c != 'K' and c != 'L' and c != 'M' and c != 'N' and c != 'O' and c != 'P' and c != 'Q' and c != 'R' and c != 'S' and c != 'T' and c != 'U' and c != 'V' and c != 'W' and c != 'X' and c != 'Y' and c != 'Z' and c != '0' and c != '1' and c != '2' and c != '3' and c != '4' and c != '5' and c != '6' and c != '7' and c != '8' and c != '9' and c != '_' and c != '-' and c != '.':
+                    yield "The username contains a character that is not allowed."
+                    return
+
             #only allow one person to register at a time
             ret=os.system("if [ -f /home/ec2-user/registering_someone ]; then exit 0; else exit 1; fi");
 
@@ -454,13 +463,13 @@ li.menubar {
 
             db_password = passwords.split('\n')[0]
 
-            dbname = "open"
+            dbname = "ecommunicate"
 
             h = hashlib.sha256()
 
             h.update(password)
 
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+            conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
             curs = conn.cursor()
 
@@ -478,7 +487,7 @@ li.menubar {
                 yield "Please choose a password that is at least 6 characters."
                 return
             
-            curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\", name = \""+name+"\"")
+            curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\", name = \""+name+"\", registration_time = now(6)")
 
             conn.commit()
 
@@ -1533,9 +1542,9 @@ class ViewChat(object):
             
             db_password = passwords.split('\n')[0]
 
-            dbname = "open"
+            dbname = "ecommunicate"
     
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+            conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
             curs = conn.cursor()
 
@@ -1707,9 +1716,9 @@ $(document).ready(function() {
 
         db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+        dbname = "ecommunicate"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
         if upon_update:
 
@@ -1839,9 +1848,9 @@ li.menubar {
 
             db_password = passwords.split('\n')[0]
 
-            dbname = "open"
+            dbname = "ecommunicate"
 
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+            conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
             curs = conn.cursor()
 
@@ -1954,9 +1963,9 @@ li.menubar {
 
             db_password = passwords.split('\n')[0]
 
-            dbname = "open"
+            dbname = "ecommunicate"
 
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+            conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
             curs = conn.cursor()
 
@@ -2079,9 +2088,9 @@ Message: <br><br>
 
         db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+        dbname = "ecommunicate"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
         curs = conn.cursor()
 
@@ -2121,7 +2130,7 @@ Message: <br><br>
         if len(contacts) > 0:
             return "Contact request already made between these two users."
 
-        curs.execute("insert into contact_requests set username1 = \""+username1+"\", username2 = \""+username2+"\", message = \""+message+"\", forward="+forward+";")
+        curs.execute("insert into contact_requests set username1 = \""+username1+"\", username2 = \""+username2+"\", message = \""+message+"\", forward="+forward+", request_time = now(6);")
 
         conn.commit()
 
@@ -2138,9 +2147,9 @@ class ContactRequestResponses(object):
 
         db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+        dbname = "ecommunicate"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
         curs = conn.cursor()
 
@@ -2218,9 +2227,9 @@ class ContactRequestResponses(object):
 
         db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+        dbname = "ecommunicate"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
         curs = conn.cursor()
 
@@ -2256,7 +2265,7 @@ class ContactRequestResponses(object):
                 username1=sorted_usernames[0]
                 username2=sorted_usernames[1]
 
-                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\", new_message_username1 = 0, new_message_username2 = 0;")
+                curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\", new_message_username1 = 0, new_message_username2 = 0, accept_time = now(6);")
             
         conn.commit()
 
@@ -2366,9 +2375,9 @@ class Chat(object):
 
         db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+        dbname = "ecommunicate"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
         curs = conn.cursor()
 
@@ -2654,9 +2663,9 @@ $(document).ready(function() {
 
         db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+        dbname = "ecommunicate"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
         if upon_update:
 
@@ -2801,9 +2810,9 @@ $(document).ready(function() {
 
         db_password = passwords.split('\n')[0]
 
-        dbname = "open"
+        dbname = "ecommunicate"
 
-        conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
         curs = conn.cursor()
 
@@ -2919,9 +2928,9 @@ li.menubar {
 
             db_password = passwords.split('\n')[0]
 
-            dbname = "open"
+            dbname = "ecommunicate"
 
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+            conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
             curs = conn.cursor()
 
@@ -3027,9 +3036,9 @@ li.menubar {
 
             db_password = passwords.split('\n')[0]
 
-            dbname = "open"
+            dbname = "ecommunicate"
 
-            conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+            conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
             curs = conn.cursor()
 
@@ -3091,9 +3100,9 @@ def is_right_password(username, password):
 
     db_password = passwords.split('\n')[0]
 
-    dbname = "open"
+    dbname = "ecommunicate"
 
-    conn = MySQLdb.connect(host='tutorial-db-instance.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='open', passwd=db_password, port=3306)
+    conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
     curs = conn.cursor()
 
