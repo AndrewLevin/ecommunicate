@@ -499,6 +499,8 @@ li.menubar {
 
             yield "Your registration was succesful. Please remember your username and password, as there is no way to recover them at this time."
 
+            conn.close()
+
         return register_function()
 
 
@@ -1536,20 +1538,6 @@ class ViewChat(object):
             html_string_usernames="username1="+username1+"\n"
             html_string_usernames=html_string_usernames+"username2="+username2
 
-            secrets_file=open("/home/ec2-user/secrets.txt")
-            
-            passwords=secrets_file.read().rstrip('\n')
-            
-            db_password = passwords.split('\n')[0]
-
-            dbname = "ecommunicate"
-    
-            conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
-
-            curs = conn.cursor()
-
-            curs.execute("use "+dbname+";")
-
             return """<html>
 <head><title>open</title>
 
@@ -1778,6 +1766,8 @@ $(document).ready(function() {
 
         curs.close()
 
+        conn.close()
+
         return json.dumps([messages_list,max_time])
 
 
@@ -1902,6 +1892,8 @@ li.menubar {
 </html>
 
 """
+            conn.close()
+
             return html_string
 
         elif issessionauthenticated:
@@ -2016,6 +2008,8 @@ li.menubar {
 </html>
 
 """
+            conn.close()
+
             return html_string
 
 class MakeContactRequest(object):
@@ -2134,6 +2128,8 @@ Message: <br><br>
 
         conn.commit()
 
+        conn.close()
+
         return "A contact request has been sent to user "+original_username2+"."
 
 class ContactRequestResponses(object):
@@ -2182,6 +2178,7 @@ class ContactRequestResponses(object):
 
         contact_request_string=contact_request_string+"<br><button type=\"submit\" id = \"contact_request_responses\">Respond to contact requests</button>\n</form>"
 
+        conn.close()
 
         return """<html>
 <head><title>open</title>
@@ -2268,6 +2265,8 @@ class ContactRequestResponses(object):
                 curs.execute("insert into contacts set username1 = \""+username1+"\", username2 = \""+username2+"\", new_message_username1 = 0, new_message_username2 = 0, accept_time = now(6);")
             
         conn.commit()
+
+        conn.close()
 
         return "Your responses have been registered."
 
@@ -2425,6 +2424,7 @@ class Chat(object):
 
         click_on_self_string = "$(\'#"+cherrypy.session.get('_cp_username')+"\').click();"
 
+        conn.close()
 
         return """<html>
 <head><title>Ecommunicate</title>
@@ -2805,6 +2805,8 @@ $(document).ready(function() {
         else:
             max_time = str(max(max_time1,max_time2))
 
+        conn.close()
+
         return json.dumps([messages_json,max_time])
 
         #return '{"a1" : "b1"}'
@@ -2853,15 +2855,17 @@ $(document).ready(function() {
 
         params_json = {'username1': username1, 'username2': username2}
 
-        
 
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
-        conn  =  httplib.HTTPSConnection("android.ecommunicate.ch")
-        conn.request('POST','/new_message_browser/', headers = headers, body = json.dumps(params_json))
-        r=conn.getresponse()
+        http_conn  =  httplib.HTTPSConnection("android.ecommunicate.ch")
+        http_conn.request('POST','/new_message_browser/', headers = headers, body = json.dumps(params_json))
+        r=http_conn.getresponse()
         print r.status
         print r.reason
+
+        conn.close()
+
 
 class Downloads(object):
     @cherrypy.expose
@@ -3006,6 +3010,8 @@ li.menubar {
 </html>
 
 """
+            conn.close()
+
         else: #authenticated    
             html_string="""
 
@@ -3113,6 +3119,7 @@ li.menubar {
 </html>
 
 """
+            conn.close()
 
         return html_string
 
@@ -3152,6 +3159,8 @@ def is_right_password(username, password):
     h = hashlib.sha256()
 
     h.update(password)
+
+    conn.close()
 
     if h.hexdigest() == hashed_password:
         return [True,""]
