@@ -2525,7 +2525,9 @@ function show_messages(e){
    }
 }
 function update_messages(){
+
     if (messages_json != "") {
+
         for (var item in messages_json) {  
             var console_iframe2 = document.getElementById('console_'+item);
             //clear the iframe
@@ -2563,18 +2565,29 @@ get_messages_url = 'get_messages?upon_update=True&client_max_time='+max_time;
       type: 'GET',
       dataType: 'html',
       success: function(data) {
+
          parsed_data = JSON.parse(data);
          //alert(parsed_data["phone8"]);
          messages_json = parsed_data[0];
+
          max_time = parsed_data[1];
          if (messages_json_old != ""){
              for (var item in messages_json) {
-                 if ( messages_json[item].length > messages_json_old[item].length ) {
-                    for ( var i = messages_json_old[item].length, l = messages_json[item].length; i < l; i++ ) { 
+                 if (item in messages_json_old){
+                    if ( messages_json[item].length > messages_json_old[item].length ) {
+                        for ( var i = messages_json_old[item].length, l = messages_json[item].length; i < l; i++ ) { 
+                            if (messages_json[item][i][0] == item){
+                                $('#'+item).css('background-color','blue');
+                            }
+                        }  
+                     }
+                 } else {
+                    for ( var i = 0, l = messages_json[item].length; i < l; i++ ) { 
                         if (messages_json[item][i][0] == item){
-                            $('#'+item).css('background-color','blue');
+                                $('#'+item).css('background-color','blue');
                         }
                     }  
+
                  }
              }
          }
@@ -2649,7 +2662,10 @@ $(document).ready(function() {
 
     @cherrypy.expose
     @require()
-    def get_messages(self,upon_update=False,client_max_time=""):
+    def get_messages(self,upon_update=False,client_max_time=None):
+
+        if client_max_time == "null":
+            client_max_time = None
 
         #dn=cherrypy.request.headers['Cms-Authn-Dn']
 
@@ -2680,7 +2696,12 @@ $(document).ready(function() {
 
                 curs.execute("select MAX(time) from messages where username1=\""+username1+"\";")
 
+                #tmp = curs.fetchall()
+
                 server_max_time = curs.fetchall()[0][0]
+
+                if server_max_time != None and client_max_time == None:
+                    break
 
                 if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
                     break
@@ -2688,6 +2709,9 @@ $(document).ready(function() {
                 curs.execute("select MAX(time) from messages where username2=\""+username1+"\";")
 
                 server_max_time = curs.fetchall()[0][0]
+
+                if server_max_time != None and client_max_time == None:
+                    break
 
                 if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
                     break
