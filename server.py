@@ -2867,13 +2867,6 @@ $(document).ready(function() {
         conn.close()
 
 
-class Downloads(object):
-    @cherrypy.expose
-    def app_apk(self):
-        path = '/home/ec2-user/downloads/app.apk'
-        return static.serve_file(path, 'application/vnd.android.package-archive',
-                                 'attachment', os.path.basename(path))
-
 class Root(object):
 
     _cp_config = {
@@ -2881,8 +2874,6 @@ class Root(object):
         'tools.auth.on': True,
         'tools.sessions.locking': 'explicit' #this and the acquire_lock and the release_lock statements in the login and logout functions are necessary so that multiple ajax requests can be processed in parallel in a single session
     }
-
-    downloads = Downloads()
 
     view = View()
 
@@ -2895,6 +2886,10 @@ class Root(object):
     about = About()
 
     email = Email()
+
+#    @cherrypy.expose
+#    def default(self,*args):
+#        return static.serve_file("/home/ec2-user/server/google_verification_file.html");        
 
     @cherrypy.expose
     def index(self):
