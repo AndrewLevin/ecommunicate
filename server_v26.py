@@ -1348,7 +1348,7 @@ class ViewReadOne(object):
 
                     if 'X-Attachment-Id' in payload and "Content-Description" in payload:
 
-                        attachment_string = attachment_string + '<tr><td><a href="/email/readone/attachment/?username='+username+'message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
+                        attachment_string = attachment_string + '<tr><td><a href="/view/email/readone/attachment/?username='+username+'message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
 
                     else:
                         if 'Content-Type' in payload and ('text/plain' in payload['Content-Type'] or 'message/delivery-status' in payload['Content-Type'] or 'message/rfc822' in payload['Content-Type']):
