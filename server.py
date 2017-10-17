@@ -1243,6 +1243,10 @@ class Email(object):
             if email_string != "":    
                 email_string = email_string+"</table>"
 
+        curs.close()
+
+        conn.close()
+                
 
         return """<html>
 <head>
@@ -1618,6 +1622,10 @@ class ViewEmail(object):
             if email_string != "":    
                 email_string = email_string+"</table>"
 
+
+        curs.close()
+
+        conn.close()
 
         return """<html>
 <head>
