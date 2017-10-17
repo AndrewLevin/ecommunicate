@@ -960,18 +960,20 @@ class ReadOne(object):
                         attachment_string = attachment_string + '<tr><td><a href="/email/readone/attachment/?message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
 
                     else:
-                        if 'Content-Type' in payload and 'text/plain' in payload['Content-Type']:
+                        if 'Content-Type' in payload and ('text/plain' in payload['Content-Type'] or 'message/delivery-status' in payload['Content-Type'] or 'message/rfc822' in payload['Content-Type']):
                             body_string = body_string + "<tr><td>"+payload.get_payload()+"</td></tr>"
-
-
                 else:
-
-                    if payload.is_multipart():
-                        if payload.get_payload()[0].get_payload().rstrip('\n'):
-                            body_string = body_string + "<tr><td>" + payload.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
+                    for subpayload in payload.get_payload():
+                        if not subpayload.is_multipart():
+                            if 'Content-Type' in subpayload and ('text/plain' in subpayload['Content-Type'] or 'message/delivery-status' in subpayload['Content-Type'] or 'message/rfc822' in subpayload['Content-Type']):
+                                body_string = body_string + "<tr><td>"+subpayload.get_payload()+"</td></tr>"
                         else:
-                            body_string = body_string + "<tr><td></td></tr>"
-
+                            for subsubpayload in subpayload.get_payload():
+                                if not subsubpayload.is_multipart():
+                                    if 'Content-Type' in subsubpayload and ('text/plain' in subsubpayload['Content-Type'] or 'message/delivery-status' in subsubpayload['Content-Type'] or 'message/rfc822' in subsubpayload['Content-Type']):
+                                        body_string = body_string + "<tr><td>"+subsubpayload.get_payload()+"</td></tr>"
+                                else:
+                                    pass
         else:
 
             body_string = body_string + "<tr><td>"+em.get_payload()+"</td></tr>"
@@ -1346,21 +1348,23 @@ class ViewReadOne(object):
 
                     if 'X-Attachment-Id' in payload and "Content-Description" in payload:
 
-                        attachment_string = attachment_string + '<tr><td><a href="/view/email/readone/attachment/?username='+username+'&&message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
+                        attachment_string = attachment_string + '<tr><td><a href="/email/readone/attachment/?username='+username+'message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
 
                     else:
-                        if 'Content-Type' in payload and 'text/plain' in payload['Content-Type']:
+                        if 'Content-Type' in payload and ('text/plain' in payload['Content-Type'] or 'message/delivery-status' in payload['Content-Type'] or 'message/rfc822' in payload['Content-Type']):
                             body_string = body_string + "<tr><td>"+payload.get_payload()+"</td></tr>"
-
-
                 else:
-
-                    if payload.is_multipart():
-                        if payload.get_payload()[0].get_payload().rstrip('\n'):
-                            body_string = body_string + "<tr><td>" + payload.get_payload()[0].get_payload().rstrip('\n')+"</td></tr>"
+                    for subpayload in payload.get_payload():
+                        if not subpayload.is_multipart():
+                            if 'Content-Type' in subpayload and ('text/plain' in subpayload['Content-Type'] or 'message/delivery-status' in subpayload['Content-Type'] or 'message/rfc822' in subpayload['Content-Type']):
+                                body_string = body_string + "<tr><td>"+subpayload.get_payload()+"</td></tr>"
                         else:
-                            body_string = body_string + "<tr><td></td></tr>"
-
+                            for subsubpayload in subpayload.get_payload():
+                                if not subsubpayload.is_multipart():
+                                    if 'Content-Type' in subsubpayload and ('text/plain' in subsubpayload['Content-Type'] or 'message/delivery-status' in subsubpayload['Content-Type'] or 'message/rfc822' in subsubpayload['Content-Type']):
+                                        body_string = body_string + "<tr><td>"+subsubpayload.get_payload()+"</td></tr>"
+                                else:
+                                    pass
         else:
 
             body_string = body_string + "<tr><td>"+em.get_payload()+"</td></tr>"
