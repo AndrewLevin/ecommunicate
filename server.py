@@ -64,9 +64,9 @@ def require(*conditions):
     return decorate
 
 about_html_string = """
-            Ecommunicate is intended to meet the need for electronic communication that is the opposite of private. Making online communication public instead of private could lead to increased levels of honesty, transparency, cooperation and decreased levels of deception, misunderstanding between people, and duplicative work. It is not clear whether this concept will catch on, but it is worth a try.<br><br>
-
-          E-mail to other ecommunicate.ch e-mail addresses and text messaging (like Google Hangouts or WeChat) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc. <br><br>
+            Ecommunicate is intended to meet the need for electronic communication that is the opposite of private. All of the communication that takes place on this website is purposefully released to the public. Anyone, with or without an Ecommunicate account, can view the communication starting immediately when it is created and continuing indefinitely, similar to an online forum.   <br><br>
+          
+Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc. <br><br>
 
   Below is a list of all of the services that we would like to provide. The ones that are operational are in bold.
 
