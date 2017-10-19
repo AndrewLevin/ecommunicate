@@ -33,6 +33,8 @@ import StringIO
 
 from cherrypy.lib import static
 
+import html_strings
+
 class LogInLogOut(object):
 
     def login_html(self,  message="", from_page="/"):
@@ -53,7 +55,7 @@ li.menubar {
 <body>
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
-"""+not_authenticated_menubar_html_string+"""
+"""+html_strings.not_authenticated_menubar_html_string+"""
 <h4>Login</h4>
 </center>
 """

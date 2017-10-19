@@ -35,6 +35,8 @@ from cherrypy.lib import static
 
 from viewattachment import ViewAttachment
 
+import html_strings
+
 class ViewReadOne(object):
 
     attachment = ViewAttachment()
@@ -132,7 +134,7 @@ li.menubar {
 <body>
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
-"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string)+"""
+"""+(html_strings.authenticated_menubar_html_string if is_session_authenticated() else html_strings.not_authenticated_menubar_html_string)+"""
 </center>
 <br><br>
 <center>

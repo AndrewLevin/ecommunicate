@@ -67,34 +67,7 @@ def require(*conditions):
         return f
     return decorate
 
-not_authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
-
-authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
+import html_strings
 
 class View(object):
 
@@ -127,7 +100,7 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+not_authenticated_menubar_html_string+"""
+            html_string = html_string+html_strings.not_authenticated_menubar_html_string+"""
 <h4>View</h4>
 </center>
 """
@@ -229,7 +202,7 @@ li.menubar {
 
             html_string = html_string+"<center><h1>Ecommunicate</h1>"
             html_string = html_string+"<h3>A free online communication service</h3>"
-            html_string = html_string+authenticated_menubar_html_string+"""
+            html_string = html_string+html_strings.authenticated_menubar_html_string+"""
 <h4>View</h4>
 </center>
 """

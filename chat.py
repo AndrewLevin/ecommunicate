@@ -36,67 +36,7 @@ from cherrypy.lib import static
 from makecontactrequest import MakeContactRequest
 from contactrequestresponses import ContactRequestResponses
 
-chat_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar">
-<ul class = "submenubar">
-<li class = "submenubar">
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-</li>
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-</div>
-</div>
-"""
-
-chat_menubar_style_html_string = """
-ul.subsubmenubar {
-text-align: left;
-padding: 0;
-}
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-}
-ul.submenubar {
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-}
-li.submenubar {
-display: block;
-}
-ul.menubar {
-text-align: center;
-}
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
-"""
+import html_strings
 
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
@@ -127,35 +67,6 @@ def require(*conditions):
         f._cp_config['auth.require'].extend(conditions)
         return f
     return decorate
-
-not_authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
-
-authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
 
 class Chat(object):
 
@@ -228,7 +139,7 @@ class Chat(object):
         return """<html>
 <head><title>Ecommunicate</title>
 <style>
-"""+chat_menubar_style_html_string+"""
+"""+html_strings.chat_menubar_style_html_string+"""
 ul.contactlistclass {
     list-style:none;
     padding-left:0;
@@ -264,7 +175,7 @@ ul.contactlistclass {
 <body>
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
-"""+chat_menubar_html_string+"""
+"""+html_strings.chat_menubar_html_string+"""
 <h4>Chat</h4>
 </center>
 <center>

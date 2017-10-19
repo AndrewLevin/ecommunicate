@@ -35,35 +35,7 @@ from cherrypy.lib import static
 
 from viewreadone import ViewReadOne
 
-not_authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
-
-authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
-
+import html_strings
 
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
@@ -237,7 +209,7 @@ li.menubar {
 <body>
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
-"""+(authenticated_menubar_html_string if is_session_authenticated() else not_authenticated_menubar_html_string)+"""
+"""+(html_strings.authenticated_menubar_html_string if is_session_authenticated() else html_strings.not_authenticated_menubar_html_string)+"""
 <h4>Email</h4>
 </center>
 <br><br>

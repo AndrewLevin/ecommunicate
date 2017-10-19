@@ -63,96 +63,7 @@ def require(*conditions):
         return f
     return decorate
 
-chat_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar">
-<ul class = "submenubar">
-<li class = "submenubar">
-<ul class = "subsubmenubar">
-<li class = "subsubmenubarleftmost"><a href="/chat">Chat</a></li>
-<li class = "subsubmenubar"><a href="/loginlogout/logout">Logout</a></li>
-<li class = "subsubmenubarrightmost"><a href="/about/">About</a></li>
-</ul>
-</li>
-<li class = "submenubar" ><a href="/chat/makecontactrequests">Make Contact Requests</a></li>
-<li class = "submenubar"><a href="/chat/respondtocontactrequests">Respond to Contact Requests</a></li>
-</ul>
-</ul>
-</div>
-</div>
-"""
-
-chat_menubar_style_html_string = """
-ul.subsubmenubar {
-text-align: left;
-padding: 0;
-}
-li.subsubmenubarleftmost {
-display: inline;
-padding-left: 0px;
-padding-right: 20px;
-}
-li.subsubmenubarrightmost {
-display: inline;
-padding-left: 20px;
-padding-right: 0px;
-}
-li.subsubmenubar {
-display: inline;
-padding: 20px;
-}
-ul.submenubar {
-list-style-type:none;
-display: inline-block;
-vertical-align:top;
-text-align: left;
-padding: 0;
-}
-li.submenubar {
-display: block;
-}
-ul.menubar {
-text-align: center;
-}
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
-"""
-
-not_authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
-
-authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
+import html_strings
 
 class ContactRequestResponses(object):
     @cherrypy.expose
@@ -205,7 +116,7 @@ class ContactRequestResponses(object):
         return """<html>
 <head><title>open</title>
 <style>
-"""+chat_menubar_style_html_string+"""
+"""+html_strings.chat_menubar_style_html_string+"""
     .messageerrorbox {
     width: 100%;
     height: 5em;
@@ -216,7 +127,7 @@ class ContactRequestResponses(object):
 <body>
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
-"""+chat_menubar_html_string+"""
+"""+html_strings.chat_menubar_html_string+"""
 </center>
 """ + contact_request_string + """
   <iframe name="console_iframe4" class="messageerrorbox" />  </iframe>

@@ -31,6 +31,8 @@ import re
 
 import StringIO
 
+import html_strings
+
 from cherrypy.lib import static
 
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
@@ -63,36 +65,6 @@ def require(*conditions):
         return f
     return decorate
 
-not_authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
-
-authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-
-"""
-
 class Register(object):
     @cherrypy.expose
     def index(self):
@@ -112,7 +84,7 @@ li.menubar {
 <body>
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
-"""+not_authenticated_menubar_html_string+"""
+"""+html_strings.not_authenticated_menubar_html_string+"""
 <h4>Registration</h4>
 </center>
       Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. E-mail to other ecommunicate.ch e-mail addresses and text messaging (like Google Hangouts or WeChat) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br> <br>

@@ -39,6 +39,8 @@ from readone import ReadOne
 
 from reply import Reply
 
+import html_strings
+
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
     conditions = cherrypy.request.config.get('auth.require', None)
@@ -68,35 +70,6 @@ def require(*conditions):
         f._cp_config['auth.require'].extend(conditions)
         return f
     return decorate
-
-not_authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/register/">Register</a></li>
-<li class="menubar"><a href="/loginlogout/login/">Login</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
-
-authenticated_menubar_html_string = """
-<div id="header">
-<div id="nav">
-<ul class="menubar">
-<li class="menubar"><a href="/">Home</a></li>
-<li class="menubar"><a href="/view/">View</a></li>
-<li class="menubar"><a href="/email/">Email</a></li>
-<li class="menubar"><a href="/chat/">Chat</a></li>
-<li class="menubar"><a href="/loginlogout/logout/">Logout</a></li>
-<li class="menubar"><a href="/about">About</a></li>
-</ul>
-</div>
-</div>
-"""
 
 class Email(object):
 
@@ -257,7 +230,7 @@ li.menubar {
 <body>
 <center><h1>Ecommunicate</h1>
 <h3>A free online communication service</h3>
-"""+authenticated_menubar_html_string+"""
+"""+html_string.authenticated_menubar_html_string+"""
 <h4>Email</h4>
 </center>
 <br><br>
