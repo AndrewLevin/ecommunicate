@@ -35,14 +35,6 @@ import html_strings
 
 from cherrypy.lib import static
 
-def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
-
-    conditions = cherrypy.request.config.get('auth.require', None)
-    if conditions is not None:
-        username = cherrypy.session.get('_cp_username')
-        if not username:
-            raise cherrypy.HTTPRedirect("/loginlogout/login")
-
 def is_session_authenticated(*args, **kwargs):
 
     username = cherrypy.session.get('_cp_username')
@@ -51,19 +43,7 @@ def is_session_authenticated(*args, **kwargs):
     else:
         return False
 
-cherrypy.tools.auth = cherrypy.Tool('before_handler', redirect_if_authentication_is_required_and_session_is_not_authenticated)
-
-def require(*conditions):
-    """A decorator that appends conditions to the auth.require config
-    variable."""
-    def decorate(f):
-        if not hasattr(f, '_cp_config'):
-            f._cp_config = dict()
-        if 'auth.require' not in f._cp_config:
-            f._cp_config['auth.require'] = []
-        f._cp_config['auth.require'].extend(conditions)
-        return f
-    return decorate
+from require import require
 
 class Register(object):
     @cherrypy.expose
