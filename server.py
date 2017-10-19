@@ -662,6 +662,7 @@ if __name__ == '__main__':
     cherrypy.server.ssl_certificate = "/etc/letsencrypt/live/ecommunicate.ch/fullchain.pem"
     cherrypy.server.ssl_private_key = "/etc/letsencrypt/live/ecommunicate.ch/privkey.pem"
     cherrypy.server.ssl_certificate_chain = "/etc/letsencrypt/live/ecommunicate.ch/fullchain.pem"
+    cherrypy.server.thread_pool = 50
 
 
     cherrypy.engine.start()

@@ -622,15 +622,18 @@ $(document).ready(function() {
 
         conn.commit()
 
-        params_json = {'username1': username1, 'username2': username2}
+        conn.close()
 
+        params_json = {'username1': username1, 'username2': username2}
 
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
         http_conn  =  httplib.HTTPSConnection("android.ecommunicate.ch")
         http_conn.request('POST','/new_message_browser/', headers = headers, body = json.dumps(params_json))
-        r=http_conn.getresponse()
-        print r.status
-        print r.reason
 
-        conn.close()
+        #do not wait for the response, since web browsers limit the number of simultaneous requests, and if there many messages added in quick succession, there will be a backlog
+        #r=http_conn.getresponse()
+        #print r.status
+        #print r.reason
+
+
