@@ -62,7 +62,10 @@ class Reply(object):
                     body = body+email.utils.parseaddr(em['To'])[1]+" wrote:\n\n"
         else:
             if 'From' in em:
-                body = body+email.utils.parseaddr(em['From'])[0]+" wrote:\n"
+                if email.utils.parseaddr(em['From'])[0]:
+                    body = body+email.utils.parseaddr(em['From'])[0]+" wrote:\n"
+                else:
+                    body = body+email.utils.parseaddr(em['From'])[1]+" wrote:\n"
                 to = "\""+email.utils.parseaddr(em['From'])[1]+"\""
 
         if email.utils.getaddresses([em['CC']]) != []:
