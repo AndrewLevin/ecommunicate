@@ -150,8 +150,6 @@ $(document).ready(function() {
 
                 curs.execute("select MAX(time) from messages where username1=\""+username1+"\" and username2=\""+username2+"\";")
 
-                print "andrew debug 1"
-
                 server_max_time = curs.fetchall()[0][0]
 
                 if server_max_time != None and server_max_time > datetime.datetime.strptime(client_max_time,"%Y-%m-%d %H:%M:%S.%f"):
