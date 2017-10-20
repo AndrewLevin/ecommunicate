@@ -37,6 +37,8 @@ from viewreadone import ViewReadOne
 
 import html_strings
 
+import utils
+
 class ViewEmail(object):
 
     readone = ViewReadOne()
