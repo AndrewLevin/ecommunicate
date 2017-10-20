@@ -1,4 +1,7 @@
 import MySQLdb
+
+import hashlib
+
 import cherrypy
 
 import html_strings

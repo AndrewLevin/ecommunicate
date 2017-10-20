@@ -5,6 +5,8 @@ import email
 
 import mailbox
 
+import time
+
 from compose import Compose
 
 from readone import ReadOne
@@ -103,10 +105,14 @@ class Email(object):
                 if email_string == "":
                     email_string = email_string+"<table border = \"1\" width = \"100%\" id=\"emaillist\" style=\"table-layout:fixed\" >"
 
-                if msg_dict["is_read"]:
-                    email_string = email_string + "<tr id=\"email"+str(i)+"\" style=\"background-color:white\">"
+                if not sent_bool:
+                    if msg_dict["is_read"]:
+                        email_string = email_string + "<tr id=\"email"+str(i)+"\" style=\"background-color:white\">"
+                    else:
+                        email_string = email_string + "<tr id=\"email"+str(i)+"\" style=\"background-color:gold\">"
                 else:
-                    email_string = email_string + "<tr id=\"email"+str(i)+"\" style=\"background-color:gold\">"
+                    email_string = email_string + "<tr id=\"email"+str(i)+"\" style=\"background-color:white\">"
+                    
 
                 if sent_bool:
                     if 'To' in em:
