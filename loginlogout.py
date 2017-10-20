@@ -35,6 +35,50 @@ from cherrypy.lib import static
 
 import html_strings
 
+def is_right_password(username, password):
+
+    secrets_file=open("/home/ec2-user/secrets.txt")
+
+    passwords=secrets_file.read().rstrip('\n')
+
+    db_password = passwords.split('\n')[0]
+
+    dbname = "ecommunicate"
+
+    conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
+
+    curs = conn.cursor()
+
+    curs.execute("use "+dbname+";")
+
+    curs.execute("select * from user_info where username = \""+username+"\";")
+
+    colnames = [desc[0] for desc in curs.description]
+
+    user_infos=curs.fetchall()
+
+    if len(user_infos) == 0:
+        return [False,"Login failed. The username that you entered was not found."]
+    else:
+        assert(len(user_infos) == 1)
+
+    user_info=user_infos[0]
+
+    user_info_dict=dict(zip(colnames, user_info))
+
+    hashed_password = user_info_dict["hashed_password"]
+
+    h = hashlib.sha256()
+
+    h.update(password)
+
+    conn.close()
+
+    if h.hexdigest() == hashed_password:
+        return [True,""]
+    else:
+        return [False,"Login failed. The password that you entered is not the one associated with the username that you entered."]
+
 class LogInLogOut(object):
 
     def login_html(self,  message="", from_page="/"):
