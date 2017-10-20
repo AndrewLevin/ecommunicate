@@ -1,35 +1,6 @@
 import MySQLdb
-import sys
-import datetime
-import sys,os
+
 import cherrypy
-import hashlib
-
-import smtplib
-import email
-
-import mailbox
-
-from email.MIMEMultipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from email.MIMEText import MIMEText
-from email.Utils import COMMASPACE, formatdate
-
-import subprocess
-
-import time
-
-from HTMLParser import HTMLParser
-
-import json
-
-import urllib
-
-import httplib
-
-import re
-
-import StringIO
 
 from cherrypy.lib import static
 
@@ -40,8 +11,6 @@ from viewchat import ViewChat
 import utils
 
 import html_strings
-
-from require import require
 
 class View(object):
 
