@@ -37,13 +37,7 @@ from viewemail import ViewEmail
 
 from viewchat import ViewChat
 
-def is_session_authenticated(*args, **kwargs):
-
-    username = cherrypy.session.get('_cp_username')
-    if username:
-        return True
-    else:
-        return False
+import utils
 
 import html_strings
 
@@ -58,7 +52,7 @@ class View(object):
     @cherrypy.expose
     def index(self):
 
-        issessionauthenticated=is_session_authenticated()
+        issessionauthenticated=utils.is_session_authenticated()
 
         if not issessionauthenticated:
         

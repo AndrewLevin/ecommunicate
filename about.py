@@ -35,14 +35,6 @@ from cherrypy.lib import static
 
 import html_strings
 
-def is_session_authenticated(*args, **kwargs):
-
-    username = cherrypy.session.get('_cp_username')
-    if username:
-        return True
-    else:
-        return False
-
 from require import require
 
 class About(object):
@@ -50,7 +42,7 @@ class About(object):
     @cherrypy.expose
     def index(self):
 
-        issessionauthenticated = is_session_authenticated()
+        issessionauthenticated = utils.is_session_authenticated()
 
         if not issessionauthenticated:
 

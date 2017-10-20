@@ -41,13 +41,7 @@ from reply import Reply
 
 import html_strings
 
-def is_session_authenticated(*args, **kwargs):
-
-    username = cherrypy.session.get('_cp_username')
-    if username:
-        return True
-    else:
-        return False
+import utils
 
 from require import require
 
