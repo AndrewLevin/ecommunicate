@@ -1,6 +1,10 @@
 import MySQLdb
 import cherrypy
 
+import mailbox
+
+import email
+
 import time
 
 from viewreadone import ViewReadOne
