@@ -37,6 +37,8 @@ import html_strings
 
 from require import require
 
+import utils
+
 class About(object):
 
     @cherrypy.expose
