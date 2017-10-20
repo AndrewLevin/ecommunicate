@@ -1,5 +1,9 @@
 import MySQLdb
+
+import time
+
 import datetime
+
 import cherrypy
 
 import json
@@ -145,6 +149,8 @@ $(document).ready(function() {
                 curs.execute("use "+dbname+";")
 
                 curs.execute("select MAX(time) from messages where username1=\""+username1+"\" and username2=\""+username2+"\";")
+
+                print "andrew debug 1"
 
                 server_max_time = curs.fetchall()[0][0]
 
