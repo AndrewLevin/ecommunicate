@@ -79,7 +79,7 @@ li.menubar {
 
             html_string = html_string + "<table>"
 
-            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.amlevin.chat\">Android Chat App<a></td></tr>"
+            html_string = html_string + "<tr><th>Chat Conversations</th><th>E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.chat\">Android Chat App <a></td></tr>"
 
             html_string = html_string + "<tr>\n"
 
