@@ -210,14 +210,14 @@ get_messages_url = 'get_messages?upon_update=True&client_max_time='+max_time;
                  if (item in messages_json_old){
                     if ( messages_json[item].length > messages_json_old[item].length ) {
                         for ( var i = messages_json_old[item].length, l = messages_json[item].length; i < l; i++ ) { 
-                            if (messages_json[item][i][0] == item){
+                            if (messages_json[item][i][0] == item && item != '"""+cherrypy.session.get('_cp_username')+"""' && item != username2){
                                 $('#'+item).css('background-color','blue');
                             }
                         }  
                      }
                  } else {
                     for ( var i = 0, l = messages_json[item].length; i < l; i++ ) { 
-                        if (messages_json[item][i][0] == item){
+                        if (messages_json[item][i][0] == item && item != '"""+cherrypy.session.get('_cp_username')+"""' && item != username2){
                                 $('#'+item).css('background-color','blue');
                         }
                     }  
