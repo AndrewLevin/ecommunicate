@@ -24,7 +24,7 @@ class ViewChat(object):
             html_string_usernames=html_string_usernames+"username2="+username2
 
             return """<html>
-<head><title>open</title>
+<head><title>Ecommunicate</title>
 <style>
 ul.menubar {
 text-align: center;

@@ -55,7 +55,7 @@ class ContactRequestResponses(object):
         conn.close()
 
         return """<html>
-<head><title>open</title>
+<head><title>Ecommunicate</title>
 <style>
 """+html_strings.chat_menubar_style_html_string+"""
     .messageerrorbox {
