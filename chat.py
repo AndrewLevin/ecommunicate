@@ -449,7 +449,7 @@ $(document).ready(function() {
         
         sorted_usernames= sorted([username1,username2])
 
-        if sorted_usernames == [username1,username2]:
+        if sorted_usernames == [username1,username2] and username1 != username2:
             forward = "1"
         else:
             forward = "0"
