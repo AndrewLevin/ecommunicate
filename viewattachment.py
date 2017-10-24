@@ -18,11 +18,11 @@ class ViewAttachment(object):
         if sent == False:
             #use the message factory so that you get MaildirMessages instead of rfc822.Messages
             try:
-                emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage,create=False)
+                emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage,create=False)
             except mailbox.NoSuchMailboxError:
                 raise Exception
         else: 
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
+            emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
 
         em = emails.get_message(message_id)
 

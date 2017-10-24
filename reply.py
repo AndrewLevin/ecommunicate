@@ -34,12 +34,12 @@ class Reply(object):
         if sent_bool == False:
 
             try:
-                emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage,create=False)
+                emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage,create=False)
             except mailbox.NoSuchMailboxError:
                 raise Exception
 
         else:
-            emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage)
+            emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage)
 
         em = emails.get_message(message_id)
 
@@ -167,7 +167,7 @@ li.menubar {
                 smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
                 smtpObj.close()
 
-                sent_emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+                sent_emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
 
                 sent_emails.add(email.message_from_string(msg.as_string()));
 

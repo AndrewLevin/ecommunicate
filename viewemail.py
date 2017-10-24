@@ -51,12 +51,12 @@ class ViewEmail(object):
             #use the message factory so that you get MaildirMessages instead of rfc822.Messages
             
             try:
-                emailbox = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage,create=False)
+                emailbox = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+username+'/', factory=mailbox.MaildirMessage,create=False)
             except mailbox.NoSuchMailboxError:
                 pass
                 
         else: 
-            emailbox = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
+            emailbox = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+username+'/', factory=mailbox.MaildirMessage)
 
         email_javascript_string = ""
 

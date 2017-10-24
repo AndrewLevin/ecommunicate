@@ -130,84 +130,44 @@ $('#attachment9').click(function(event) { $('#attachment10').css('display','bloc
                         mime_applications.append(mime_application)
 
             try:
-                print "andrew debug 0"
-
                 msg.attach(MIMEText(body))
-
-                print "andrew debug 1"
 
                 for mime_application in mime_applications:
                     msg.attach(mime_application)
 
-                print "andrew debug 2"
-
                 smtpObj = smtplib.SMTP(port=25)
-
-                print "andrew debug 3"
 
                 smtpObj.connect()
 
-                print "andrew debug 4"
-
                 smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
                 
-                print "andrew debug 5"
-
                 smtpObj.close()
 
-                print "andrew debug 6"
-
-                sent_emails = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
-
-                print "andrew debug 7"
+                sent_emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
 
                 add_return_value=sent_emails.add(email.message_from_string(msg.as_string()));
                 
-                print "andrew debug 8"
-
                 dbname="ecommunicate"
-
-                print "andrew debug 9"
 
                 secrets_file=open("/home/ec2-user/secrets.txt")
 
-                print "andrew debug 10"
-                
                 passwords=secrets_file.read().rstrip('\n')
 
-                print "andrew debug 11"
-            
                 db_password = passwords.split('\n')[0]
-
-                print "andrew debug 12"
 
                 conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
-                print "andrew debug 13"
-
                 curs = conn.cursor()
-
-                print "andrew debug 14"
 
                 curs.execute("use "+dbname+";")
 
-                print "andrew debug 15"
-
                 curs.execute("insert into sent_emails set username = \""+cherrypy.session.get('_cp_username')+"\", id=\""+add_return_value+"\", sent_time=\""+time.strftime('%Y-%m-%d %H:%M:%S',email.utils.parsedate(msg['Date']))+"\";")
 
-                print "andrew debug 16"
-                
                 curs.close()
-
-                print "andrew debug 17"
 
                 conn.commit()
 
-                print "andrew debug 18"
-
                 conn.close()
-
-                print "andrew debug 19"
 
             except Exception as e:
                 print "Error: unable to send email", e.__class__
