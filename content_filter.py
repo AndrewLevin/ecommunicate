@@ -47,11 +47,11 @@ log_file.write(msg.as_string())
 
 log_file.write("andrew debug 11\n")
 
-log_file.write('/var/mail/vhosts/ecommunicate.ch/'+sys.argv[1].split("@")[0]+'/'+"\n")
+log_file.write('/efsemail/mail/vhosts/ecommunicate.ch/'+sys.argv[1].split("@")[0]+'/'+"\n")
 
 log_file.write("andrew debug 12\n")
 
-maildir = mailbox.Maildir('/var/mail/vhosts/ecommunicate.ch/'+sys.argv[1].split("@")[0]+'/', factory=mailbox.MaildirMessage,create=True)
+maildir = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+sys.argv[1].split("@")[0]+'/', factory=mailbox.MaildirMessage,create=True)
 
 log_file.write("andrew debug 13\n")
 
