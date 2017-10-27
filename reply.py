@@ -167,9 +167,9 @@ li.menubar {
                 smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
                 smtpObj.close()
 
-                sent_emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+                #sent_emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
 
-                sent_emails.add(email.message_from_string(msg.as_string()));
+                #sent_emails.add(email.message_from_string(msg.as_string()));
 
             except Exception as e:
                 print "Error: unable to send email", e.__class__

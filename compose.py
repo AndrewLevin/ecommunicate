@@ -143,31 +143,31 @@ $('#attachment9').click(function(event) { $('#attachment10').css('display','bloc
                 
                 smtpObj.close()
 
-                sent_emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
+                #sent_emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
 
-                add_return_value=sent_emails.add(email.message_from_string(msg.as_string()));
+                #add_return_value=sent_emails.add(email.message_from_string(msg.as_string()));
                 
-                dbname="ecommunicate"
+                #dbname="ecommunicate"
 
-                secrets_file=open("/home/ec2-user/secrets.txt")
+                #secrets_file=open("/home/ec2-user/secrets.txt")
 
-                passwords=secrets_file.read().rstrip('\n')
+                #passwords=secrets_file.read().rstrip('\n')
 
-                db_password = passwords.split('\n')[0]
+                #db_password = passwords.split('\n')[0]
 
-                conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
+                #conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
-                curs = conn.cursor()
+                #curs = conn.cursor()
 
-                curs.execute("use "+dbname+";")
+                #curs.execute("use "+dbname+";")
 
-                curs.execute("insert into sent_emails set username = \""+cherrypy.session.get('_cp_username')+"\", id=\""+add_return_value+"\", sent_time=\""+time.strftime('%Y-%m-%d %H:%M:%S',email.utils.parsedate(msg['Date']))+"\";")
+                #curs.execute("insert into sent_emails set username = \""+cherrypy.session.get('_cp_username')+"\", id=\""+add_return_value+"\", sent_time=\""+time.strftime('%Y-%m-%d %H:%M:%S',email.utils.parsedate(msg['Date']))+"\";")
 
-                curs.close()
+                #curs.close()
 
-                conn.commit()
+                #conn.commit()
 
-                conn.close()
+                #conn.close()
 
             except Exception as e:
                 print "Error: unable to send email", e.__class__
