@@ -26,6 +26,8 @@ log_file.write(sys.argv[1]+"\n")
 
 log_file.write("andrew debug 3\n")
 
+log_file.write(sys.argv[2]+"\n")
+
 msg_string = ""
 
 for line in sys.stdin:
@@ -49,13 +51,19 @@ log_file.write("andrew debug 11\n")
 
 log_file.write('/efsemail/mail/vhosts/ecommunicate.ch/'+sys.argv[1].split("@")[0]+'/'+"\n")
 
+log_file.write('/efsemail/mail/vhosts/ecommunicate.ch/'+sys.argv[2].split("@")[0]+'/'+"\n")
+
 log_file.write("andrew debug 12\n")
 
-maildir = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+sys.argv[1].split("@")[0]+'/', factory=mailbox.MaildirMessage,create=True)
+maildir_receiver = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+sys.argv[1].split("@")[0]+'/', factory=mailbox.MaildirMessage,create=True)
+
+maildir_sender = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+sys.argv[2].split("@")[0]+'/', factory=mailbox.MaildirMessage,create=True)
 
 log_file.write("andrew debug 13\n")
 
-add_return_value=maildir.add(msg)
+add_return_value_receiver=maildir_receiver.add(msg)
+
+add_return_value_sender=maildir_sender.add(msg)
 
 log_file.write("andrew debug 14\n")
 
@@ -91,7 +99,9 @@ log_file.write(time.strftime('%Y-%m-%d %H:%M:%S',email.utils.parsedate(msg['Date
 
 log_file.write("andrew debug 22\n")
 
-curs.execute("insert into received_emails set username = \""+sys.argv[1].split("@")[0]+"\", id=\""+add_return_value+"\", received_time=\""+time.strftime('%Y-%m-%d %H:%M:%S',email.utils.parsedate(msg['Date']))+"\", is_read = 0;")
+curs.execute("insert into received_emails set username = \""+sys.argv[1].split("@")[0]+"\", id=\""+add_return_value_receiver+"\", received_time=\""+time.strftime('%Y-%m-%d %H:%M:%S',email.utils.parsedate(msg['Date']))+"\", is_read = 0;")
+
+curs.execute("insert into sent_emails set username = \""+sys.argv[2].split("@")[0]+"\", id=\""+add_return_value_sender+"\", sent_time=\""+time.strftime('%Y-%m-%d %H:%M:%S',email.utils.parsedate(msg['Date']))+"\";")
 
 log_file.write("andrew debug 23\n")
 
@@ -107,4 +117,4 @@ conn.close()
 
 log_file.write("andrew debug 26\n")
 
-os.system("mv " + tmp_filename + " /home/vmail/" + add_return_value + ".log")
+os.system("mv " + tmp_filename + " /home/vmail/" + add_return_value_receiver + ".log")
