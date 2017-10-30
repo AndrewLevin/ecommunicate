@@ -9,8 +9,6 @@ class About(object):
     @cherrypy.expose
     def index(self):
 
-        issessionauthenticated = utils.is_session_authenticated()
-
         html_string = """
 <html>
 <head>

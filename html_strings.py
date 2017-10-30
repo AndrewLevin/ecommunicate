@@ -22,7 +22,7 @@ Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicat
 <li>Create
 <ol>
 <li><b>Browser</b>
-<li>Android
+<li><br>Android</b>
 <li>iOS
 </ol>
 <li>View
