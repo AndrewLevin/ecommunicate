@@ -12,6 +12,10 @@ import time
 
 import os
 
+import httplib
+
+import json
+
 tmp_filename=os.popen("mktemp").read().rstrip('\n')
 
 log_file = open(tmp_filename,"w")
@@ -116,5 +120,12 @@ log_file.write("andrew debug 25\n")
 conn.close()
 
 log_file.write("andrew debug 26\n")
+
+params_json = {'username': sys.argv[1].split("@")[0]}
+
+headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+
+http_conn  =  httplib.HTTPSConnection("email.android.ecommunicate.ch")
+http_conn.request('POST','/new_email/', headers = headers, body = json.dumps(params_json))
 
 os.system("mv " + tmp_filename + " /home/vmail/" + add_return_value_receiver + ".log")
