@@ -160,16 +160,40 @@ li.menubar {
             msg['Date'] = formatdate(localtime=True)
             msg['Subject'] = subject
             msg['Message-ID'] = email.Utils.make_msgid()
+
+            mime_applications = []
+
+            l = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9']
+
+            if len(attachments) > 36:
+                raise Exception
+
+            for i,attachment in enumerate(attachments):
+                if attachment.file != None and attachment.filename != "":
+                    tmp_filename=os.popen("mktemp").read().rstrip('\n')
+                    open(tmp_filename,'wb').write(attachment.file.read());
+                    
+                    if str(attachment.content_type) == "application/pdf":
+                        mime_application = MIMEApplication(open(tmp_filename,'rb').read(),"pdf")
+                        mime_application['Content-Disposition'] = 'attachment; filename="'+str(attachment.filename)+'"'
+                        mime_application['Content-Description'] = str(attachment.filename)
+                        mime_application['X-Attachment-Id'] = str("f_")+l[random.randint(0,35)]+l[random.randint(0,35)]+l[random.randint(0,35)]+l[random.randint(0,35)]+l[i]+l[random.randint(0,35)]+l[random.randint(0,35)]+l[random.randint(0,35)]+l[random.randint(0,35)]
+                        mime_applications.append(mime_application)
+
             try:
                 msg.attach(MIMEText(body))
+
+                for mime_application in mime_applications:
+                    msg.attach(mime_application)
+
                 smtpObj = smtplib.SMTP(port=25)
+
                 smtpObj.connect()
+
                 smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
+                
                 smtpObj.close()
 
-                #sent_emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/', msgfactory)
-
-                #sent_emails.add(email.message_from_string(msg.as_string()));
 
             except Exception as e:
                 print "Error: unable to send email", e.__class__
