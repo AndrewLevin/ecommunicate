@@ -487,7 +487,7 @@ $(document).ready(function() {
 
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
-        http_conn  =  httplib.HTTPSConnection("android.ecommunicate.ch")
+        http_conn  =  httplib.HTTPSConnection("chat.android.ecommunicate.ch")
         http_conn.request('POST','/new_message_browser/', headers = headers, body = json.dumps(params_json))
 
         #do not wait for the response, since web browsers limit the number of simultaneous requests, and if there many messages added in quick succession, there will be a backlog

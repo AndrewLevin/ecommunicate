@@ -64,6 +64,7 @@ class ViewReadOne(object):
             for payload in em.get_payload():
                 if not payload.is_multipart():
 
+
                     if 'X-Attachment-Id' in payload and "Content-Description" in payload:
 
                         attachment_string = attachment_string + '<tr><td><a href="/view/email/readone/attachment/?username='+username+'&&message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
