@@ -31,7 +31,7 @@ class ContactRequestResponses(object):
 
         curs.execute("select * from contact_requests where username2 = \""+cherrypy.session.get('_cp_username')+"\" and forward=1;")
 
-        contact_requests = contact_requests+curs.fetchall()
+        contact_requests += curs.fetchall()
 
         contact_request_string = "<form action=\"contact_request_responses\" method=\"post\" id =\"contact_request_responses\" target=\"console_iframe4\">\n"
 
@@ -48,9 +48,9 @@ class ContactRequestResponses(object):
                 username = contact_request_dict["username2"]
 
 
-            contact_request_string = contact_request_string+username+": <select name=\""+username+"\">\n<option value=\"Wait\"></option>\n<option value=\"Accept\">Accept</option>\n<option value=\"Reject\">Reject</option></select>\n<br><br>"
+            contact_request_string += username+": <select name=\""+username+"\">\n<option value=\"Wait\"></option>\n<option value=\"Accept\">Accept</option>\n<option value=\"Reject\">Reject</option></select>\n<br><br>"
 
-        contact_request_string=contact_request_string+"<br><button type=\"submit\" id = \"contact_request_responses\">Respond to contact requests</button>\n</form>"
+        contact_request_string += "<br><button type=\"submit\" id = \"contact_request_responses\">Respond to contact requests</button>\n</form>"
 
         conn.close()
 
