@@ -46,19 +46,19 @@ class Chat(object):
 
         curs.execute("select * from contacts where username2 = \""+cherrypy.session.get('_cp_username')+"\"")
 
-        contacts = contacts+curs.fetchall()
+        contacts += curs.fetchall()
 
         contacts_string = "<td><ul class=\"contactlistclass\" id=\"contactslist\">\n"
 
-        contacts_string = contacts_string+"<li id=\""+cherrypy.session.get('_cp_username')+"\" name=\""+cherrypy.session.get('_cp_username')+"\" class=\"contact\">"+cherrypy.session.get('_cp_username')+"</li>\n"
+        contacts_string += "<li id=\""+cherrypy.session.get('_cp_username')+"\" name=\""+cherrypy.session.get('_cp_username')+"\" class=\"contact\">"+cherrypy.session.get('_cp_username')+"</li>\n"
 
         iframes_string = "";
 
-        iframes_string = iframes_string+ "<iframe id=\"console_"+cherrypy.session.get('_cp_username')+"\" name=\"console_"+cherrypy.session.get('_cp_username')+"\" class=\"terminal\" />  </iframe>\n"
+        iframes_string += "<iframe id=\"console_"+cherrypy.session.get('_cp_username')+"\" name=\"console_"+cherrypy.session.get('_cp_username')+"\" class=\"terminal\" />  </iframe>\n"
 
         iframes_hide_string = "";
 
-        iframes_hide_string = iframes_hide_string+iframes_hide_string+"$(\'#console_" + cherrypy.session.get('_cp_username') + "\').hide();\n"
+        iframes_hide_string += "$(\'#console_" + cherrypy.session.get('_cp_username') + "\').hide();\n"
 
         for contact in contacts:
 
@@ -72,13 +72,13 @@ class Chat(object):
                 assert(contact_dict["username1"] == cherrypy.session.get('_cp_username'))
                 username = contact_dict["username2"]
 
-            contacts_string = contacts_string+"<li id=\""+username+"\" name=\""+username+"\" class=\"contact\">"+username+"</li>\n" 
+            contacts_string += "<li id=\""+username+"\" name=\""+username+"\" class=\"contact\">"+username+"</li>\n" 
 
-            iframes_string = iframes_string+ "<iframe id=\"console_"+username+"\" name=\"console_"+username+"\" class=\"terminal\" />  </iframe>\n"
+            iframes_string += "<iframe id=\"console_"+username+"\" name=\"console_"+username+"\" class=\"terminal\" />  </iframe>\n"
 
-            iframes_hide_string = iframes_hide_string+"$(\'#console_" + username + "\').hide();\n"
+            iframes_hide_string += "$(\'#console_" + username + "\').hide();\n"
 
-        contacts_string=contacts_string+"</ul></td>\n</td>"
+        contacts_string += "</ul></td>\n</td>"
 
         click_on_self_string = "$(\'#"+cherrypy.session.get('_cp_username')+"\').click();"
 
