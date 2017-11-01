@@ -16,14 +16,12 @@ import utils
 
 class ViewChat(object):
     @cherrypy.expose
-    def index(self,username1=None,username2=None):
+    def index(self,username1,username2):
 
-        if username1 != None and username2 != None:    
+        html_string_usernames = "username1="+username1+"\n"
+        html_string_usernames += "username2="+username2
 
-            html_string_usernames="username1="+username1+"\n"
-            html_string_usernames=html_string_usernames+"username2="+username2
-
-            return """<html>
+        return """<html>
 <head><title>Ecommunicate</title>
 <style>
 ul.menubar {
@@ -181,10 +179,10 @@ $(document).ready(function() {
                 message_dict=dict(zip(colnames, message))
 
                 if message_dict["forward"] == 1:
-                    return_string=return_string+str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
+                    return_string+=str(message_dict["username1"] +": " + message_dict["message"]+"<br>");
                     messages_list.append([message_dict["username1"], message_dict["message"]])
                 elif message_dict["forward"] == 0:
-                    return_string=return_string+str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
+                    return_string+=str(message_dict["username2"] + ": " + message_dict["message"]+"<br>");
                     messages_list.append([message_dict["username2"], message_dict["message"]])
 
         #return str(messages_json)
