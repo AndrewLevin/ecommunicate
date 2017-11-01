@@ -75,22 +75,22 @@ li.menubar {
 </center>
 """
 
-        login_html_string = login_html_string+"<center>"
-        login_html_string = login_html_string+"<form method=\"post\" action=\"/loginlogout/login\">"
-        login_html_string = login_html_string+"<input type=\"hidden\" name=\"from_page\" value=\""+from_page+"\" />"
-        login_html_string = login_html_string+"username: <br><br>"
-        login_html_string = login_html_string+"<input type=\"text\" id=\"username\" name=\"username\" size=\"18\" /><br><br>"
-        login_html_string = login_html_string+"password: <br><br>"
-        login_html_string = login_html_string+"<input type=\"password\" id=\"password\" name=\"password\" size=\"18\" /> <br><br>"
-        login_html_string = login_html_string+"<button type=\"submit\">"
-        login_html_string = login_html_string+"Login"
-        login_html_string = login_html_string+"</button>"
+        login_html_string += "<center>"
+        login_html_string += "<form method=\"post\" action=\"/loginlogout/login\">"
+        login_html_string += "<input type=\"hidden\" name=\"from_page\" value=\""+from_page+"\" />"
+        login_html_string += "username: <br><br>"
+        login_html_string += "<input type=\"text\" id=\"username\" name=\"username\" size=\"18\" /><br><br>"
+        login_html_string += "password: <br><br>"
+        login_html_string += "<input type=\"password\" id=\"password\" name=\"password\" size=\"18\" /> <br><br>"
+        login_html_string += "<button type=\"submit\">"
+        login_html_string += "Login"
+        login_html_string += "</button>"
         if message != "":
-            login_html_string = login_html_string+"<br><br>"
-            login_html_string = login_html_string+message
-        login_html_string = login_html_string+"</center>"
-        login_html_string = login_html_string+"</body>"
-        login_html_string = login_html_string+"</html>"
+            login_html_string += "<br><br>"
+            login_html_string += message
+        login_html_string += "</center>"
+        login_html_string += "</body>"
+        login_html_string += "</html>"
 
         return login_html_string    
         
