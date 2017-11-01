@@ -54,6 +54,8 @@ class LogInLogOut(object):
 
     def login_html(self,  message="", from_page="/"):
 
+        from_page = from_page.strip('"')
+
         login_html_string = """
 <html>
 <head>
