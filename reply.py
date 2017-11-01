@@ -52,41 +52,41 @@ class Reply(object):
         
 
         if 'Date' in em:
-            body = body +"On "+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+", "
+            body += "On "+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+", "
 
         if sent_bool:
             if 'To' in em:
                 if email.utils.parseaddr(em['To'])[0]:
-                    body = body+email.utils.parseaddr(em['To'])[0]+" wrote:\n\n"
+                    body += email.utils.parseaddr(em['To'])[0]+" wrote:\n\n"
                 else:    
-                    body = body+email.utils.parseaddr(em['To'])[1]+" wrote:\n\n"
+                    body += email.utils.parseaddr(em['To'])[1]+" wrote:\n\n"
         else:
             if 'From' in em:
                 if email.utils.parseaddr(em['From'])[0]:
-                    body = body+email.utils.parseaddr(em['From'])[0]+" wrote:\n"
+                    body += email.utils.parseaddr(em['From'])[0]+" wrote:\n"
                 else:
-                    body = body+email.utils.parseaddr(em['From'])[1]+" wrote:\n"
+                    body += email.utils.parseaddr(em['From'])[1]+" wrote:\n"
                 to = "\""+email.utils.parseaddr(em['From'])[1]+"\""
 
         if email.utils.getaddresses([em['CC']]) != []:
             for address_pair in email.utils.getaddresses([em['CC']]):
                 if CC != "":
-                    CC = CC + COMMASPACE + address_pair[0]
+                    CC += COMMASPACE + address_pair[0]
                 else:
-                    CC = CC + address_pair[0]
+                    CC += address_pair[0]
 
         if 'Subject' in em:  
-            subject = subject+"\"Re: "+em['Subject']+"\""
+            subject += "\"Re: "+em['Subject']+"\""
             
 
         if em.is_multipart():
             if em.get_payload()[0].get_payload().rstrip('\n'):
                 for line in em.get_payload()[0].get_payload().rstrip('\n').split('\n'):
-                    body = body + ">"+line+"\n"
+                    body += ">"+line+"\n"
                 
         else:
             for line in em.get_payload().split('\n'):
-                body = body + ">"+line+"\n"
+                body += ">"+line+"\n"
 
             
 
