@@ -4,11 +4,14 @@ from root import Root
 
 def redirect_if_authentication_is_required_and_session_is_not_authenticated(*args, **kwargs):
 
+    if len(cherrypy.url().split("https://ecommunicate.ch")) != 2:
+        raise Exception
+
     conditions = cherrypy.request.config.get('auth.require', None)
     if conditions is not None:
         username = cherrypy.session.get('_cp_username')
         if not username:
-            raise cherrypy.HTTPRedirect("/loginlogout/login")
+            raise cherrypy.HTTPRedirect("/loginlogout/login?from_page=%22"+cherrypy.url().split("https://ecommunicate.ch")[1]+"%22")
 
 cherrypy.tools.auth = cherrypy.Tool('before_handler', redirect_if_authentication_is_required_and_session_is_not_authenticated)
 
