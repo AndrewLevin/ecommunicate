@@ -1,3 +1,68 @@
+
+not_authenticated_header_style = """
+
+h1 { 
+
+margin-bottom: 0.0em; 
+
+} 
+
+h3 { 
+
+margin-top: 0.0em; 
+
+} 
+
+.header1 {width:380px; float:left;}
+
+.nav {
+
+float: right;
+font-family: QuicksandBook, Helvetica, Arial, sans-serif;
+padding: 45px 0px 0px 0px;
+text-align: right;
+
+}
+
+
+header {
+
+position:fixed;
+top:0px;
+left:0px;
+width:100%;
+height:60px;
+z-index:50;
+
+}
+
+.page{
+
+width:960px; 
+margin:0px auto 0px auto;
+
+}
+
+
+"""
+
+not_authenticated_header = """
+
+<header>
+<div class = "page">
+<div class="header1">
+<h1> Ecommunicate </h1>
+<h3>An online communication service</h3>
+</div>
+<div class="nav">
+<a href="/">Home</a> / <a href="/view/">View</a> / <a href="/register/">Register</a> / <a href="/loginlogout/login/">Login</a> / <a href="/about/">About</a>
+</div>
+</div>
+</header>
+
+
+"""
+
 about_html_string = """
             Ecommunicate is intended to meet the need for electronic communication that is the opposite of private. All of the communication that takes place on this website is purposefully released to the public. Anyone, with or without an Ecommunicate account, can view the communication starting immediately when it is created and continuing indefinitely, similar to an online forum.   <br><br>
           
