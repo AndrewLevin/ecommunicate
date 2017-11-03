@@ -27,10 +27,9 @@ class ViewChat(object):
 ul.menubar {
 text-align: center;
 }
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+
+.nonheader { width:960px; margin: 140px auto 0px auto;  } 
+"""+html_strings.header_style+"""
 ul {
     list-style:none;
     padding-left:0;
@@ -48,13 +47,14 @@ ul {
 </style>
 </head>
 <body>
-</body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+(html_strings.authenticated_menubar_html_string if utils.is_session_authenticated() else html_strings.not_authenticated_menubar_html_string)+"""
-<h4>View</h4>
-</center>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class = "nonheader">
+
 <iframe id="console_iframe2" name="console_iframe2" class="terminal" /></iframe>
+
+</div>
+
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
 <script>
 messages_list = "";

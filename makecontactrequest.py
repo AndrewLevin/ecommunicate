@@ -6,6 +6,8 @@ import html_strings
 
 from require import require
 
+import utils
+
 class MakeContactRequest(object):
 
     _cp_config = {
@@ -20,7 +22,11 @@ class MakeContactRequest(object):
         return """<html>
 <head><title>Ecommunicate</title>
 <style>
-"""+html_strings.chat_menubar_style_html_string+"""
+
+.nonheader { width:960px; margin: 80px auto 0px auto;  }  
+
+"""+html_strings.header_style+"""
+
 .messageerrorbox {
     width: 100%;
     height: 5em;
@@ -29,10 +35,11 @@ class MakeContactRequest(object):
 </style>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+html_strings.chat_menubar_html_string +"""
-</center>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header) +"""
+
+<div class = "nonheader">
+
+<center>
 <h2>Make a contact request </h2>
 <form id="contact_request_form" target="console_iframe3" method="post" action="contact_request">
   Username: <br><br>
@@ -44,6 +51,9 @@ Message: <br><br>
   </button>
   </form>
   <iframe name="console_iframe3" class="messageerrorbox" /> </iframe>
+
+</div>
+
 </body>
         </html>"""
 

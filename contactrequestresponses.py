@@ -6,6 +6,8 @@ import html_strings
 
 from require import require
 
+import utils
+
 class ContactRequestResponses(object):
     @cherrypy.expose
     @require()
@@ -57,8 +59,9 @@ class ContactRequestResponses(object):
         return """<html>
 <head><title>Ecommunicate</title>
 <style>
-"""+html_strings.chat_menubar_style_html_string+"""
-    .messageerrorbox {
+.nonheader { width:960px; margin: 80px auto 0px auto;  }
+"""+html_strings.header_style+"""
+.messageerrorbox {
     width: 100%;
     height: 5em;
     border: none;
@@ -66,12 +69,21 @@ class ContactRequestResponses(object):
 </style>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+html_strings.chat_menubar_html_string+"""
-</center>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class = "nonheader">
+
+<h2>
+
+Respond to Contact Requests
+
+</h2>
+
 """ + contact_request_string + """
   <iframe name="console_iframe4" class="messageerrorbox" />  </iframe>
+
+</div>
+
 </body>
         </html>"""
 

@@ -16,6 +16,8 @@ import httplib
 
 import json
 
+#import smtplib
+
 tmp_filename=os.popen("mktemp").read().rstrip('\n')
 
 log_file = open(tmp_filename,"w")
@@ -128,4 +130,20 @@ headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/
 http_conn  =  httplib.HTTPSConnection("email.android.ecommunicate.ch")
 http_conn.request('POST','/new_email/', headers = headers, body = json.dumps(params_json))
 
+#log_file.write("andrew debug 27\n")
+
+#smtp_object = smtplib.SMTP('localhost', 10026)
+
+#log_file.write("andrew debug 28\n")
+
+#smtp_object.sendmail(sys.argv[2], sys.argv[1], msg_string)
+
+#log_file.write("andrew debug 29\n")
+
+#smtp_object.quit()
+
+#log_file.write("andrew debug 30\n")
+
 os.system("mv " + tmp_filename + " /home/vmail/" + add_return_value_receiver + ".log")
+
+

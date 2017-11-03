@@ -87,7 +87,10 @@ class Chat(object):
         return """<html>
 <head><title>Ecommunicate</title>
 <style>
-"""+html_strings.chat_menubar_style_html_string+"""
+
+.nonheader { width:960px; margin: 80px auto 0px auto;  }
+
+"""+html_strings.header_style+"""
 ul.contactlistclass {
     list-style:none;
     padding-left:0;
@@ -121,10 +124,11 @@ ul.contactlistclass {
 </style>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+html_strings.chat_menubar_html_string+"""
-<h4>Chat</h4>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class = "nonheader">
+<center>
+<h2>Chat</h2>
 </center>
 <center>
   <table border=2>
@@ -141,6 +145,9 @@ ul.contactlistclass {
   </tr>
   </table>
 </center>
+
+</div>
+
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
 <script>

@@ -100,18 +100,16 @@ class ViewReadOne(object):
 .terminal {
 border: none; 
 }
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+.nonheader { width:960px; margin: 80px auto 0px auto;  }
+"""+html_strings.header_style+"""   
 </style>
 <title>Ecommunicate</title>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+(html_strings.authenticated_menubar_html_string if utils.is_session_authenticated() else html_strings.not_authenticated_menubar_html_string)+"""
-</center>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class="nonheader">
+
 <br><br>
 <center>
 """+email_string+"""
@@ -121,6 +119,8 @@ li.menubar {
   <br>
   <br>
   </center>
+</div>
+
 </body>
 <script>
 </script>

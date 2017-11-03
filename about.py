@@ -16,19 +16,23 @@ class About(object):
 Ecommunicate
 </title>
 <style>
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+.nonheader { width:960px; margin: 80px auto 0px auto;  }     
+
+"""+html_strings.header_style+"""
 </style>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+(html_strings.authenticated_menubar_html_string if utils.is_session_authenticated() else html_strings.not_authenticated_menubar_html_string)+"""
-<h4>About This Website</h4>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class = "nonheader">
+
+<center>
+<h2>About This Website</h2>
 </center>
 """+html_strings.about_html_string+"""
+
+</div>
+
 </body>
 </html>
 """

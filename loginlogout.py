@@ -6,6 +6,8 @@ import cherrypy
 
 import html_strings
 
+import utils
+
 def is_right_password(username, password):
 
     secrets_file=open("/home/ec2-user/secrets.txt")
@@ -63,17 +65,17 @@ class LogInLogOut(object):
 Ecommunicate
 </title>
 <style>
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
-</style
-</head>   
+.nonheader { width:960px; margin: 80px auto 0px auto;  }
+"""+html_strings.header_style+"""
+</style>
+</head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+html_strings.not_authenticated_menubar_html_string+"""
-<h4>Login</h4>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class = "nonheader">
+
+<center>
+<h2>Login</h2>
 </center>
 """
 
@@ -91,6 +93,8 @@ li.menubar {
             login_html_string += "<br><br>"
             login_html_string += message
         login_html_string += "</center>"
+        login_html_string += "</div>"
+
         login_html_string += "</body>"
         login_html_string += "</html>"
 

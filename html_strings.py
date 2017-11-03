@@ -1,7 +1,9 @@
 
-not_authenticated_header_style = """
+header_style = """
 
 h1 { 
+
+margin-top: 0.0em; 
 
 margin-bottom: 0.0em; 
 
@@ -18,12 +20,12 @@ margin-top: 0.0em;
 .nav {
 
 float: right;
-font-family: QuicksandBook, Helvetica, Arial, sans-serif;
-padding: 45px 0px 0px 0px;
+padding: 20px 0px 0px 0px;
 text-align: right;
 
 }
 
+header {background-color: White}
 
 header {
 
@@ -56,6 +58,23 @@ not_authenticated_header = """
 </div>
 <div class="nav">
 <a href="/">Home</a> / <a href="/view/">View</a> / <a href="/register/">Register</a> / <a href="/loginlogout/login/">Login</a> / <a href="/about/">About</a>
+</div>
+</div>
+</header>
+
+
+"""
+
+authenticated_header = """
+
+<header>
+<div class = "page">
+<div class="header1">
+<h1> Ecommunicate </h1>
+<h3>An online communication service</h3>
+</div>
+<div class="nav">
+<a href="/">Home</a> / <a href="/view/">View</a> / <a href="/chat/">Chat</a> / <a href="/email/">Email</a> / <a href="/loginlogout/logout/">Logout</a>  / <a href="/about/">About</a>
 </div>
 </div>
 </header>

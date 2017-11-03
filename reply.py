@@ -96,19 +96,18 @@ class Reply(object):
 .terminal {
 border: none; 
 }
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+
+.nonheader { width:960px; margin: 80px auto 0px auto;  } 
+
+"""+html_strings.header_style+"""
 </style>
 <title>Ecommunicate</title>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+html_strings.authenticated_menubar_html_string+"""
-<h4>Reply</h4>
-</center>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class = "nonheader">
+
 <br><br>
 <center>
    <form id="compose_email" target="console_iframe" method="post" action="reply">
@@ -119,7 +118,7 @@ li.menubar {
    subject: <br><br>
    <input type="text" id="subject" name="subject" size="100" value="""+subject+"""/><br><br>
    body: <br><br>
-   <textarea name="body" rows="50" cols="200">"""+body+"""</textarea> <br><br>
+   <textarea name="body" rows="30" cols="120">"""+body+"""</textarea> <br><br>
   <button id="send" type="submit">
   Send
   </button>
@@ -139,6 +138,9 @@ li.menubar {
   <br>
   <br>
   </center>
+
+</div>
+
 </body>
         </html>"""
     @cherrypy.expose

@@ -57,14 +57,14 @@ Ecommunicate
 </title>
 <style>
 
-.nonheader { width:960px; margin: 140px auto 0px auto;  }
+.nonheader { width:960px; margin: 80px auto 0px auto;  }
 
-"""+html_strings.not_authenticated_header_style+"""
+"""+html_strings.header_style+"""
 </style>
 </head>
 <body>
-"""+html_strings.not_authenticated_header
-    
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)
+
         html_string += "<div class=\"nonheader\">"
 
         html_string += "Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"

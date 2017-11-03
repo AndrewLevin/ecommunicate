@@ -23,6 +23,8 @@ from require import require
 
 import random
 
+import utils
+
 class Compose(object):
     @cherrypy.expose
     @require()
@@ -33,20 +35,18 @@ class Compose(object):
 .terminal {
 border: none; 
 }
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+
+.nonheader { width:960px; margin: 80px auto 0px auto;  }
+
+"""+html_strings.header_style+"""
 </style>
 <title>Ecommunicate</title>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+html_strings.authenticated_menubar_html_string+"""
-<h4>Compose</h4>
-</center>
-<br><br>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
+<div class = "nonheader">
+
 <center>
    <form id="compose_email" target="console_iframe" method="post" action="send" enctype="multipart/form-data">
    to: <br><br>
@@ -68,13 +68,16 @@ li.menubar {
    <input type="file" id="attachment10" name="attachment10" style="display:none;"/>
    <br><br>
    body: <br><br>
-   <textarea name="body" rows="50" cols="200"></textarea> <br><br>
+   <textarea name="body" rows="30" cols="120"></textarea> <br><br>
   <button id="send" type="submit">
   Send
   </button>
   </form>
   <iframe name="console_iframe" class="terminal" /></iframe>
 </center>
+
+</div>
+
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
 <script type="text/javascript">

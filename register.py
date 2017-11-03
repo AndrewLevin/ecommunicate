@@ -10,27 +10,28 @@ from cherrypy.lib import static
 
 from require import require
 
+import utils
+
 class Register(object):
     @cherrypy.expose
     def index(self):
         return """<html>
 <head>
 <style>
+
+.nonheader { width:960px; margin: 80px auto 0px auto;  } 
+
 .terminal {
 border: none; 
 }
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+"""+html_strings.header_style+"""
 </style>
-<title>Ecommunicate</title>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+html_strings.not_authenticated_menubar_html_string+"""
-<h4>Registration</h4>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+<div class="nonheader">
+<center>
+<h2>Registration</h2>
 </center>
       Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. E-mail to other ecommunicate.ch e-mail addresses and text messaging (like Google Hangouts or WeChat) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br> <br>
       Register here for your free account. Please remember your username and password, as there is no way to recover them at this time.
@@ -62,6 +63,7 @@ li.menubar {
   <br>
   <br>
   </center>
+</div>
 </body>
         </html>"""
     @cherrypy.expose
