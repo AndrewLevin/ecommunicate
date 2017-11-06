@@ -45,18 +45,6 @@ class ViewEmail(object):
 
         emails=curs.fetchall()
 
-        print "andrew debug 1"
-
-        print "select * from received_emails where username = \""+username+"\" order by received_time desc;"
-
-        print "select * from sent_emails where username = \""+username+"\" order by sent_time desc;"
-
-        print "andrew debug 2"
-
-        print emails
-
-        print "andrew debug 3"
-
         username = username.strip('"')
 
         if sent == False:
@@ -77,8 +65,6 @@ class ViewEmail(object):
         if "emails" in vars():
 
             for i,msg in  enumerate(emails):
-
-                print str(i)
 
                 msg_dict=dict(zip(colnames, msg))
 
