@@ -490,7 +490,7 @@ $(document).ready(function() {
 
         conn.close()
 
-        params_json = {'username1': username1, 'username2': username2}
+        params_json = {'username1': username1, 'username2': username2, 'forward' : forward}
 
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
