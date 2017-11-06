@@ -48,7 +48,7 @@ border: none;
 <div class = "nonheader">
 
 <center>
-   <form id="compose_email" target="console_iframe" method="post" action="send" enctype="multipart/form-data">
+   <form id="compose_email_form" target="console_iframe" method="post" action="send" enctype="multipart/form-data">
    to: <br><br>
    <input type="text" id="to" name="to" size="100" /><br><br>
    cc: <br><br>
@@ -73,14 +73,14 @@ border: none;
   Send
   </button>
   </form>
-  <iframe name="console_iframe" class="terminal" /></iframe>
+  <iframe name="console_iframe" id="console_iframe" class="terminal" /></iframe>
 </center>
 
 </div>
 
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
-<script type="text/javascript">
+<script>
 $('#attachment1').click(function(event) { $('#attachment2').css('display','block')  });
 $('#attachment2').click(function(event) { $('#attachment3').css('display','block')  });
 $('#attachment3').click(function(event) { $('#attachment4').css('display','block')  });
@@ -90,6 +90,45 @@ $('#attachment6').click(function(event) { $('#attachment7').css('display','block
 $('#attachment7').click(function(event) { $('#attachment8').css('display','block')  });
 $('#attachment8').click(function(event) { $('#attachment9').css('display','block')  });
 $('#attachment9').click(function(event) { $('#attachment10').css('display','block')  });
+
+
+$('#compose_email_form').submit(function(event) {
+
+var formdata = new FormData($(this)[0]); 
+
+//for (var pair of formdata.entries()) {
+//    alert(pair[0]+ ', ' + pair[1]); 
+//}
+
+   event.preventDefault();
+
+   var $this = $(this);
+
+   $.ajax({
+      url: $this.attr('action'),
+      type: 'POST',
+      data: formdata,
+      processData: false,
+      contentType: false,
+      success: function(data){
+        $('#compose_email_form').hide();
+
+        var console_iframe = document.getElementById('console_iframe');
+
+        console_iframe.contentWindow.document.write("E-mail sent succesfully.");
+
+      },
+      error : function (data) {
+        var console_iframe = document.getElementById('console_iframe');
+
+        console_iframe.write("Error. E-mail not sent succesfully.");
+        //alert(JSON.stringify(data))
+      }
+   });
+
+
+});
+
   </script>        
         </html>"""
     @cherrypy.expose
@@ -98,6 +137,7 @@ $('#attachment9').click(function(event) { $('#attachment10').css('display','bloc
         attachments = [attachment1, attachment2, attachment3, attachment4, attachment5, attachment6, attachment7, attachment8, attachment9, attachment10]
 
         def send_function():
+
             msg = MIMEMultipart()
             send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
             #msg['From'] = 
@@ -134,6 +174,7 @@ $('#attachment9').click(function(event) { $('#attachment10').css('display','bloc
                         mime_applications.append(mime_application)
 
             try:
+
                 msg.attach(MIMEText(body))
 
                 for mime_application in mime_applications:
@@ -146,6 +187,7 @@ $('#attachment9').click(function(event) { $('#attachment10').css('display','bloc
                 smtpObj.sendmail(send_from, send_to+send_cc, msg.as_string())
                 
                 smtpObj.close()
+
 
             except Exception as e:
                 print "Error: unable to send email", e.__class__

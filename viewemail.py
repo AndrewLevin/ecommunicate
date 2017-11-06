@@ -45,6 +45,18 @@ class ViewEmail(object):
 
         emails=curs.fetchall()
 
+        print "andrew debug 1"
+
+        print "select * from received_emails where username = \""+username+"\" order by received_time desc;"
+
+        print "select * from sent_emails where username = \""+username+"\" order by sent_time desc;"
+
+        print "andrew debug 2"
+
+        print emails
+
+        print "andrew debug 3"
+
         username = username.strip('"')
 
         if sent == False:
@@ -65,6 +77,8 @@ class ViewEmail(object):
         if "emails" in vars():
 
             for i,msg in  enumerate(emails):
+
+                print str(i)
 
                 msg_dict=dict(zip(colnames, msg))
 
@@ -115,16 +129,16 @@ class ViewEmail(object):
                         else:
                             email_string += "<td style =\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\"></td>"
                 else:
-                    email_string = "<td style =\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()+"</td>"
+                    email_string += "<td style =\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()+"</td>"
                 if 'Date' in em:
-                    email_string = "<td id=\"table_divide\" style=\"overflow:hidden;max-width:10%;width:10%;white-space:nowrap\">"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td>"
+                    email_string += "<td id=\"table_divide\" style=\"overflow:hidden;max-width:10%;width:10%;white-space:nowrap\">"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td>"
 
 
-                email_string = "</tr>"
+                email_string += "</tr>"
 
 
             if email_string != "":    
-                email_string = "</table>"
+                email_string += "</table>"
 
 
         curs.close()
@@ -145,20 +159,16 @@ a.button {
 .terminal {
 border: none; 
 }
-li.menubar {
-        display: inline;
-        padding: 20px;
-}
+
+.nonheader { width:960px; margin: 140px auto 0px auto;  } 
+"""+html_strings.header_style+"""
+
 </style>
 <title>Ecommunicate</title>
 </head>
 <body>
-<center><h1>Ecommunicate</h1>
-<h3>A free online communication service</h3>
-"""+(html_strings.authenticated_menubar_html_string if utils.is_session_authenticated() else html_strings.not_authenticated_menubar_html_string)+"""
-<h4>Email</h4>
-</center>
-<br><br>
+"""+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+<div class = "nonheader">
 <table>
 <tr>
 <td width="150">
