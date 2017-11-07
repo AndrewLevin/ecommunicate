@@ -12,6 +12,8 @@ from require import require
 
 import utils
 
+import json
+
 class Register(object):
     @cherrypy.expose
     def index(self):
@@ -23,6 +25,7 @@ class Register(object):
 
 .terminal {
 border: none; 
+width: 400px;
 }
 """+html_strings.header_style+"""
 </style>
@@ -37,7 +40,7 @@ border: none;
       Register here for your free account. Please remember your username and password, as there is no way to recover them at this time.
 <br><br>
 <center>
-   <form id="register" target="console_iframe" method="post" action="register">
+   <form id="register_form" target="console_iframe" method="post" action="register">
    username: <br><br>
    <input type="text" id="username" name="username" size="18" /><br><br>
    password: <br><br>
@@ -48,17 +51,59 @@ border: none;
   Register
   </button>
   </form>
-  <iframe name="console_iframe" class="terminal" />
+  <iframe name="console_iframe" id ="console_iframe" class="terminal" /></iframe>
 </center>
   
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
   <script type="text/javascript">
-  $( document ).ready(function() {
-    $( "button" ).click(function( event ) {
- $("iframe").attr('src', '');
-    });
-  });
-  </script>        
+
+$('#register_form').submit(function(event) {
+
+   event.preventDefault();
+   var $this = $(this);
+   $.ajax({
+      url: $this.attr('action'),
+      type: 'POST',
+      data: $this.serialize(),
+      success: function(data){
+
+        json_object = JSON.parse(data)
+
+        if (json_object["success"]) {
+
+            var console_iframe = document.getElementById('console_iframe');
+
+            console_iframe.contentWindow.document.open();
+            console_iframe.contentWindow.document.close();
+
+            $('#register_form').hide();
+
+            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.</center>');
+
+        }
+
+        else {
+
+            var console_iframe = document.getElementById('console_iframe');
+
+
+            console_iframe.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
+
+        }
+
+
+      },
+      error : function (data) {
+
+        alert(data);
+
+        var console_iframe = document.getElementById('console_iframe');
+        console_iframe.write("Error.");
+      }
+   });
+});
+
+</script>        
   
   <br>
   <br>
@@ -72,21 +117,29 @@ border: none;
 #        $( "iframe" ).clear()
         def register_function():
 
+            json_object = {}
+
+            json_object["success"] = True
+
+            json_object["errors"] = []
+
             if len(username) > 30:
-                yield "Username is too long."
-                return
+                json_object["success"] = False
+                json_object["errors"].append("username too long")
+                return json.dumps(json_object)
                 
             for c in username:
                 if c != 'a' and c != 'b' and c != 'c' and c != 'd' and c != 'e' and c != 'f' and c != 'g' and c != 'h' and c != 'i' and c != 'j' and c != 'k' and c != 'l' and c != 'm' and c != 'n' and c != 'o' and c != 'p' and c != 'q' and c != 'r' and c != 's' and c != 't' and c != 'u' and c != 'v' and c != 'w' and c != 'x' and c != 'y' and c != 'z' and c != 'A' and c != 'B' and c != 'C' and c != 'D' and c != 'E' and c != 'F' and c != 'G' and c != 'H' and c != 'I' and c != 'J' and c != 'K' and c != 'L' and c != 'M' and c != 'N' and c != 'O' and c != 'P' and c != 'Q' and c != 'R' and c != 'S' and c != 'T' and c != 'U' and c != 'V' and c != 'W' and c != 'X' and c != 'Y' and c != 'Z' and c != '0' and c != '1' and c != '2' and c != '3' and c != '4' and c != '5' and c != '6' and c != '7' and c != '8' and c != '9' and c != '_' and c != '-' and c != '.':
-                    yield "The username contains a character that is not allowed."
-                    return
+                    json_object["success"] = False
+                    json_object["errors"].append("Username contains a character that is not allowed.")
+                    return json.dumps(json_object)
 
             #only allow one person to register at a time
             ret=os.system("if [ -f /home/ec2-user/registering_someone ]; then exit 0; else exit 1; fi");
 
             if ret == 0:
-                yield "Registration was not succesful. Please try again later."
-                return
+                json_object["success"] = False
+                return json.dumps(json_object)
 
             os.system("touch /home/ec2-user/registering_someone");
 
@@ -113,12 +166,22 @@ border: none;
             user_infos = curs.fetchall()
 
             if len(user_infos) > 0:
-                yield "That username is already taken."
-                return
+                json_object["success"] = False
+                json_object["errors"].append("This username already taken.")
+                os.system("rm /home/ec2-user/registering_someone");
+                return json.dumps(json_object)
             
+            if len(username) == 0:
+                json_object["success"] = False
+                json_object["errors"].append("Username is empty.")
+                os.system("rm /home/ec2-user/registering_someone");
+                return json.dumps(json_object)
+
             if len(password) < 6:
-                yield "Please choose a password that is at least 6 characters."
-                return
+                json_object["success"] = False
+                json_object["errors"].append("Password shorter than 6 characters.")
+                os.system("rm /home/ec2-user/registering_someone");
+                return json.dumps(json_object)
             
             curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\", name = \""+name+"\", registration_time = now(6)")
 
@@ -130,8 +193,8 @@ border: none;
 
             os.system("rm /home/ec2-user/registering_someone");
 
-            yield "Your registration was succesful. Please remember your username and password, as there is no way to recover them at this time."
-
             conn.close()
+
+            return json.dumps(json_object)
 
         return register_function()
