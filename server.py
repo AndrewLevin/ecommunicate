@@ -8,7 +8,9 @@ def redirect_if_authentication_is_required_and_session_is_not_authenticated(*arg
     if conditions is not None:
         username = cherrypy.session.get('_cp_username')
         if not username:
-            raise cherrypy.HTTPRedirect("/loginlogout/login?from_page=%22"+cherrypy.request.request_line.split()[1]+"%22")
+            from_url = cherrypy.request.request_line.split()[1]
+
+            raise cherrypy.HTTPRedirect("/loginlogout/login?from_page=%22"+from_url.replace('&&','%01').replace('%22','%00')+"%22")
 
 cherrypy.tools.auth = cherrypy.Tool('before_handler', redirect_if_authentication_is_required_and_session_is_not_authenticated)
 

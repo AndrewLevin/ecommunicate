@@ -56,7 +56,7 @@ class LogInLogOut(object):
 
     def login_html(self,  message="", from_page="/"):
 
-        from_page = from_page.strip('"')
+        from_page = from_page.replace(chr(1),"&&").replace(chr(0),"%22")
 
         login_html_string = """
 <html>
@@ -104,6 +104,8 @@ Ecommunicate
     @cherrypy.expose
     def login(self, username=None, password=None, from_page="/"):
 
+        from_page = from_page.strip('"')
+
         if username is None or password is None:
             return self.login_html(from_page=from_page)
         
@@ -120,6 +122,8 @@ Ecommunicate
 
             cherrypy.session.release_lock()
 
+            from_page = from_page.strip('"')
+            
             raise cherrypy.HTTPRedirect(from_page)
     
     @cherrypy.expose

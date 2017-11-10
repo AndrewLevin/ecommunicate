@@ -8,9 +8,12 @@ import mailbox
 
 from cherrypy.lib import static
 
+from require import require
+
 class Attachment(object):
 
     @cherrypy.expose
+    @require()
     def index(self,message_id,attachment_id,sent="False"):
 
         sent = sent.strip('"')
