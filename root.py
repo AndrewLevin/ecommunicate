@@ -113,19 +113,29 @@ Ecommunicate
 
         html_string += "<td valign=\"top\">\n"
 
-        curs.execute("select username from user_info;")
-
         colnames = [desc[0] for desc in curs.description]
             
         usernames = curs.fetchall()
 
         html_string+= "<ol>\n"
 
-        for username in usernames:
+        curs.execute("select username from received_emails;")
 
-            username_dict=dict(zip(colnames, username))
-            
-            html_string+= "<li><a href=\"/view/email?username=%22"+username_dict["username"]+"%22\">"+username_dict["username"]+"</a><br></li>\n"
+        email_usernames = curs.fetchall()
+
+        curs.execute("select username from sent_emails;")
+
+        email_usernames += curs.fetchall()
+
+        already_listed_usernames = []
+
+        for username in email_usernames:
+
+            if username not in already_listed_usernames:
+
+                html_string+= "<li><a href=\"/view/email?username=%22"+username[0]+"%22\">"+username[0]+"</a><br></li>\n"
+
+                already_listed_usernames.append(username)
 
         html_string += "</ol>\n"
 
