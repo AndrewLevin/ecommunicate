@@ -73,7 +73,7 @@ Ecommunicate
 
         html_string += "<table>"
 
-        html_string += "<tr><th>Chat Conversations</th><th>E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.chat\">Android Chat App <a></td><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.email\">Android Email App <a></td></tr>"
+        html_string += "<tr><th>Chat Conversations</th><th style=\"padding-left:100px\">E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.chat\">Android Chat App <a></td><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.email\">Android Email App <a></td></tr>"
 
         html_string += "<tr>\n"
         
@@ -111,7 +111,7 @@ Ecommunicate
             
         html_string += "</td>\n"
 
-        html_string += "<td valign=\"top\">\n"
+        html_string += "<td valign=\"top\" style=\"padding-left:100px\">\n"
 
         html_string+= "<ol>\n"
 
