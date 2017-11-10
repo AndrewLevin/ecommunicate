@@ -17,12 +17,21 @@ class ViewReadOne(object):
     attachment = ViewAttachment()
 
     @cherrypy.expose
-    def index(self,username,message_id,sent=False):
+    def index(self,username,message_id,sent="False"):
+
+        sent = sent.strip('"')
 
         username = username.strip('"')
 
+        message_id = message_id.strip('"')
+
+        sent_bool = True
+
+        if sent == "False":
+            sent_bool = False
+
         #the default message factory is the rfc822.Message for historical reasons (see https://docs.python.org/2/library/mailbox.html#maildir)
-        if sent == False:
+        if sent_bool == False:
             try:
                 emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+username+'/',factory=mailbox.MaildirMessage,create=False)
             except mailbox.NoSuchMailboxError:
@@ -36,7 +45,7 @@ class ViewReadOne(object):
 
         email_string += "<table border = \"1\" width = \"100%\"  >"
 
-        if sent:
+        if sent_bool:
             if 'To' in em:
                 if email.utils.parseaddr(em['To'])[0]:
                     email_string += "<tr><td><b>To: </b>"+email.utils.parseaddr(em['To'])[0]+"</td></tr>"
@@ -59,6 +68,8 @@ class ViewReadOne(object):
 
         body_string = ""
 
+        at_least_one_attachment = False
+
         if em.is_multipart():
 
             for payload in em.get_payload():
@@ -67,26 +78,40 @@ class ViewReadOne(object):
 
                     if 'X-Attachment-Id' in payload and "Content-Description" in payload:
 
-                        attachment_string += '<tr><td><a href="/view/email/readone/attachment/?username='+username+'&&message_id='+message_id+'&&attachment_id='+payload["X-Attachment-Id"]+'">'+payload["Content-Description"]+'</a></tr></td>'
+
+                        if not at_least_one_attachment:
+                            at_least_one_attachment = True
+
+                            attachment_string += '<tr><td style="white-space:pre-wrap">'
+
+                            attachment_string += '<a href="/view/email/readone/attachment/?username=%22'+username+'%22&&sent=%22'+str(sent_bool)+'%22&&message_id=%22'+message_id+'%22&&attachment_id=%22'+payload["X-Attachment-Id"]+'%22">'+payload["Content-Description"]+'</a>'
+
+                        else:
+
+                            attachment_string += '   <a href="/view/email/readone/attachment/?username=%22'+username+'%22&&sent=%22'+str(sent_bool)+'%22&&message_id=%22'+message_id+'%22&&attachment_id=%22'+payload["X-Attachment-Id"]+'%22">'+payload["Content-Description"]+'</a>'
 
                     else:
                         if 'Content-Type' in payload and ('text/plain' in payload['Content-Type'] or 'message/delivery-status' in payload['Content-Type'] or 'message/rfc822' in payload['Content-Type']):
-                            body_string += "<tr><td>"+payload.get_payload()+"</td></tr>"
+                            body_string += '<tr><td style="white-space:pre-line">'+payload.get_payload()+"</td></tr>"
                 else:
                     for subpayload in payload.get_payload():
                         if not subpayload.is_multipart():
                             if 'Content-Type' in subpayload and ('text/plain' in subpayload['Content-Type'] or 'message/delivery-status' in subpayload['Content-Type'] or 'message/rfc822' in subpayload['Content-Type']):
-                                body_string += "<tr><td>"+subpayload.get_payload()+"</td></tr>"
+                                body_string += '<tr><td style="white-space:pre-line">'+subpayload.get_payload()+"</td></tr>"
                         else:
                             for subsubpayload in subpayload.get_payload():
                                 if not subsubpayload.is_multipart():
                                     if 'Content-Type' in subsubpayload and ('text/plain' in subsubpayload['Content-Type'] or 'message/delivery-status' in subsubpayload['Content-Type'] or 'message/rfc822' in subsubpayload['Content-Type']):
-                                        body_string += "<tr><td>"+subsubpayload.get_payload()+"</td></tr>"
+                                        body_string += '<tr><td style="white-space:pre-line">'+subsubpayload.get_payload()+"</td></tr>"
                                 else:
                                     pass
         else:
 
             body_string += "<tr><td>"+em.get_payload()+"</td></tr>"
+
+        if at_least_one_attachment:
+            attachment_string += '</tr></td>'
+        
 
         email_string += attachment_string
 

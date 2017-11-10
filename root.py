@@ -113,10 +113,6 @@ Ecommunicate
 
         html_string += "<td valign=\"top\">\n"
 
-        colnames = [desc[0] for desc in curs.description]
-            
-        usernames = curs.fetchall()
-
         html_string+= "<ol>\n"
 
         curs.execute("select username from received_emails;")

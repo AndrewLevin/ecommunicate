@@ -11,9 +11,21 @@ from cherrypy.lib import static
 class Attachment(object):
 
     @cherrypy.expose
-    def index(self,message_id,attachment_id,sent=False):
+    def index(self,message_id,attachment_id,sent="False"):
 
-        if sent == False:
+        sent = sent.strip('"')
+
+        message_id = message_id.strip('"')
+
+        attachment_id = attachment_id.strip('"')
+
+        sent_bool = False
+
+        if sent == "True":
+            sent_bool = True
+
+
+        if sent_bool == False:
             #use the message factory so that you get MaildirMessages instead of rfc822.Messages
             try:
                 emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/', factory=mailbox.MaildirMessage)
