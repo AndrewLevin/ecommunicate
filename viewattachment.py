@@ -15,12 +15,16 @@ class ViewAttachment(object):
 
         sent = sent.strip('"')
 
+        username = username.strip('"')
+
+        message_id = message_id.strip('"')
+    
+        attachment_id = attachment_id.strip('"')
+
         sent_bool = False
 
         if sent == "True":
             sent_bool = True
-
-        username = username.strip('"')
 
         if sent_bool == False:
             #use the message factory so that you get MaildirMessages instead of rfc822.Messages
