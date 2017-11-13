@@ -130,7 +130,26 @@ ul.contactlistclass {
 <center>
 <h2>Chat</h2>
 </center>
-<center>
+
+<table border = "0" style="float:left;padding:0;border-spacing:0;font-family:verdana;" width = "15%">
+<tr> <td style="padding:0;background-color:green">
+<table border="2"  id="makecontactrequeststable"><tr> <td width="15%" style="font-weight:bold">Make Contact Requests</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+</tr>
+<td>
+</td>
+<tr>
+<td style="padding:0;background-color:green">
+<table border="2" id = "respondtocontactrequeststable">  <tr> <td width="15%" style="font-weight:bold"> Respond to Contact Requests</td></tr>
+</table>
+</td>
+</tr>
+</table>
+
+
   <table border=2>
   <tr>
 """ + contacts_string + """ 
@@ -144,7 +163,6 @@ ul.contactlistclass {
 </td>
   </tr>
   </table>
-</center>
 
 </div>
 
@@ -258,11 +276,28 @@ $('#add_message_form').submit(function(event) {
 //alert(event.keyCode);
 //}
 //});
+var makecontactrequeststable = document.getElementById('makecontactrequeststable');
+
+makecontactrequeststable.addEventListener('mouseover',function(e) { $('#makecontactrequeststable').css('background-color','orange');  } ,  false);
+
+makecontactrequeststable.addEventListener('mouseout',function(e) { $('#makecontactrequeststable').css('background-color','green');  } ,  false);
+
+makecontactrequeststable.addEventListener('click',function(e) { open('https://ecommunicate.ch/chat/makecontactrequests/','_self')  } ,  false);
+
+var respondtocontactrequeststable = document.getElementById('respondtocontactrequeststable');
+
+respondtocontactrequeststable.addEventListener('mouseover',function(e) { $('#respondtocontactrequeststable').css('background-color','orange');  } ,  false);
+
+respondtocontactrequeststable.addEventListener('mouseout',function(e) { $('#respondtocontactrequeststable').css('background-color','green');  } ,  false);
+
+respondtocontactrequeststable.addEventListener('click',function(e) { open('https://ecommunicate.ch/chat/respondtocontactrequests/','_self') } ,  false);
+
 function contact_mouseover(e){
 var target = e.target;
 if( target.id != "contactslist"){
     $('#'+target.id).css('background-color','orange');
 }
+
 }
 function contact_mouseout(e){
 var target = e.target;
