@@ -90,21 +90,28 @@ Ecommunicate
 
         html_string += "</td>\n"
         
-        html_string += "<td valign=\"top\">\n"
+        html_string += "<td valign=\"top\" style=\"padding-left:100px\">\n"
 
-        curs.execute("select username from user_info;")
-        
-        colnames = [desc[0] for desc in curs.description]
+        html_string+= "<ol>\n"
 
-        usernames = curs.fetchall()
-        
-        html_string += "<ol>\n"
-        
-        for username in usernames:
+        curs.execute("select username from received_emails;")
 
-            username_dict=dict(zip(colnames, username))
+        email_usernames = curs.fetchall()
 
-            html_string += "<li><a href=\"/view/email?username=%22"+username_dict["username"]+"%22\">"+username_dict["username"]+"</a><br></li>\n"
+        curs.execute("select username from sent_emails;")
+
+        email_usernames += curs.fetchall()
+
+        already_listed_usernames = []
+
+        for username in email_usernames:
+
+            if username not in already_listed_usernames:
+                
+                html_string+= "<li><a href=\"/view/email?username=%22"+username[0]+"%22\">"+username[0]+"</a><br></li>\n"
+
+                already_listed_usernames.append(username)
+
 
         html_string += "</ol>\n"
 
