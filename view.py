@@ -52,7 +52,7 @@ Ecommunicate
         
         html_string += "<table>"
     
-        html_string += "<tr><th>Chat Conversations</th><th>E-mail Boxes</th></tr>"
+        html_string += "<tr><th>Chat Conversations</th><th style=\"padding-left:100px\">E-mail Boxes</th></tr>"
     
         html_string += "<tr>\n"
 
