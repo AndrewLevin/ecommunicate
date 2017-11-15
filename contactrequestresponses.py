@@ -72,15 +72,19 @@ class ContactRequestResponses(object):
 """+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
 
 <div class = "nonheader">
-
+<center>
 <h2>
 
 Respond to Contact Requests
 
 </h2>
+</center>
 
+<center>
 """ + contact_request_string + """
   <iframe name="console_iframe4" class="messageerrorbox" />  </iframe>
+</center>
+
 
 </div>
 
