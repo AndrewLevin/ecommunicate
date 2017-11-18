@@ -36,7 +36,7 @@ width: 400px;
 <center>
 <h2>Registration</h2>
 </center>
-      Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. E-mail to other ecommunicate.ch e-mail addresses and text messaging (like Google Hangouts or WeChat) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br> <br>
+      Ecommunicate is a free online communication service in which <b>all communication is viewable by anyone on the open internet</b> instead of being private. E-mail to other ecommunicate.ch e-mail addresses and text messaging (like Google Hangouts or WeChat) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after registering and logging in) or you can view other people's chat conversations or e-mail inboxes. This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br> <br>
       Register here for your free account. Please remember your username and password, as there is no way to recover them at this time.
 <br><br>
 <center>
@@ -47,12 +47,19 @@ width: 400px;
    <input type="password" id="password" name="password" size="18" /> <br><br>
    name: <br><br>
    <input type="text" id="name" name="name" size="18" /><br><br>
+
+<b>By clicking the "Register" button, you agree that you have read and understand the above description of what Ecommunicate is.</b> 
+
+<br> <br>
+
   <button id="register" type="submit">
   Register
   </button>
   </form>
   <iframe name="console_iframe" id ="console_iframe" class="terminal" /></iframe>
 </center>
+
+
   
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
   <script type="text/javascript">
