@@ -93,6 +93,9 @@ $('#register_form').submit(function(event) {
 
             var console_iframe = document.getElementById('console_iframe');
 
+            console_iframe.contentWindow.document.open();
+            console_iframe.contentWindow.document.close();
+
 
             console_iframe.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
 
