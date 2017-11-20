@@ -94,15 +94,14 @@ class Chat(object):
 ul.contactlistclass {
     list-style:none;
     padding-left:0;
+    width:125px;
 }
     .contact {
         color : black;
         background-color: green;
         height: 50px;
         font-size: 24px;
-        font-size: 24px;
         width: 98.5%;
-//        padding-left: 20px;
         padding-top: 20px;
         margin-top: 2px;
         font-family: Verdana;
@@ -110,6 +109,8 @@ ul.contactlistclass {
         cursor: default;
         border-top: 2px solid black;
         border-bottom: 2px solid black;
+        white-space:nowrap;
+        overflow:hidden;
     }
     .terminal {
     width: 100%;
