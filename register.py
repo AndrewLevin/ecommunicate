@@ -19,6 +19,9 @@ class Register(object):
     def index(self):
         return """<html>
 <head>
+<title>
+Ecommunicate
+</title>
 <style>
 
 .nonheader { width:960px; margin: 80px auto 0px auto;  } 
