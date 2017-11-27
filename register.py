@@ -44,9 +44,9 @@ width: 400px;
 <br><br>
 <center>
    <form id="register_form" target="console_iframe" method="post" action="register">
-   username: <br><br>
+   username: * <br><br>
    <input type="text" id="username" name="username" size="18" /><br><br>
-   password: <br><br>
+   password: * <br><br>
    <input type="password" id="password" name="password" size="18" /> <br><br>
    name: <br><br>
    <input type="text" id="name" name="name" size="18" /><br><br>
