@@ -74,7 +74,7 @@ Ecommunicate
 
         curs.execute("use "+dbname+";")
 
-        curs.execute("select DISTINCT username1,username2 from messages;")
+        curs.execute("select DISTINCT username1,username2,max(time) from messages group by username1,username2 order by time desc;")
 
         conversations = curs.fetchall()
 
@@ -84,8 +84,11 @@ Ecommunicate
 
             conversation_dict=dict(zip(colnames, conversation))
             
-            html_string += "<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
-
+            if conversation_dict["username1"] == conversation_dict["username2"]:
+                html_string += "<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" with self</a><br></li>\n"
+            else:
+                html_string += "<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
+                
         html_string += "</ol>\n"
 
         html_string += "</td>\n"
@@ -112,7 +115,6 @@ Ecommunicate
 
                 already_listed_usernames.append(username)
 
-
         html_string += "</ol>\n"
 
         html_string += "</td>\n"
@@ -122,7 +124,6 @@ Ecommunicate
         html_string += "</table>"
 
         html_string += "</div>"
-        
 
         html_string += """
 </body>
