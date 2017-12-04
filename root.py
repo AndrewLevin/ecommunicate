@@ -94,7 +94,7 @@ Ecommunicate
         
         curs.execute("use "+dbname+";")
     
-        curs.execute("select DISTINCT username1,username2,max(time) from messages group by username1,username2 order by time desc;")
+        curs.execute("select DISTINCT username1,username2,max(time) from messages group by username1,username2 order by max(time) desc;")
     
         conversations = curs.fetchall()
 

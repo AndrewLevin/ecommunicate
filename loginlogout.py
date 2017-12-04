@@ -65,8 +65,11 @@ class LogInLogOut(object):
 Ecommunicate
 </title>
 <style>
+
 .nonheader { width:960px; margin: 80px auto 0px auto;  }
+
 """+html_strings.header_style+"""
+
 </style>
 </head>
 <body>

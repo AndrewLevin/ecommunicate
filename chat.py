@@ -490,6 +490,8 @@ $(document).ready(function() {
 
         username1=cherrypy.session.get('_cp_username')
 
+        if len(add_message_text) > 5000:
+            return
 
         if add_message_text == "":
             return
@@ -499,8 +501,6 @@ $(document).ready(function() {
                 print "not allowed character:"
                 print ord(c)
                 return
-                
-                    
         
         sorted_usernames= sorted([username1,username2])
 

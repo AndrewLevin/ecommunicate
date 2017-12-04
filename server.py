@@ -21,7 +21,11 @@ if __name__ == '__main__':
     
 
     #cherrypy.tree.mount(Root())
-    cherrypy.tree.mount(Root(),'/',{ '/favicon.ico': { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/favicon.ico' } })
+    cherrypy.tree.mount(Root(),'/',
+
+{ '/favicon.ico': { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/favicon.ico' }, '/google30be966b06bbaa70.html': { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/google30be966b06bbaa70.html'  } }
+
+ )
 
     cherrypy.server.ssl_module = 'builtin'
     cherrypy.server.ssl_certificate = "/etc/letsencrypt/live/ecommunicate.ch/fullchain.pem"

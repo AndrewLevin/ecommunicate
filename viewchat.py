@@ -195,4 +195,6 @@ $(document).ready(function() {
 
         conn.close()
 
+        print messages_list
+
         return json.dumps([messages_list,max_time])

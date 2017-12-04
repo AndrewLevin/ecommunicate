@@ -110,7 +110,7 @@ Message: <br><br>
         contacts = curs.fetchall()
 
         if len(contacts) > 0:
-            return "Contact request already made between these two users."
+            return "This user is already your contact."
 
         curs.execute("insert into contact_requests set username1 = \""+username1+"\", username2 = \""+username2+"\", message = \""+message+"\", forward="+forward+", request_time = now(6);")
 

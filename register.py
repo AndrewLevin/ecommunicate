@@ -127,6 +127,10 @@ $('#register_form').submit(function(event) {
     @cherrypy.expose
     def register(self, username, password,name):
 
+        print "username: "+username
+        print "len(password): "+str(len(password))
+        print "name: "+name
+
 #        $( "iframe" ).clear()
         def register_function():
 
@@ -139,12 +143,14 @@ $('#register_form').submit(function(event) {
             if len(username) > 30:
                 json_object["success"] = False
                 json_object["errors"].append("username too long")
+                print json.dumps(json_object)
                 return json.dumps(json_object)
                 
             for c in username:
                 if c != 'a' and c != 'b' and c != 'c' and c != 'd' and c != 'e' and c != 'f' and c != 'g' and c != 'h' and c != 'i' and c != 'j' and c != 'k' and c != 'l' and c != 'm' and c != 'n' and c != 'o' and c != 'p' and c != 'q' and c != 'r' and c != 's' and c != 't' and c != 'u' and c != 'v' and c != 'w' and c != 'x' and c != 'y' and c != 'z' and c != 'A' and c != 'B' and c != 'C' and c != 'D' and c != 'E' and c != 'F' and c != 'G' and c != 'H' and c != 'I' and c != 'J' and c != 'K' and c != 'L' and c != 'M' and c != 'N' and c != 'O' and c != 'P' and c != 'Q' and c != 'R' and c != 'S' and c != 'T' and c != 'U' and c != 'V' and c != 'W' and c != 'X' and c != 'Y' and c != 'Z' and c != '0' and c != '1' and c != '2' and c != '3' and c != '4' and c != '5' and c != '6' and c != '7' and c != '8' and c != '9' and c != '_' and c != '-' and c != '.':
                     json_object["success"] = False
                     json_object["errors"].append("Username contains a character that is not allowed.")
+                    print json.dumps(json_object)
                     return json.dumps(json_object)
 
             #only allow one person to register at a time
@@ -152,6 +158,7 @@ $('#register_form').submit(function(event) {
 
             if ret == 0:
                 json_object["success"] = False
+                print json.dumps(json_object)
                 return json.dumps(json_object)
 
             os.system("touch /home/ec2-user/registering_someone");
@@ -182,18 +189,21 @@ $('#register_form').submit(function(event) {
                 json_object["success"] = False
                 json_object["errors"].append("This username already taken.")
                 os.system("rm /home/ec2-user/registering_someone");
+                print json.dumps(json_object)
                 return json.dumps(json_object)
             
             if len(username) == 0:
                 json_object["success"] = False
                 json_object["errors"].append("Username is empty.")
                 os.system("rm /home/ec2-user/registering_someone");
+                print json.dumps(json_object)
                 return json.dumps(json_object)
 
             if len(password) < 6:
                 json_object["success"] = False
                 json_object["errors"].append("Password shorter than 6 characters.")
                 os.system("rm /home/ec2-user/registering_someone");
+                print json.dumps(json_object)
                 return json.dumps(json_object)
             
             curs.execute("insert into user_info set username = \""+username+"\", hashed_password = \""+h.hexdigest()+"\", name = \""+name+"\", registration_time = now(6)")
@@ -207,6 +217,8 @@ $('#register_form').submit(function(event) {
             os.system("rm /home/ec2-user/registering_someone");
 
             conn.close()
+
+            print json.dumps(json_object)
 
             return json.dumps(json_object)
 
