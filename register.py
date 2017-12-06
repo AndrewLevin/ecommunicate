@@ -149,7 +149,13 @@ $('#register_form').submit(function(event) {
             for c in username:
                 if c != 'a' and c != 'b' and c != 'c' and c != 'd' and c != 'e' and c != 'f' and c != 'g' and c != 'h' and c != 'i' and c != 'j' and c != 'k' and c != 'l' and c != 'm' and c != 'n' and c != 'o' and c != 'p' and c != 'q' and c != 'r' and c != 's' and c != 't' and c != 'u' and c != 'v' and c != 'w' and c != 'x' and c != 'y' and c != 'z' and c != 'A' and c != 'B' and c != 'C' and c != 'D' and c != 'E' and c != 'F' and c != 'G' and c != 'H' and c != 'I' and c != 'J' and c != 'K' and c != 'L' and c != 'M' and c != 'N' and c != 'O' and c != 'P' and c != 'Q' and c != 'R' and c != 'S' and c != 'T' and c != 'U' and c != 'V' and c != 'W' and c != 'X' and c != 'Y' and c != 'Z' and c != '0' and c != '1' and c != '2' and c != '3' and c != '4' and c != '5' and c != '6' and c != '7' and c != '8' and c != '9' and c != '_' and c != '-' and c != '.':
                     json_object["success"] = False
-                    json_object["errors"].append("Username contains a character that is not allowed.")
+
+                    if c == " ":
+                        json_object["errors"].append("Empty spaces now allowed in username.")                        
+                    elif c != '"' and c != "'":
+                        json_object["errors"].append('"' + c + '"' +" not allowed in username.")
+                    else:
+                        json_object["errors"].append(c +" not allowed in username.")
                     print json.dumps(json_object)
                     return json.dumps(json_object)
 
