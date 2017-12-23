@@ -25,6 +25,8 @@ import random
 
 import utils
 
+import json
+
 class Compose(object):
     @cherrypy.expose
     @require()
@@ -111,11 +113,32 @@ var formdata = new FormData($(this)[0]);
       processData: false,
       contentType: false,
       success: function(data){
-        $('#compose_email_form').hide();
 
-        var console_iframe = document.getElementById('console_iframe');
+        json_object = JSON.parse(data)
 
-        console_iframe.contentWindow.document.write("E-mail sent succesfully.");
+        if (json_object["success"]) {
+
+            $('#compose_email_form').hide();
+
+            var console_iframe = document.getElementById('console_iframe');
+
+            console_iframe.contentWindow.document.open();
+            console_iframe.contentWindow.document.close();
+
+            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"E-mail sent succesfully."+'</center>');
+
+        }
+
+        else {
+
+            var console_iframe = document.getElementById('console_iframe');
+
+            console_iframe.contentWindow.document.open();
+            console_iframe.contentWindow.document.close();
+
+            console_iframe.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
+
+        }
 
       },
       error : function (data) {
@@ -138,15 +161,42 @@ var formdata = new FormData($(this)[0]);
 
         def send_function():
 
+            json_object = {}
+
+            json_object["success"] = True
+
+            json_object["errors"] = []
+
+            print "to:"
+            print to
+            print "cc:"
+            print cc
+            print "subject:"
+            print subject
+
             msg = MIMEMultipart()
             send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
             #msg['From'] = 
             send_to = re.findall(r'[^\;\,\s]+',to)
             send_cc = re.findall(r'[^\;\,\s]+',cc)
 
+            if to == "":
+                json_object["success"] = False
+                json_object["errors"].append("to is empty.")
+                print json.dumps(json_object)
+                return json.dumps(json_object)
+
             for email_address in (send_to + send_cc):
+                if len(email_address.split("@")) != 2:
+                    json_object["success"] = False
+                    json_object["errors"].append("Each e-mail address must contain one @ symbol.")
+                    print json.dumps(json_object)
+                    return json.dumps(json_object)
                 if email_address.split("@")[1] != "ecommunicate.ch":
-                    return "Can only send emails to ecommunicate.ch e-mail addresses."
+                    json_object["success"] = False
+                    json_object["errors"].append("Can only send e-mails to other ecommunicate.ch e-mail addresses.")
+                    print json.dumps(json_object)
+                    return json.dumps(json_object)
 
             msg['To'] = COMMASPACE.join(send_to)
             msg['CC'] = COMMASPACE.join(send_cc)
@@ -191,5 +241,8 @@ var formdata = new FormData($(this)[0]);
 
             except Exception as e:
                 print "Error: unable to send email", e.__class__
+
+            print json.dumps(json_object)
+            return json.dumps(json_object)
               
         return send_function()
