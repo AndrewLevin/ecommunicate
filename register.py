@@ -395,7 +395,7 @@ $('#register_form').submit(function(event) {
 
             if len(user_infos) > 0:
                 json_object["success"] = False
-                json_object["errors"].append("This username already taken.")
+                json_object["errors"].append("This username is already taken.")
                 os.system("rm /home/ec2-user/registering_someone");
                 print json.dumps(json_object)
                 return json.dumps(json_object)
