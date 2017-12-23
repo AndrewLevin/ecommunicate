@@ -173,6 +173,8 @@ var formdata = new FormData($(this)[0]);
             print cc
             print "subject:"
             print subject
+            print "body:"
+            print body
 
             msg = MIMEMultipart()
             send_from = cherrypy.session.get('_cp_username')+"@ecommunicate.ch"
