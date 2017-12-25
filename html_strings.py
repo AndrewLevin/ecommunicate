@@ -1,4 +1,3 @@
-
 header_style = """
 
 h1 { 
@@ -46,6 +45,27 @@ margin:0px auto 0px auto;
 }
 
 
+"""
+
+not_authenticated_mobile_navigation_menu = """
+<ul style="list-style:none;font-size:20px;padding-left:40px;">
+<li style="padding-bottom:20px"><a href="/">Home</a></li>
+<li style="padding-bottom:20px"><a href="/view/">View</a></li>
+<li style="padding-bottom:20px"><a href="/register/">Register</a></li>
+<li style="padding-bottom:20px"><a href="/loginlogout/login/">Login</a></li>
+<li><a href="/about">About</a></li>
+</ul>
+"""
+
+authenticated_mobile_navigation_menu = """
+<ul style="list-style:none;font-size:20px;padding-left:40px;">
+<li style="padding-bottom:20px"><a href="/">Home</a></li>
+<li style="padding-bottom:20px"><a href="/view/">View</a></li>
+<li style="padding-bottom:20px"><a href="/chat/">Chat</a></li>
+<li style="padding-bottom:20px"><a href="/email/">Email</a></li>
+<li style="padding-bottom:20px"><a href="/loginlogout/logout/">Logout</a></li>
+<li><a href="/about">About</a></li>
+</ul>
 """
 
 not_authenticated_header = """

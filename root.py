@@ -143,14 +143,7 @@ padding-right:1em;
 <body>
 
 <nav id="drawer" style="background-color:LightGrey">
-<center><h2 style="margin-top:0">Ecommunicate</h2></center>
-<ul style="list-style:none;font-size:20px;padding-left:40px;">
-<li style="padding-bottom:20px"><a href="/">Home</a></li>
-<li style="padding-bottom:20px"><a href="/view/">View</a></li>
-<li style="padding-bottom:20px"><a href="/register/">Register</a></li>
-<li style="padding-bottom:20px"><a href="/loginlogout/login/">Login</a></li>
-<li><a href="/about">About</a></li>
-</ul>
+<center><h2 style="margin-top:0">Ecommunicate</h2></center>"""+(html_strings.authenticated_mobile_navigation_menu if utils.is_session_authenticated() else html_strings.not_authenticated_mobile_navigation_menu)+"""
 </nav>
 
 <main>
