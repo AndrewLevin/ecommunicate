@@ -61,7 +61,9 @@ Message: <br><br>
     @cherrypy.expose
     def contact_request(self, username2, message):
 
-        if username2 == cherrypy.session.get('_cp_username'):
+        username2 = username2.strip().lower()
+
+        if username2 == cherrypy.session.get('_cp_username').lower():
             return "You cannot make a contact request for yourself."
         
         secrets_file=open("/home/ec2-user/secrets.txt")
