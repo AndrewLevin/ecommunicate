@@ -345,7 +345,7 @@ main.addEventListener('touchstart', function() {
 
         else:
 
-            html_string += """<html>
+            html_string = """<html>
 <head>
 <style>
 a.button {
