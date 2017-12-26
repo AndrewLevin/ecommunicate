@@ -377,13 +377,12 @@ border: none;
 <table>
 <tr>
 <td width="150">
-<a href="/email/compose/" class="button">Compose</a>
 </td>
 <td width="150">
-<a href="/email/">Received</a>
+<a href="/view/email/">Received</a>
 </td>
 <td width="150">
-<a href="/email/?sent=True">Sent</a>
+<a href="/view/email/?sent=True">Sent</a>
 </td>
 </tr>
 </table>
