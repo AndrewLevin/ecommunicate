@@ -379,10 +379,10 @@ border: none;
 <td width="150">
 </td>
 <td width="150">
-<a href="/view/email/">Received</a>
+<a href="/view/email/?username=%22"""+username+"""%22">Received</a>   
 </td>
 <td width="150">
-<a href="/view/email/?sent=True">Sent</a>
+<a href="/view/email/?username=%22"""+username+"""%22&&sent=True">Sent</a>
 </td>
 </tr>
 </table>
