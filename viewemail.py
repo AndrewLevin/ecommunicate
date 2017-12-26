@@ -1,9 +1,9 @@
 import MySQLdb
 import cherrypy
 
-import mailbox
-
 import email
+
+import mailbox
 
 import time
 
@@ -18,9 +18,19 @@ class ViewEmail(object):
     readone = ViewReadOne()
 
     @cherrypy.expose
-    def index(self,username,sent=False):
+    def index(self,username,sent="False"):
+
+        is_mobile = False
+
+        if "Android" in cherrypy.request.headers['User-Agent'] or "iPhone" in cherrypy.request.headers['User-Agent'] or "iPad" in cherrypy.request.headers['User-Agent']:
+            is_mobile = True
 
         username = username.strip('"')
+
+        if sent == "False":
+            sent_bool = False
+        else:
+            sent_bool = True
 
         secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -36,7 +46,7 @@ class ViewEmail(object):
 
         curs.execute("use "+dbname+";")
 
-        if sent == False:
+        if sent_bool == False:
             curs.execute("select * from received_emails where username = \""+username+"\" order by received_time desc;")
         else:
             curs.execute("select * from sent_emails where username = \""+username+"\" order by sent_time desc;")
@@ -45,9 +55,7 @@ class ViewEmail(object):
 
         emails=curs.fetchall()
 
-        username = username.strip('"')
-
-        if sent == False:
+        if sent_bool == False:
             #use the message factory so that you get MaildirMessages instead of rfc822.Messages
             
             try:
@@ -69,69 +77,275 @@ class ViewEmail(object):
                 msg_dict=dict(zip(colnames, msg))
 
                 em = emailbox.get_message(msg_dict["id"])
-                
+
                 email_javascript_string += "var email"+str(i)+" = document.getElementById('email"+str(i)+"');\n"
 
                 email_javascript_string += "email"+str(i)+".addEventListener('mouseover',function(e) { $('#email"+str(i)+"').css('background-color','WhiteSmoke');  } ,  false);\n"
-                email_javascript_string += "email"+str(i)+".addEventListener('mouseout',function(e) { $('#email"+str(i)+"').css('background-color','White');  } ,  false);\n"
-                if sent == False:
+
+                if not sent_bool:
+                    if msg_dict["is_read"]:
+                        email_javascript_string += "email"+str(i)+".addEventListener('mouseout',function(e) { $('#email"+str(i)+"').css('background-color','White');  } ,  false);\n"
+                    else:
+                        email_javascript_string += "email"+str(i)+".addEventListener('mouseout',function(e) { $('#email"+str(i)+"').css('background-color','Gold');  } ,  false);\n"
+                else:
+                    email_javascript_string += "email"+str(i)+".addEventListener('mouseout',function(e) { $('#email"+str(i)+"').css('background-color','White');  } ,  false);\n"
+
+
+                if sent_bool == False:
                     email_javascript_string += "email"+str(i)+".addEventListener('click',function(e) { window.open('/view/email/readone/?username=\""+username+"\"&&message_id="+msg_dict["id"]+"','_self')  } ,  false);\n"
                 else:    
                     email_javascript_string += "email"+str(i)+".addEventListener('click',function(e) { window.open('/view/email/readone/?username=\""+username+"\"&&sent=True&&message_id="+msg_dict["id"]+"','_self')  } ,  false);\n"
 
+
+
                 if email_string == "":
                     email_string += "<table border = \"1\" width = \"100%\" id=\"emaillist\" style=\"table-layout:fixed\" >"
 
-                email_string += "<tr id=\"email"+str(i)+"\">"
-
-                if sent:
-                    if 'To' in em:
-                        if email.utils.parseaddr(em['To'])[0]:
-                            email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em['To'])[0]+"</b></td>"
-                        else:    
-                            email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em['To'])[1]+"</b></td>"
-                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
-                else:
-                    if 'From' in em:
-                        if email.utils.parseaddr(em['From'])[0]:
-                            email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em['From'])[0]+"</b></td>"
-                        else:
-                            email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em['From'])[1]+"</b></td>"
-                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"
-                if 'Subject' in em:    
-                    email_string += "<td style =\"overflow:hidden;max-width:30%;width:30%;white-space:nowrap\"><i>"+em['Subject']+"</i></td>"
-
-            #return em[1].get_payload()[1].get_payload()
-            
-            #print type(em[1].get_payload())
-
-                if em.is_multipart():
-                    if em.get_payload()[0].is_multipart():
-                        email_string += "<td style =\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()[0].get_payload()[0].get_payload()+"</td>"
+                if not sent_bool:
+                    if msg_dict["is_read"]:
+                        email_string += "<tr id=\"email"+str(i)+"\" style=\"background-color:white\">"
                     else:
-                
-                        if em.get_payload()[0].get_payload().rstrip('\n'):
-                            email_string += "<td style =\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()[0].get_payload().rstrip('\n')+"</td>"
-                        else:
-                            email_string += "<td style =\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\"></td>"
+                        email_string += "<tr id=\"email"+str(i)+"\" style=\"background-color:gold\">"
                 else:
-                    email_string += "<td style =\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()+"</td>"
-                if 'Date' in em:
-                    email_string += "<td id=\"table_divide\" style=\"overflow:hidden;max-width:10%;width:10%;white-space:nowrap\">"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td>"
+                    email_string += "<tr id=\"email"+str(i)+"\" style=\"background-color:white\">"
+                    
+
+                if is_mobile:
+
+                    if 'Date' in em:
+                        email_string += "<td id=\"table_divide\" style=\"overflow:hidden;max-width:100%;width:100%;white-space:nowrap\" ><div style=\"text-align:right\">"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</div>"
 
 
-                email_string += "</tr>"
+                    if sent_bool:
+                        if 'To' in em:
+                            if email.utils.parseaddr(em['To'])[0]:
+                                email_string += "<b>"+email.utils.parseaddr(em[1]['To'])[0]+"</b>"
+                            else:    
+                                email_string += "<b>"+email.utils.parseaddr(em['To'])[1]+"</b>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+                    else:
+                        if 'From' in em:
+                            if email.utils.parseaddr(em['From'])[0]:
+                                email_string += "<b>"+email.utils.parseaddr(em['From'])[0]+"</b>"
+                            else:
+                                email_string += "<b>"+email.utils.parseaddr(em['From'])[1]+"</b>"
+
+                    if 'Subject' in em:    
+                        email_string += "<br><i>"+em['Subject']+"</i>"
+                    else:
+                        email_string += "<br>"
+
+                    if em.is_multipart():
+                        if em.get_payload()[0].is_multipart():
+                            email_string += "<br>"+em.get_payload()[0].get_payload()[0].get_payload().rstrip('\n')
+                        else:
+                
+                            if em.get_payload()[0].get_payload().rstrip('\n'):
+                                email_string += "<br>"+em.get_payload()[0].get_payload().rstrip('\n')
+                            else:
+                                email_string += "<br>"
+                    else:
+                        email_string += "<br>"+em.get_payload()
+
+                    email_string += "<br>"
+
+                    email_string += "</td>"
+
+
+                    email_string += "</tr>"
+
+
+                else:
+
+                    if sent_bool:
+                        if 'To' in em:
+                            if email.utils.parseaddr(em['To'])[0]:
+                                email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em[1]['To'])[0]+"</b></td>"
+                            else:    
+                                email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em['To'])[1]+"</b></td>"
+                    #email_string = email_string + email.utils.parseaddr(em[1]['From'])[1]+"<br>"            
+                    else:
+                        if 'From' in em:
+                            if email.utils.parseaddr(em['From'])[0]:
+                                email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em['From'])[0]+"</b></td>"
+                            else:
+                                email_string += "<td style=\"overflow:hidden;max-width:25%;width:25%;white-space:nowrap\"><b>"+email.utils.parseaddr(em['From'])[1]+"</b></td>"
+
+                    if 'Subject' in em:    
+                        email_string += "<td style=\"overflow:hidden;max-width:30%;width:30%;white-space:nowrap\"><i>"+em['Subject']+"</i></td>"
+
+                    if em.is_multipart():
+                        if em.get_payload()[0].is_multipart():
+                            email_string += "<td style=\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()[0].get_payload()[0].get_payload()+"</td>"
+                        else:
+                
+                            if em.get_payload()[0].get_payload().rstrip('\n'):
+                                email_string += "<td style=\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()[0].get_payload().rstrip('\n')+"</td>"
+                            else:
+                                email_string += "<td style=\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\"></td>"
+                    else:
+                        email_string += "<td style=\"overflow:hidden;max-width:35%;width:35%;white-space:nowrap\">"+em.get_payload()+"</td>"
+
+                    if 'Date' in em:
+                        email_string += "<td id=\"table_divide\" style=\"overflow:hidden;max-width:10%;width:10%;white-space:nowrap\" >"+time.strftime("%d %b %H:%M",email.utils.parsedate(em['Date']))+"</td>"
+
+
+                    email_string += "</tr>"
 
 
             if email_string != "":    
                 email_string += "</table>"
 
-
         curs.close()
 
         conn.close()
+                
 
-        return """<html>
+        if is_mobile:
+
+            html_string = """
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+Ecommunicate
+</title>
+<style>
+
+nav a, button {
+    min-width: 48px;
+    min-height: 48px;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin-top:0;
+    margin-left:0;
+    margin-right:0;
+}
+
+a#menu svg {
+    width: 40px;
+    fill: #000;
+}
+
+main {
+    width: 100%;
+    height: 100%;
+}
+
+nav {
+    width: 250px;
+    height: 100%;
+    position: fixed;
+    transform: translate(-250px, 0);
+    transition: transform 0.3s ease;
+}
+
+nav.open {
+    transform: translate(0, 0);
+}
+
+.header {
+    float : right
+}
+
+.content {
+    padding-left:1em;
+    padding-right:1em;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav id="drawer" style="background-color:LightGrey">
+
+<center><h2 style="margin-top:0">Ecommunicate</h2></center>"""+(html_strings.authenticated_mobile_navigation_menu if utils.is_session_authenticated() else html_strings.not_authenticated_mobile_navigation_menu)+"""
+
+</nav>
+
+<main>
+
+<div style = "width:100%;top:0;left:0;">
+
+<a id="menu">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z" />
+  </svg>
+</a>
+
+<div class = "header">
+
+<h1 style="margin-top:0;margin-bottom:0">Ecommunicate</h1>
+
+</div>
+
+</div>
+
+<div class = "content">
+
+<center>
+<h2>Email</h2>
+</center>
+<br><br>
+<table>
+<tr>
+<td width="150">
+</td>
+<td width="150">
+<a href="/view/email/?username=%22"""+username+"""%22">Received</a>
+</td>
+<td width="150">
+<a href="/view/email/?username=%22"""+username+"""%22&&sent=True">Sent</a>
+</td>
+</tr>
+</table>
+<br><br>
+
+"""+email_string+"""
+
+</div>
+</main>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
+<script>
+"""+email_javascript_string+"""
+</script>
+
+<script type="text/javascript">
+
+var menu = document.querySelector('#menu');
+
+var main = document.querySelector('main');
+
+var drawer = document.querySelector('#drawer');
+
+menu.addEventListener('click', function(e) {
+    drawer.classList.toggle('open');
+    e.stopPropagation();
+});
+
+main.addEventListener('click', function() {
+    drawer.classList.remove('open');
+});
+
+main.addEventListener('touchstart', function() {
+    drawer.classList.remove('open');
+});
+
+</script>  
+
+</body></html>
+
+"""
+
+        else:
+
+            html_string += """<html>
 <head>
 <style>
 a.button {
@@ -146,32 +360,43 @@ a.button {
 border: none; 
 }
 
-.nonheader { width:960px; margin: 140px auto 0px auto;  } 
-"""+html_strings.header_style+"""
+.nonheader { width:960px; margin: 80px auto 0px auto;  }   
 
+"""+html_strings.header_style+"""
 </style>
 <title>Ecommunicate</title>
 </head>
 <body>
 """+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
 <div class = "nonheader">
+<center>
+<h2>Email</h2>
+</center>
+<br><br>
 <table>
 <tr>
 <td width="150">
+<a href="/email/compose/" class="button">Compose</a>
 </td>
 <td width="150">
-<a href="/view/email/?username=%22"""+username+"""%22">Received</a>
+<a href="/email/">Received</a>
 </td>
 <td width="150">
-<a href="/view/email/?username=%22"""+username+"""%22&&sent=True">Sent</a>
+<a href="/email/?sent=True">Sent</a>
 </td>
 </tr>
 </table>
 <br><br>
 """+email_string+"""
+
+</div>
+
 </body>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
 <script>
 """+email_javascript_string+"""
 </script>
         </html>"""
+
+        return html_string
