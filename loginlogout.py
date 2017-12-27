@@ -70,6 +70,9 @@ class LogInLogOut(object):
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <title>
 Ecommunicate
 </title>
@@ -228,6 +231,9 @@ main.addEventListener('touchstart', function() {
             login_html_string = """
 <html>
 <head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <title>
 Ecommunicate
 </title>

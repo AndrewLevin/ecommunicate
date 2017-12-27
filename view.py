@@ -70,6 +70,9 @@ class View(object):
             html_string = """
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <title>
 Ecommunicate
 </title>
@@ -213,6 +216,9 @@ main.addEventListener('touchstart', function() {
             html_string = """
 <html>
 <head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <title>
 Ecommunicate
 </title>

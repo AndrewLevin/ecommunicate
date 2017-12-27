@@ -121,6 +121,9 @@ class ViewReadOne(object):
         
         return """<html>
 <head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <style>
 .terminal {
 border: none; 

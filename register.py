@@ -30,6 +30,9 @@ class Register(object):
             return """<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+html_strings.google_adsense_conversion_tracking_event_snippet+"""
+
 <title>
 Ecommunicate
 </title>
@@ -238,6 +241,9 @@ $('#register_form').submit(function(event) {
 <title>
 Ecommunicate
 </title>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+html_strings.google_adsense_conversion_tracking_event_snippet+"""
+
 <style>
 
 .nonheader { width:960px; margin: 80px auto 0px auto;  } 
@@ -295,6 +301,8 @@ $('#register_form').submit(function(event) {
             console_iframe.contentWindow.document.close();
             $('#register_form').hide();
             console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.</center>');
+            gtag_report_conversion();
+
         }
         else {
             var console_iframe = document.getElementById('console_iframe');
