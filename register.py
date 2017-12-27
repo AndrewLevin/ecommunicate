@@ -330,9 +330,10 @@ $('#register_form').submit(function(event) {
     @cherrypy.expose
     def register(self, username, password,name):
 
-
+        print "username.encode('utf-8'): "+username.encode('utf-8')
         print "username: "+username
         print "len(password): "+str(len(password))
+        print "name.encode('utf-8'): "+name.encode('utf-8')
         print "name: "+name
 
 #        $( "iframe" ).clear()
@@ -357,11 +358,13 @@ $('#register_form').submit(function(event) {
                     if c == " ":
                         json_object["errors"].append("Empty spaces now allowed in username.")                        
                     elif c != '"' and c != "'":
+                        print "ord(c): "+str(ord(c))
                         json_object["errors"].append('"' + c + '"' +" not allowed in username.")
                     else:
                         json_object["errors"].append(c +" not allowed in username.")
                     print json.dumps(json_object)
                     return json.dumps(json_object)
+
 
             #only allow one person to register at a time
             ret=os.system("if [ -f /home/ec2-user/registering_someone ]; then exit 0; else exit 1; fi");
