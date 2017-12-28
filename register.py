@@ -356,7 +356,7 @@ $('#register_form').submit(function(event) {
                     json_object["success"] = False
 
                     if c == " ":
-                        json_object["errors"].append("Empty spaces now allowed in username.")                        
+                        json_object["errors"].append("Empty spaces not allowed in username.")                        
                     elif c != '"' and c != "'":
                         print "ord(c): "+str(ord(c))
                         json_object["errors"].append('"' + c + '"' +" not allowed in username.")
