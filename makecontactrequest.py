@@ -19,7 +19,153 @@ class MakeContactRequest(object):
     @require()
     def index(self):
 
-        return """<html>
+        is_mobile = False
+
+        if "Android" in cherrypy.request.headers['User-Agent'] or "iPhone" in cherrypy.request.headers['User-Agent'] or "iPad" in cherrypy.request.headers['User-Agent']:
+            is_mobile = True
+
+        if is_mobile:
+
+            html_string = """
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+Ecommunicate
+</title>
+<style>
+
+nav a, button {
+    min-width: 48px;
+    min-height: 48px;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin-top:0;
+    margin-left:0;
+    margin-right:0;
+}
+
+a#menu svg {
+    width: 40px;
+    fill: #000;
+}
+
+main {
+    width: 100%;
+    height: 100%;
+}
+
+nav {
+    width: 250px;
+    height: 100%;
+    position: fixed;
+    transform: translate(-250px, 0);
+    transition: transform 0.3s ease;
+}
+
+nav.open {
+    transform: translate(0, 0);
+}
+
+.header {
+    float : right
+}
+
+.content {
+    padding-left:1em;
+    padding-right:1em;
+}
+
+.messageerrorbox {
+    width: 100%;
+    height: 5em;
+    border: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav id="drawer" style="background-color:LightGrey">
+
+<center><h2 style="margin-top:0">Ecommunicate</h2></center>"""+(html_strings.authenticated_mobile_navigation_menu if utils.is_session_authenticated() else html_strings.not_authenticated_mobile_navigation_menu)+"""
+
+</nav>
+
+<main>
+
+<div style = "width:100%;top:0;left:0;">
+
+<a id="menu">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z" />
+  </svg>
+</a>
+
+<div class = "header">
+
+<h1 style="margin-top:0;margin-bottom:0">Ecommunicate</h1>
+
+</div>
+
+</div>
+
+<div class = "content">
+
+<center>
+<h2>Make a contact request </h2>
+<form id="contact_request_form" target="console_iframe3" method="post" action="contact_request">
+<div style = "font-size:120%">username:</div><br>
+  <input type="text" id="username2" name="username2" size="18" style="border:2px solid black;font-size: 120%;outline: none;"/> <br><br>
+<div style = "font-size:120%">message:</div><br>
+  <input type="text" id="message" name="message" style="width:100%;border:2px solid black;font-size: 120%;outline: none;"/> <br><br>
+  <button id="contact_request" class="fg-button ui-state-default ui-corner-all" type="submit">
+  Submit
+  </button>
+  </form>
+  <iframe name="console_iframe3" class="messageerrorbox" /> </iframe>
+
+</div>
+
+</main>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
+<script type="text/javascript">
+
+var menu = document.querySelector('#menu');
+
+var main = document.querySelector('main');
+
+var drawer = document.querySelector('#drawer');
+
+menu.addEventListener('click', function(e) {
+    drawer.classList.toggle('open');
+    e.stopPropagation();
+});
+
+main.addEventListener('click', function() {
+    drawer.classList.remove('open');
+});
+
+main.addEventListener('touchstart', function() {
+    drawer.classList.remove('open');
+});
+
+</script>
+
+</body>
+
+</html>
+
+"""
+        else:
+
+            html_string = """<html>
 <head><title>Ecommunicate</title>
 <style>
 
@@ -56,6 +202,9 @@ Message: <br><br>
 
 </body>
         </html>"""
+
+
+        return html_string
 
 
     @cherrypy.expose
