@@ -156,6 +156,66 @@ main.addEventListener('touchstart', function() {
     drawer.classList.remove('open');
 });
 
+$('#contact_request_form').submit(function(event) {
+
+   event.preventDefault();
+
+   var $this = $(this);
+
+   $.ajax({
+
+      url: $this.attr('action'),
+
+      type: 'POST',
+
+      data: $this.serialize(),
+
+      success: function(data){
+
+        json_object = JSON.parse(data)
+
+        if (json_object["success"]) {
+
+            $('#contact_request_form').hide();
+
+            var console_iframe3 = document.getElementById('console_iframe3');
+
+            console_iframe3.contentWindow.document.open();
+
+            console_iframe3.contentWindow.document.close();
+
+            console_iframe3.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"E-mail sent succesfully."+'</center>');
+
+        }
+
+        else {
+
+            var console_iframe3 = document.getElementById('console_iframe3');
+
+            console_iframe3.contentWindow.document.open();
+
+            console_iframe3.contentWindow.document.close();
+
+            console_iframe3.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
+
+        }
+
+      },
+
+      error : function (data) {
+
+        var console_iframe3 = document.getElementById('console_iframe3');
+
+        console_iframe3.write("Error. E-mail not sent succesfully.");
+
+        //alert(JSON.stringify(data))
+
+      }
+
+   });
+
+});
+
 </script>
 
 </body>
@@ -200,6 +260,72 @@ Message: <br><br>
 
 </div>
 
+<script>
+
+$('#contact_request_form').submit(function(event) {
+
+   event.preventDefault();
+
+   var $this = $(this);
+
+   $.ajax({
+
+      url: $this.attr('action'),
+
+      type: 'POST',
+
+      data: $this.serialize(),
+
+      success: function(data){
+
+        json_object = JSON.parse(data)
+
+        if (json_object["success"]) {
+
+            $('#contact_request_form').hide();
+
+            var console_iframe3 = document.getElementById('console_iframe3');
+
+            console_iframe3.contentWindow.document.open();
+
+            console_iframe3.contentWindow.document.close();
+
+            console_iframe3.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"E-mail sent succesfully."+'</center>');
+
+        }
+
+        else {
+
+            var console_iframe3 = document.getElementById('console_iframe3');
+
+            console_iframe3.contentWindow.document.open();
+
+            console_iframe3.contentWindow.document.close();
+
+            console_iframe3.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
+
+        }
+
+      },
+
+      error : function (data) {
+
+        var console_iframe3 = document.getElementById('console_iframe3');
+
+        console_iframe3.write("Error. E-mail not sent succesfully.");
+
+        //alert(JSON.stringify(data))
+
+      }
+
+   });
+
+});
+
+
+
+</script>
+
 </body>
         </html>"""
 
@@ -210,11 +336,24 @@ Message: <br><br>
     @cherrypy.expose
     def contact_request(self, username2, message):
 
+        print username2
+
+        print message
+
+        json_object = {}
+
+        json_object["success"] = True
+
+        json_object["errors"] = []
+
         username2 = username2.strip().lower()
 
         if username2 == cherrypy.session.get('_cp_username').lower():
-            return "You cannot make a contact request for yourself."
-        
+            json_object["success"] = False
+            json_object["errors"].append("You cannot make a contact request for yourself.")
+            print json_object
+            return json_object
+
         secrets_file=open("/home/ec2-user/secrets.txt")
 
         passwords=secrets_file.read().rstrip('\n')
@@ -232,7 +371,10 @@ Message: <br><br>
         curs.execute("select * from user_info where username = \""+username2+"\";")
 
         if len(curs.fetchall()) == 0:
-            return "Username "+username2+" does not exist."
+            json_object["success"] = False
+            json_object["errors"].append("Username "+username2+" does not exist.")
+            print json_object
+            return json_object
 
         username1=cherrypy.session.get('_cp_username')
 
@@ -254,14 +396,20 @@ Message: <br><br>
         contact_requests = curs.fetchall()
 
         if len(contact_requests) > 0:
-            return "Contact request already made between these two users."
+            json_object["success"] = False
+            json_object["errors"].append("Contact request already made between these two users")
+            print json_object
+            return json_object
 
         curs.execute("select * from contacts where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
 
         contacts = curs.fetchall()
 
         if len(contacts) > 0:
-            return "This user is already your contact."
+            json_object["success"] = False
+            json_object["errors"].append("This user is already your contact.")
+            print json_object
+            return json_object
 
         curs.execute("insert into contact_requests set username1 = \""+username1+"\", username2 = \""+username2+"\", message = \""+message+"\", forward="+forward+", request_time = now(6);")
 
@@ -269,4 +417,5 @@ Message: <br><br>
 
         conn.close()
 
-        return "A contact request has been sent to user "+original_username2+"."
+        print json_object
+        return json_object
