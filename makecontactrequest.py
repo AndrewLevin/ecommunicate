@@ -129,7 +129,7 @@ nav.open {
   Submit
   </button>
   </form>
-  <iframe name="console_iframe3" class="messageerrorbox" /> </iframe>
+  <iframe name="console_iframe3" id = "console_iframe3" class="messageerrorbox" /> </iframe>
 
 </div>
 
@@ -186,7 +186,7 @@ $('#contact_request_form').submit(function(event) {
 
             console_iframe3.contentWindow.document.close();
 
-            console_iframe3.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"E-mail sent succesfully."+'</center>');
+            console_iframe3.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"Contact request sent succesfully."+'</center>');
 
         }
 
@@ -208,7 +208,7 @@ $('#contact_request_form').submit(function(event) {
 
         var console_iframe3 = document.getElementById('console_iframe3');
 
-        console_iframe3.write("Error. E-mail not sent succesfully.");
+        console_iframe3.write("Error. Contact request not sent succesfully.");
 
         //alert(JSON.stringify(data))
 
@@ -258,7 +258,7 @@ Message: <br><br>
   Submit
   </button>
   </form>
-  <iframe name="console_iframe3" class="messageerrorbox" /> </iframe>
+  <iframe name="console_iframe3" id = "console_iframe3" class="messageerrorbox" /> </iframe>
 
 </div>
 
@@ -292,7 +292,7 @@ $('#contact_request_form').submit(function(event) {
 
             console_iframe3.contentWindow.document.close();
 
-            console_iframe3.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"E-mail sent succesfully."+'</center>');
+            console_iframe3.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"Contact request sent succesfully."+'</center>');
 
         }
 
@@ -314,7 +314,7 @@ $('#contact_request_form').submit(function(event) {
 
         var console_iframe3 = document.getElementById('console_iframe3');
 
-        console_iframe3.write("Error. E-mail not sent succesfully.");
+        console_iframe3.write("Error. Contact request not sent succesfully.");
 
         //alert(JSON.stringify(data))
 
