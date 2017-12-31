@@ -262,6 +262,8 @@ Message: <br><br>
 
 </div>
 
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
 <script>
 
 $('#contact_request_form').submit(function(event) {
