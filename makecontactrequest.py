@@ -8,6 +8,8 @@ from require import require
 
 import utils
 
+import json
+
 class MakeContactRequest(object):
 
     _cp_config = {
