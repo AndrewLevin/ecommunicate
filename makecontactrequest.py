@@ -351,8 +351,8 @@ $('#contact_request_form').submit(function(event) {
         if username2 == cherrypy.session.get('_cp_username').lower():
             json_object["success"] = False
             json_object["errors"].append("You cannot make a contact request for yourself.")
-            print json_object
-            return json_object
+            print json.dumps(json_object)
+            return json.dumps(json_object)
 
         secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -373,8 +373,9 @@ $('#contact_request_form').submit(function(event) {
         if len(curs.fetchall()) == 0:
             json_object["success"] = False
             json_object["errors"].append("Username "+username2+" does not exist.")
-            print json_object
-            return json_object
+            print json.dumps(json_object)
+            return json.dumps(json_object)
+
 
         username1=cherrypy.session.get('_cp_username')
 
@@ -398,8 +399,8 @@ $('#contact_request_form').submit(function(event) {
         if len(contact_requests) > 0:
             json_object["success"] = False
             json_object["errors"].append("Contact request already made between these two users")
-            print json_object
-            return json_object
+            print json.dumps(json_object)
+            return json.dumps(json_object)
 
         curs.execute("select * from contacts where username1 = \""+username1+"\" and username2 = \""+username2+"\";")
 
@@ -408,8 +409,8 @@ $('#contact_request_form').submit(function(event) {
         if len(contacts) > 0:
             json_object["success"] = False
             json_object["errors"].append("This user is already your contact.")
-            print json_object
-            return json_object
+            print json.dumps(json_object)
+            return json.dumps(json_object)
 
         curs.execute("insert into contact_requests set username1 = \""+username1+"\", username2 = \""+username2+"\", message = \""+message+"\", forward="+forward+", request_time = now(6);")
 
@@ -417,5 +418,6 @@ $('#contact_request_form').submit(function(event) {
 
         conn.close()
 
-        print json_object
-        return json_object
+        print json.dumps(json_object)
+        return json.dumps(json_object)
+
