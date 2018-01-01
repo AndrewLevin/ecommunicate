@@ -12,6 +12,8 @@ import html_strings
 
 import utils
 
+from require import require
+
 class ReadOne(object):
 
     attachment = Attachment()
