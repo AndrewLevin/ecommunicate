@@ -1,4 +1,3 @@
-import MySQLdb
 import cherrypy
 
 import email
@@ -10,8 +9,6 @@ import time
 from attachment import Attachment
 
 import html_strings
-
-from require import require
 
 import utils
 
@@ -27,14 +24,17 @@ class ReadOne(object):
 
         message_id = message_id.strip('"')
 
+        sent_bool = True
+
         if sent == "False":
             sent_bool = False
-        else:
-            sent_bool = True
 
         #the default message factory is the rfc822.Message for historical reasons (see https://docs.python.org/2/library/mailbox.html#maildir)
         if sent_bool == False:
-            emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage,create=False)
+            try:
+                emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage,create=False)
+            except mailbox.NoSuchMailboxError:
+                raise Exception
         else:
             emails = mailbox.Maildir('/efsemail/mail/vhosts/ecommunicate.ch-sent/'+cherrypy.session.get('_cp_username')+'/',factory=mailbox.MaildirMessage)
 
@@ -74,19 +74,20 @@ class ReadOne(object):
             for payload in em.get_payload():
                 if not payload.is_multipart():
 
+
                     if 'X-Attachment-Id' in payload and "Content-Description" in payload:
+
 
                         if not at_least_one_attachment:
                             at_least_one_attachment = True
 
                             attachment_string += '<tr><td style="white-space:pre-wrap">'
 
-
                             attachment_string += '<a href="/email/readone/attachment/?sent=%22'+str(sent_bool)+'%22&&message_id=%22'+message_id+'%22&&attachment_id=%22'+payload["X-Attachment-Id"]+'%22">'+payload["Content-Description"]+'</a>'
+
                         else:
 
-                            attachment_string += '    <a href="/email/readone/attachment/?sent=%22'+str(sent_bool)+'%22&&message_id=%22'+message_id+'%22&&attachment_id=%22'+payload["X-Attachment-Id"]+'%22">'+payload["Content-Description"]+'</a>'
-
+                            attachment_string += '   <a href="/email/readone/attachment/?sent=%22'+str(sent_bool)+'%22&&message_id=%22'+message_id+'%22&&attachment_id=%22'+payload["X-Attachment-Id"]+'%22">'+payload["Content-Description"]+'</a>'
 
                     else:
                         if 'Content-Type' in payload and ('text/plain' in payload['Content-Type'] or 'message/delivery-status' in payload['Content-Type'] or 'message/rfc822' in payload['Content-Type']):
@@ -109,77 +110,170 @@ class ReadOne(object):
 
         if at_least_one_attachment:
             attachment_string += '</tr></td>'
+        
 
         email_string += attachment_string
 
         email_string += body_string
 
         email_string += "</table>"
+
+        is_mobile = False
+
+        if "User-Agent" in cherrypy.request.headers and ("Android" in cherrypy.request.headers['User-Agent'] or "iPhone" in cherrypy.request.headers['User-Agent'] or "iPad" in cherrypy.request.headers['User-Agent']):
+            is_mobile = True
+
+        if is_mobile:
         
-        secrets_file=open("/home/ec2-user/secrets.txt")
-
-        passwords=secrets_file.read().rstrip('\n')
-
-        db_password = passwords.split('\n')[0]
-
-        dbname = "ecommunicate"
-
-        conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
-
-        curs = conn.cursor()
-
-        curs.execute("use "+dbname+";")
-
-        if not sent_bool:
-            curs.execute("update received_emails set is_read=1 where username=\""+cherrypy.session.get('_cp_username')+"\" and id=\""+message_id+"\";");
-
-        curs.close()
-
-        conn.commit()
-
-        conn.close()
-
-        return """<html>
+            html_string = """
 <head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
+<title>
+Ecommunicate
+</title>
+
 <style>
-a.button {
-    -webkit-appearance: button;
-    -moz-appearance: button;
-    appearance: button;
-    padding: 7px;    
-    text-decoration: none;
-    color: initial;
+
+nav a, button {
+    min-width: 48px;
+    min-height: 48px;
 }
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin-top:0;
+    margin-left:0;
+    margin-right:0;
+}
+
+a#menu svg {
+    width: 40px;
+    fill: #000;
+}
+
+main {
+    width: 100%;
+    height: 100%;
+}
+
+nav {
+    width: 250px;
+    height: 100%;
+    position: fixed;
+    transform: translate(-250px, 0);
+    transition: transform 0.3s ease;
+}
+
+nav.open {
+    transform: translate(0, 0);
+}
+
+.header {
+    float : right
+}
+
+.content {
+    padding-left:1em;
+    padding-right:1em;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav id="drawer" style="background-color:LightGrey">
+
+<center><h2 style="margin-top:0">Ecommunicate</h2></center>"""+(html_strings.authenticated_mobile_navigation_menu if utils.is_session_authenticated() else html_strings.not_authenticated_mobile_navigation_menu)+"""
+
+</nav>
+
+<main>
+
+<div style = "width:100%;top:0;left:0;">
+
+<a id="menu">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z" />
+  </svg>
+</a>
+
+<div class = "header">
+
+<h1 style="margin-top:0;margin-bottom:0">Ecommunicate</h1>
+
+</div>
+
+</div>
+
+<div class = "content">
+
+"""+email_string+"""
+
+</div>
+
+</main>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+<script type="text/javascript">
+
+var menu = document.querySelector('#menu');
+
+var main = document.querySelector('main');
+
+var drawer = document.querySelector('#drawer');
+
+menu.addEventListener('click', function(e) {
+    drawer.classList.toggle('open');
+    e.stopPropagation();
+});
+
+main.addEventListener('click', function() {
+    drawer.classList.remove('open');
+});
+
+main.addEventListener('touchstart', function() {
+    drawer.classList.remove('open');
+});
+
+</script>
+
+</body>
+
+</html>
+
+"""
+
+        else:
+            
+            html_string = """<html>
+<head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
+<style>
 .terminal {
 border: none; 
 }
-
 .nonheader { width:960px; margin: 80px auto 0px auto;  }
-
-"""+html_strings.header_style+"""
+"""+html_strings.header_style+"""   
 </style>
 <title>Ecommunicate</title>
 </head>
 <body>
 """+(html_strings.authenticated_header if utils.is_session_authenticated() else html_strings.not_authenticated_header)+"""
+
 <div class="nonheader">
-<br><br>
-<table>
-<tr>
-<td width="150">
-<a href="/email/compose/" class="button">Compose</a>
-</td>
-<td width="150">
-<a href="/email/">Received</a>
-</td>
-<td width="150">
-<a href="/email/?sent=True">Sent</a>
-</td>
-<td width="150">
-<a href="/email/reply/?sent="""+str(sent)+"""&&message_id="""+message_id+"""" class="button">Reply</a>
-</td>
-</tr>
-</table>
+
 <br><br>
 <center>
 """+email_string+"""
@@ -189,10 +283,12 @@ border: none;
   <br>
   <br>
   </center>
-
 </div>
 
 </body>
 <script>
 </script>
         </html>"""
+
+
+        return html_string
