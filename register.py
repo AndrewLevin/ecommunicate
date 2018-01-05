@@ -202,6 +202,8 @@ $('#register_form').submit(function(event) {
 
             console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.</center>');
 
+            gtag_report_conversion();
+
         }
 
         else {
