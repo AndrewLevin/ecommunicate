@@ -214,6 +214,9 @@ class Email(object):
 
             html_string = """
 <head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>
 Ecommunicate
@@ -357,6 +360,9 @@ main.addEventListener('touchstart', function() {
 
             html_string = """<html>
 <head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <style>
 a.button {
     -webkit-appearance: button;

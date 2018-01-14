@@ -30,6 +30,9 @@ class MakeContactRequest(object):
 
             html_string = """
 <head>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>
 Ecommunicate
@@ -228,6 +231,9 @@ $('#contact_request_form').submit(function(event) {
         else:
 
             html_string = """<html>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <head><title>Ecommunicate</title>
 <style>
 

@@ -67,6 +67,8 @@ class ContactRequestResponses(object):
 
 <head>
 
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
@@ -207,6 +209,9 @@ main.addEventListener('touchstart', function() {
         else:
 
             html_string = """<html>
+
+"""+html_strings.google_adsense_conversion_tracking_global_site_tag+"""
+
 <head><title>Ecommunicate</title>
 <style>
 .nonheader { width:960px; margin: 80px auto 0px auto;  }
