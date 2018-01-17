@@ -8,6 +8,8 @@ from require import require
 
 import utils
 
+import json
+
 class ContactRequestResponses(object):
     @cherrypy.expose
     @require()
@@ -35,7 +37,7 @@ class ContactRequestResponses(object):
 
         contact_requests += curs.fetchall()
 
-        contact_request_string = "<form action=\"contact_request_responses\" method=\"post\" id =\"contact_request_responses\" target=\"console_iframe4\">\n"
+        contact_request_string = "<form action=\"contact_request_responses\" method=\"post\" id =\"contact_request_responses_form\" target=\"console_iframe4\">\n"
 
         for contact_request in contact_requests:
 
@@ -52,7 +54,8 @@ class ContactRequestResponses(object):
 
             contact_request_string += username+": <select name=\""+username+"\">\n<option value=\"Wait\"></option>\n<option value=\"Accept\">Accept</option>\n<option value=\"Reject\">Reject</option></select>\n<br><br>"
 
-        contact_request_string += "<br><button type=\"submit\" id = \"contact_request_responses\">Respond to contact requests</button>\n</form>"
+        if len(contact_requests) > 0:
+            contact_request_string += "<br><button type=\"submit\" id = \"contact_request_responses_button\">Respond to contact requests</button>\n</form>"
 
         conn.close()
 
@@ -170,7 +173,7 @@ Respond to Contact Requests
 
 <center>
 """ + contact_request_string + """
-  <iframe name="console_iframe4" class="messageerrorbox" />  </iframe>
+  <iframe name="console_iframe4" id = "console_iframe4" class="messageerrorbox" />  </iframe>
 </center>
 
 </div>
@@ -198,6 +201,77 @@ main.addEventListener('click', function() {
 
 main.addEventListener('touchstart', function() {
     drawer.classList.remove('open');
+});
+
+</script>
+
+<script>
+
+var console_iframe4 = document.getElementById('console_iframe4');
+
+"""+("console_iframe4.contentWindow.document.write('<center style=\"color:red;font-size:20px;font-weight:bold\">'+\"There are no contact requests for you.\"+'</center>');" if len(contact_requests) == 0 else "")+"""
+
+</script>
+
+<script>
+
+$('#contact_request_responses_form').submit(function(event) {
+
+   event.preventDefault();
+
+   var $this = $(this);
+
+   $.ajax({
+
+      url: $this.attr('action'),
+
+      type: 'POST',
+
+      data: $this.serialize(),
+
+      success: function(data){
+
+        json_object = JSON.parse(data)
+
+        if (json_object["success"]) {
+
+            $('#contact_request_responses_form').hide();
+
+            var console_iframe4 = document.getElementById('console_iframe4');
+
+            console_iframe4.contentWindow.document.open();
+
+            console_iframe4.contentWindow.document.close();
+
+            console_iframe4.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"Your responses have been registered."+'</center>');
+
+        }
+        else {
+
+            var console_iframe4 = document.getElementById('console_iframe4');
+
+            console_iframe4.contentWindow.document.open();
+
+            console_iframe4.contentWindow.document.close();
+
+            console_iframe4.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
+
+        }
+
+      },
+
+      error : function (data) {
+
+        var console_iframe4 = document.getElementById('console_iframe4');
+
+        console_iframe4.write("Error. Contact request not sent succesfully.");
+
+        //alert(JSON.stringify(data))
+
+      }
+
+   });
+
 });
 
 </script>
@@ -237,11 +311,84 @@ Respond to Contact Requests
 
 <center>
 """ + contact_request_string + """
-  <iframe name="console_iframe4" class="messageerrorbox" />  </iframe>
+  <iframe name="console_iframe4" class="messageerrorbox" id = "console_iframe4"/>  </iframe>
 </center>
 
 
 </div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+
+<script>
+
+var console_iframe4 = document.getElementById('console_iframe4');
+
+"""+("console_iframe4.contentWindow.document.write('<center style=\"color:red;font-size:20px;font-weight:bold\">'+\"There are no contact requests for you.\"+'</center>');" if len(contact_requests) == 0 else "")+"""
+
+</script>
+
+<script>
+
+$('#contact_request_responses_form').submit(function(event) {
+
+   event.preventDefault();
+
+   var $this = $(this);
+
+   $.ajax({
+
+      url: $this.attr('action'),
+
+      type: 'POST',
+
+      data: $this.serialize(),
+
+      success: function(data){
+
+        json_object = JSON.parse(data)
+
+        if (json_object["success"]) {
+
+            $('#contact_request_responses_form').hide();
+
+            var console_iframe4 = document.getElementById('console_iframe4');
+
+            console_iframe4.contentWindow.document.open();
+
+            console_iframe4.contentWindow.document.close();
+
+            console_iframe4.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">'+"Your responses have been registered."+'</center>');
+
+        }
+        else {
+
+            var console_iframe4 = document.getElementById('console_iframe4');
+
+            console_iframe4.contentWindow.document.open();
+
+            console_iframe4.contentWindow.document.close();
+
+            console_iframe4.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
+
+        }
+
+      },
+
+      error : function (data) {
+
+        var console_iframe4 = document.getElementById('console_iframe4');
+
+        console_iframe4.write("Error. Contact request not sent succesfully.");
+
+        //alert(JSON.stringify(data))
+
+      }
+
+   });
+
+});
+
+</script>
 
 </body>
         </html>"""
@@ -251,6 +398,12 @@ Respond to Contact Requests
 
     @cherrypy.expose
     def contact_request_responses(self,**responses):
+
+        json_object = {}
+
+        json_object["success"] = True
+
+        json_object["errors"] = []
 
         secrets_file=open("/home/ec2-user/secrets.txt")
 
@@ -302,4 +455,6 @@ Respond to Contact Requests
 
         conn.close()
 
-        return "Your responses have been registered."
+        print json.dumps(json_object)
+
+        return json.dumps(json_object)
