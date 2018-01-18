@@ -1,0 +1,13 @@
+User-agent: *
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-Agent: msnbot
+Crawl-Delay: 20
+
+User-agent: AhrefsBot
+Disallow: /
