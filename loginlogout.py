@@ -282,13 +282,13 @@ Ecommunicate
 
         from_page = from_page.strip('"')
 
-        print "username: " + str(username)
-
-        print "len(password): " + str(len(password))
-
         if username is None or password is None:
             print "username or password is none"
             return self.login_html(from_page=from_page)
+
+        print "username: " + str(username)
+
+        print "len(password): " + str(len(password))
         
         [pass_password_check,error_msg] = is_right_password(username, password)
         if not pass_password_check:
