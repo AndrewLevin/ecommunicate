@@ -332,6 +332,7 @@ $('#register_form').submit(function(event) {
     @cherrypy.expose
     def register(self, username, password,name):
 
+        print "len(username): "+str(len(username))
         print "username.encode('utf-8'): "+username.encode('utf-8')
         print "username: "+username
         print "len(password): "+str(len(password))
