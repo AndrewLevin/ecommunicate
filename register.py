@@ -200,7 +200,7 @@ $('#register_form').submit(function(event) {
 
             $('#register_form').hide();
 
-            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.<br>You can now <a href="/loginlogout/login/">login</a>.</center>');
+            console_iframe.contentWindow.document.write('<head><base target="_parent"></head><center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.<br>You can now <a href="/loginlogout/login/">login</a>.</center>');
 
             gtag_report_conversion();
 
@@ -301,7 +301,7 @@ $('#register_form').submit(function(event) {
             console_iframe.contentWindow.document.open();
             console_iframe.contentWindow.document.close();
             $('#register_form').hide();
-            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.<br>You can now <a href="/loginlogout/login/">login</a>.</center>');
+            console_iframe.contentWindow.document.write('<head><base target="_parent"></head><center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.<br>You can now <a href="/loginlogout/login/">login</a>.</center>');
             gtag_report_conversion();
 
         }
