@@ -200,7 +200,7 @@ $('#register_form').submit(function(event) {
 
             $('#register_form').hide();
 
-            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.</center>');
+            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.<br>You can now <a href="/loginlogout/login/">login</a>.</center>');
 
             gtag_report_conversion();
 
@@ -212,7 +212,6 @@ $('#register_form').submit(function(event) {
 
             console_iframe.contentWindow.document.open();
             console_iframe.contentWindow.document.close();
-
 
             console_iframe.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
 
@@ -302,7 +301,7 @@ $('#register_form').submit(function(event) {
             console_iframe.contentWindow.document.open();
             console_iframe.contentWindow.document.close();
             $('#register_form').hide();
-            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful.</center>');
+            console_iframe.contentWindow.document.write('<center style="color:blue;font-size:20px;font-weight:bold">Registration was successful. <br>You can now <a href="/loginlogout/login/">login</a>.</center>');
             gtag_report_conversion();
 
         }
@@ -310,6 +309,7 @@ $('#register_form').submit(function(event) {
             var console_iframe = document.getElementById('console_iframe');
             console_iframe.contentWindow.document.open();
             console_iframe.contentWindow.document.close();
+
             console_iframe.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
         }
       },
