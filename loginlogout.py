@@ -176,6 +176,7 @@ outline: none;}
 """
 
             login_html_string += "<center>"
+            login_html_string += "<div style = \"font-size:120%\">Register <a href=\"/register/\">here</a> before logging in.</div><br>"
             login_html_string += "<form method=\"post\" action=\"/loginlogout/login\">"
             login_html_string += "<input type=\"hidden\" name=\"from_page\" value=\""+from_page+"\" />"
             login_html_string += "<div style = \"font-size:120%\">username:</div><br>"
@@ -256,6 +257,7 @@ Ecommunicate
 """
 
             login_html_string += "<center>"
+            login_html_string += "Register <a href=\"/register/\">here</a> before logging in.<br><br>"
             login_html_string += "<form method=\"post\" action=\"/loginlogout/login\">"
             login_html_string += "<input type=\"hidden\" name=\"from_page\" value=\""+from_page+"\" />"
             login_html_string += "username: <br><br>"
