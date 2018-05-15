@@ -404,7 +404,7 @@ makecontactrequeststable.addEventListener('mouseover',function(e) { $('#makecont
 
 makecontactrequeststable.addEventListener('mouseout',function(e) { $('#makecontactrequeststable').css('background-color','green');  } ,  false);
 
-makecontactrequeststable.addEventListener('click',function(e) { open('https://ecommunicate.ch/chat/makecontactrequests/','_self')  } ,  false);
+makecontactrequeststable.addEventListener('click',function(e) { open('/chat/makecontactrequests/','_self')  } ,  false);
 
 var respondtocontactrequeststable = document.getElementById('respondtocontactrequeststable');
 
@@ -412,7 +412,7 @@ respondtocontactrequeststable.addEventListener('mouseover',function(e) { $('#res
 
 respondtocontactrequeststable.addEventListener('mouseout',function(e) { $('#respondtocontactrequeststable').css('background-color','green');  } ,  false);
 
-respondtocontactrequeststable.addEventListener('click',function(e) { open('https://ecommunicate.ch/chat/respondtocontactrequests/','_self') } ,  false);
+respondtocontactrequeststable.addEventListener('click',function(e) { open('/chat/respondtocontactrequests/','_self') } ,  false);
 
 function contact_mouseover(e){
 var target = e.target;
@@ -672,7 +672,7 @@ makecontactrequeststable.addEventListener('mouseover',function(e) { $('#makecont
 
 makecontactrequeststable.addEventListener('mouseout',function(e) { $('#makecontactrequeststable').css('background-color','green');  } ,  false);
 
-makecontactrequeststable.addEventListener('click',function(e) { open('https://ecommunicate.ch/chat/makecontactrequests/','_self')  } ,  false);
+makecontactrequeststable.addEventListener('click',function(e) { open('/chat/makecontactrequests/','_self')  } ,  false);
 
 var respondtocontactrequeststable = document.getElementById('respondtocontactrequeststable');
 
@@ -680,7 +680,7 @@ respondtocontactrequeststable.addEventListener('mouseover',function(e) { $('#res
 
 respondtocontactrequeststable.addEventListener('mouseout',function(e) { $('#respondtocontactrequeststable').css('background-color','green');  } ,  false);
 
-respondtocontactrequeststable.addEventListener('click',function(e) { open('https://ecommunicate.ch/chat/respondtocontactrequests/','_self') } ,  false);
+respondtocontactrequeststable.addEventListener('click',function(e) { open('/chat/respondtocontactrequests/','_self') } ,  false);
 
 function contact_mouseover(e){
 var target = e.target;

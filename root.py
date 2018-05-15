@@ -263,61 +263,136 @@ Ecommunicate
 
             html_string += "<div class=\"nonheader\">"
 
-            html_string += "Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after <a href=\"/register\">registering</a> and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"
+            if not utils.is_session_authenticated():
 
-            html_string += "<br>"
+                html_string += "Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after <a href=\"/register\">registering</a> and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"
 
-            html_string += "<table>"
-
-            html_string += "<tr><th>Chat Conversations</th><th style=\"padding-left:100px\">E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.chat\">Android Chat App <a></td><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.email\">Android Email App <a></td></tr>"
-
-            html_string += "<tr>\n"
-        
-            html_string += "<td valign=\"top\">\n"
-        
-            html_string += "<ol>\n"
-
-            for conversation in conversations:
+                html_string += "<br>"
                 
-                conversation_dict=dict(zip(colnames, conversation))
-            
-                if conversation_dict["username1"] == conversation_dict["username2"]:
-                    html_string += "<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" with self</a><br></li>\n"
-                else:
-                    html_string += "<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
-
-            html_string += "</ol>\n"
-            
-            html_string += "</td>\n"
-            
-            html_string += "<td valign=\"top\" style=\"padding-left:100px\">\n"
-            
-            html_string+= "<ol>\n"
+                html_string += "<table>"
+                
+                html_string += "<tr><th>Chat Conversations</th><th style=\"padding-left:100px\">E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.chat\">Android Chat App <a></td><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.email\">Android Email App <a></td></tr>"
+                
+                html_string += "<tr>\n"
         
-            already_listed_usernames = []
-
-            for username in email_usernames:
-
-                if username not in already_listed_usernames:
-
-                    html_string+= "<li><a href=\"/view/email?username=%22"+username[0]+"%22\">"+username[0]+"</a><br></li>\n"
-
-                    already_listed_usernames.append(username)
-
-            html_string += "</ol>\n"
-
-            html_string += "</td>\n"
+                html_string += "<td valign=\"top\">\n"
         
-            html_string += "</tr>\n"
+                html_string += "<ol>\n"
+
+                for conversation in conversations:
+                
+                    conversation_dict=dict(zip(colnames, conversation))
             
-            html_string += "</table>"
+                    if conversation_dict["username1"] == conversation_dict["username2"]:
+                        html_string += "<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" with self</a><br></li>\n"
+                    else:
+                        html_string += "<li><a href=\"/view/chat/?username1=%22"+conversation_dict["username1"]+"%22&username2=%22"+conversation_dict["username2"]+"%22\">"+conversation_dict["username1"]+" and "+conversation_dict["username2"]+"</a><br></li>\n"
+
+                html_string += "</ol>\n"
+            
+                html_string += "</td>\n"
+            
+                html_string += "<td valign=\"top\" style=\"padding-left:100px\">\n"
+            
+                html_string+= "<ol>\n"
+        
+                already_listed_usernames = []
+
+                for username in email_usernames:
+
+                    if username not in already_listed_usernames:
+
+                        html_string+= "<li><a href=\"/view/email?username=%22"+username[0]+"%22\">"+username[0]+"</a><br></li>\n"
+
+                        already_listed_usernames.append(username)
+
+                html_string += "</ol>\n"
+
+                html_string += "</td>\n"
+        
+                html_string += "</tr>\n"
+            
+                html_string += "</table>"
+
+
+            else:
+
+                html_string += """
+
+                <br>
+
+                <center>
+                <table border="2" width = "35%">
+                <tr>
+                <td width="100%" style="font-weight:bold;font-size:24px;background-color:rgb(200,200,200)" id = "chattable"><center>Chat</center></td>
+                </tr>
+                </table>
+
+                <br>
+                <br>
+
+                <table border="2" width = "35%">
+                <tr>
+                <td width="100%" style="font-weight:bold;font-size:24px;background-color:rgb(200,200,200)" id = "emailtable"><center>Email</center></td>
+                </tr>
+                </table>
+
+                <br>
+                <br>
+
+                <table border="2" width = "35%">
+                <tr>
+                <td width="100%" style="font-weight:bold;font-size:24px;background-color:rgb(200,200,200)" id = "viewtable"><center>View</center></td>
+                </tr>
+                </table>
+                </center>
+
+
+                """
         
             html_string += "</div>"
+
+            if utils.is_session_authenticated():
+
+                html_string += """
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script> 
+<script type="text/javascript">
+
+var table_chat = document.getElementById('chattable');
+
+table_chat.addEventListener('mouseover',function(e) { $('#chattable').css('background-color','#eeeceb');  } ,  false);
+
+table_chat.addEventListener('mouseout',function(e) { $('#chattable').css('background-color','rgb(200,200,200)');  } ,  false);
+
+table_chat.addEventListener('click',function(e) { open('/chat/','_self')  } ,  false);
+
+var table_email = document.getElementById('emailtable');
+
+table_email.addEventListener('mouseover',function(e) { $('#emailtable').css('background-color','#eeeceb');  } ,  false);
+
+table_email.addEventListener('mouseout',function(e) { $('#emailtable').css('background-color','rgb(200,200,200)');  } ,  false);
+
+table_email.addEventListener('click',function(e) { open('/email/','_self')  } ,  false);
+
+var table_view = document.getElementById('viewtable');
+
+table_view.addEventListener('mouseover',function(e) { $('#viewtable').css('background-color','#eeeceb');  } ,  false);
+
+table_view.addEventListener('mouseout',function(e) { $('#viewtable').css('background-color','rgb(200,200,200)');  } ,  false);
+
+table_view.addEventListener('click',function(e) { open('/view/','_self')  } ,  false);
+
+</script>  
+
+"""
             
             html_string +=  """
             </body>
             </html>
-"""
+            """
+
+
 
         return html_string
 
