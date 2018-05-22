@@ -275,6 +275,7 @@ var formdata = new FormData($(this)[0]);
 <style>
 .terminal {
 border: none; 
+width: 100%; 
 }
 
 .nonheader { width:960px; margin: 80px auto 0px auto;  }
