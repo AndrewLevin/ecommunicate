@@ -251,7 +251,7 @@ Ecommunicate
 
 .terminal {
 border: none; 
-width: 400px;
+width: 100%;
 }
 """+html_strings.header_style+"""
 </style>
@@ -310,7 +310,7 @@ $('#register_form').submit(function(event) {
             console_iframe.contentWindow.document.open();
             console_iframe.contentWindow.document.close();
 
-            console_iframe.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold">'+json_object["errors"]+'</center>');
+            console_iframe.contentWindow.document.write('<center style="color:red;font-size:20px;font-weight:bold;white-space:pre-wrap">'+json_object["errors"]+'</center>');
         }
       },
       error : function (data) {
@@ -353,20 +353,45 @@ $('#register_form').submit(function(event) {
                 json_object["errors"].append("username too long")
                 print json.dumps(json_object)
                 return json.dumps(json_object)
-                
-            for c in username:
+            
+            if len(username) == 0:
+                json_object["success"] = False
+                json_object["errors"].append("Username is empty.")
+                print json.dumps(json_object)
+                return json.dumps(json_object)
+
+            if len(username.strip(" ")) == 0:
+                json_object["success"] = False
+                json_object["errors"].append("Empty spaces are not allowed in the username. The username that you entered is \""+username+"\".")
+                print json.dumps(json_object)
+                return json.dumps(json_object)
+
+            if username[0] == " ":
+                json_object["success"] = False
+                json_object["errors"].append("Empty spaces are not allowed in the username. The username that you entered is \""+username+"\". There are one or more empty spaces at the beginning.")
+                print json.dumps(json_object)
+                return json.dumps(json_object)
+    
+            for c in username.rstrip(" "):
                 if c != 'a' and c != 'b' and c != 'c' and c != 'd' and c != 'e' and c != 'f' and c != 'g' and c != 'h' and c != 'i' and c != 'j' and c != 'k' and c != 'l' and c != 'm' and c != 'n' and c != 'o' and c != 'p' and c != 'q' and c != 'r' and c != 's' and c != 't' and c != 'u' and c != 'v' and c != 'w' and c != 'x' and c != 'y' and c != 'z' and c != 'A' and c != 'B' and c != 'C' and c != 'D' and c != 'E' and c != 'F' and c != 'G' and c != 'H' and c != 'I' and c != 'J' and c != 'K' and c != 'L' and c != 'M' and c != 'N' and c != 'O' and c != 'P' and c != 'Q' and c != 'R' and c != 'S' and c != 'T' and c != 'U' and c != 'V' and c != 'W' and c != 'X' and c != 'Y' and c != 'Z' and c != '0' and c != '1' and c != '2' and c != '3' and c != '4' and c != '5' and c != '6' and c != '7' and c != '8' and c != '9' and c != '_' and c != '-' and c != '.':
                     json_object["success"] = False
 
                     if c == " ":
-                        json_object["errors"].append("Empty spaces not allowed in username.")                        
+                        json_object["errors"].append("Empty spaces are not allowed in the username.")
                     elif c != '"' and c != "'":
                         print "ord(c): "+str(ord(c))
                         json_object["errors"].append('"' + c + '"' +" not allowed in username.")
                     else:
                         json_object["errors"].append(c +" not allowed in username.")
+                        
                     print json.dumps(json_object)
                     return json.dumps(json_object)
+
+            if len(username) != len(username.rstrip(" ")):
+                json_object["success"] = False
+                json_object["errors"].append("Empty spaces are not allowed in the username. The username that you entered is \""+username+"\". There are one or more empty spaces at the end.")
+                print json.dumps(json_object)
+                return json.dumps(json_object)
 
 
             #only allow one person to register at a time
@@ -408,13 +433,6 @@ $('#register_form').submit(function(event) {
                 print json.dumps(json_object)
                 return json.dumps(json_object)
             
-            if len(username) == 0:
-                json_object["success"] = False
-                json_object["errors"].append("Username is empty.")
-                os.system("rm /home/ec2-user/registering_someone");
-                print json.dumps(json_object)
-                return json.dumps(json_object)
-
             if len(password) < 6:
                 json_object["success"] = False
                 json_object["errors"].append("Password shorter than 6 characters.")
