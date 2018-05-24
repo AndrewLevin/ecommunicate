@@ -144,8 +144,7 @@ padding-right:1em;
 </div>
 
 <div class = "content">
-<center><h2>View</h2></center>
-Ecommunicate is a free online communication service in which <b>all communication is viewable by anyone on the open internet</b> instead of being private. Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after <a href=\"/register\">registering</a> and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"""
+<center><h2>View</h2></center>"""
 
             html_string += "<center><h3>Chat Conversations</h3></center>"
 
@@ -235,10 +234,6 @@ Ecommunicate
             html_string += "<div class=\"nonheader\">"
 
             html_string += "<center><h2>View</h2></center>"
-
-            html_string += "Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after <a href=\"/register\">registering</a> and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"
-
-            html_string += "<br>"
 
             html_string += "<table>"
 
