@@ -15,8 +15,8 @@ def redirect_if_authentication_is_required_and_session_is_not_authenticated(*arg
 cherrypy.tools.auth = cherrypy.Tool('before_handler', redirect_if_authentication_is_required_and_session_is_not_authenticated)
 
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_port': 443}) #port 443 for https or port 80 for http
-#    cherrypy.config.update({'server.socket_port': 80})
+#    cherrypy.config.update({'server.socket_port': 8443}) #port 443 for https or port 80 for http
+    cherrypy.config.update({'server.socket_port': 80})
     cherrypy.config.update({'server.socket_host': 'ec2-35-163-111-83.us-west-2.compute.amazonaws.com'})
     
 
@@ -29,8 +29,11 @@ if __name__ == '__main__':
 
 '/google30be966b06bbaa70.html': { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/google30be966b06bbaa70.html'  }, 
 
-'/robots.txt': { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/robots.txt'  } 
+'/robots.txt': { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/robots.txt'  }, 
 
+'/ChatBrowserPhoneImage.png' : { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/ChatBrowserPhoneImage.png'  },
+
+'/EmailBrowserPhoneImage.png' : { 'tools.staticfile.on': True, 'tools.staticfile.filename': '/home/ec2-user/server/EmailBrowserPhoneImage.png'  }
 
 }
 
