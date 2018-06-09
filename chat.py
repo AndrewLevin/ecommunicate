@@ -63,11 +63,13 @@ class Chat(object):
 
         iframes_hide_string = "";
 
-        iframes_hide_string += "$(\'#console_" + cherrypy.session.get('_cp_username') + "\').hide();\n"
+#this syntax does not work when the username has aperiod in it
+#        iframes_hide_string += "$(\'#console_" + cherrypy.session.get('_cp_username') + "\').hide();\n"
+        iframes_hide_string += "$(\"[id='console_" + cherrypy.session.get('_cp_username') + "']\").hide();\n"
 
-        iframes_touch_string = "var console_" + cherrypy.session.get('_cp_username') + " = document.getElementById('console_" + cherrypy.session.get('_cp_username') + "');\n"
+#        iframes_touch_string = "var console_" + cherrypy.session.get('_cp_username') + " = document.getElementById('console_" + cherrypy.session.get('_cp_username') + "');\n"
         
-        iframes_touch_string += "console_" + cherrypy.session.get('_cp_username') + ".addEventListener('touchstart', function(e) { drawer.classList.remove('open'); });\n"
+        iframes_touch_string = "document.getElementById('console_" + cherrypy.session.get('_cp_username') + "').addEventListener('touchstart', function(e) { drawer.classList.remove('open'); });\n"
 
         for contact in contacts:
 
@@ -85,13 +87,18 @@ class Chat(object):
 
             iframes_string += "<iframe id=\"console_"+username+"\" name=\"console_"+username+"\" class=\"terminal\" />  </iframe>\n"
 
-            iframes_hide_string += "$(\'#console_" + username + "\').hide();\n"
+            #this syntax does not work when the username has a period in it
+            #iframes_hide_string += "$(\'#console_" + username + "\').hide();\n"
+            iframes_hide_string += "$(\"[id='console_" + username + "']\").hide();\n"
+
 
 
 
         contacts_string += "</ul></td>\n</td>"
 
-        click_on_self_string = "$(\'#"+cherrypy.session.get('_cp_username')+"\').click();"
+#this syntax does not work when the username has a period in it
+#        click_on_self_string = "$(\'#"+cherrypy.session.get('_cp_username')+"\').click();"
+        click_on_self_string = "$(\"[id='"+cherrypy.session.get('_cp_username')+"']\").click();"
 
         conn.close()
 
@@ -286,13 +293,17 @@ function show_messages(e){
    if( target.id != "contactslist"){
     var console_iframe2 = document.getElementById('console_'+e.target.id);
     if (username2 != ""){
-    
-        $('#console_'+username2).hide();
+// this syntax does not work when username2 has a period in it    
+//        $('#console_'+username2).hide();
+        $("[id='console_"+username2+"']").hide();
     }
 //    console_iframe2.slideDown('slow');
  
     username2=e.target.id;
-    $('#console_'+username2).show();
+// this syntax does not work when username2 has a period in it    
+   // $('#console_'+username2).show();
+    $("[id='console_"+username2+"']").show();
+
    }
 }
 function update_messages(){
@@ -315,7 +326,9 @@ function update_messages(){
 
 
             //writing to the document clears all of the event listeners that were already attached to it, so you need to reattach them
-            $('#console_'+item).contents().on('touchstart', function(event) { 
+//this syntax does not work when item has a period in it
+//            $('#console_'+item).contents().on('touchstart', function(event) { 
+            $("[id='console_"+item+"']").contents().on('touchstart', function(event) { 
                 event.preventDefault();
                 drawer.classList.remove('open');
                 } 
@@ -358,14 +371,18 @@ get_messages_url = 'get_messages?upon_update=True&client_max_time='+max_time;
                     if ( messages_json[item].length > messages_json_old[item].length ) {
                         for ( var i = messages_json_old[item].length, l = messages_json[item].length; i < l; i++ ) { 
                             if (messages_json[item][i][0] == item && item != username2){
-                                $('#'+item).css('background-color','blue');
+//this syntax does not work when item has a period in it
+//                                $('#'+item).css('background-color','blue');
+                                $("[id='"+item+"']").css('background-color','blue');
                             }
                         }  
                      }
                  } else {
                     for ( var i = 0, l = messages_json[item].length; i < l; i++ ) { 
                         if (messages_json[item][i][0] == item && item != username2){
-                                $('#'+item).css('background-color','blue');
+//this syntax does not work when item has a period in it
+//                                $('#'+item).css('background-color','blue');
+                                $("[id='"+item+"']").css('background-color','blue');
                         }
                     }  
                  }
@@ -416,15 +433,22 @@ respondtocontactrequeststable.addEventListener('click',function(e) { open('/chat
 
 function contact_mouseover(e){
 var target = e.target;
+
 if( target.id != "contactslist"){
-    $('#'+target.id).css('background-color','orange');
+
+ //this syntax does not work when the target.id has a period in it
+//    $('#'+target.id).css('background-color','orange');
+    $("[id='"+target.id+"']").css('background-color','orange');
 }
 
 }
 function contact_mouseout(e){
 var target = e.target;
+
 if( target.id != "contactslist"){
-    $('#'+target.id).css('background-color','green');
+ //this syntax does not work when the target.id has a period in it
+//    $('#'+target.id).css('background-color','green');
+    $("[id='"+target.id+"']").css('background-color','green');
 }
 }
 console_iframe1=document.getElementById('console_iframe1')
@@ -442,8 +466,11 @@ contactslist.addEventListener('touchstart', function(e) { show_messages(e); } , 
 contactslist.addEventListener('click', function(e) { 
     show_messages(e); 
 } , false )
-contactslist.addEventListener('mouseover',function(e) {contact_mouseover(e); } ,  false)
-contactslist.addEventListener('mouseout',function(e) {contact_mouseout(e); } ,  false)
+
+contactslist.addEventListener('touchstart',function(e) { contact_mouseover(e); } ,  false)
+contactslist.addEventListener('touchend',function(e) { contact_mouseout(e); } ,  false)
+contactslist.addEventListener('touchcancel',function(e) { contact_mouseout(e); } ,  false)
+
 
 """+iframes_touch_string+"""
 
@@ -563,13 +590,19 @@ function show_messages(e){
    if( target.id != "contactslist"){
     var console_iframe2 = document.getElementById('console_'+e.target.id);
     if (username2 != ""){
-    
-        $('#console_'+username2).hide();
+
+//  this syntax does not work when username2 has a period in it
+//        $('#console_'+username2).hide();
+    $("[id='console_"+username2+"']").hide();    
+
     }
 //    console_iframe2.slideDown('slow');
  
     username2=e.target.id;
-    $('#console_'+username2).show();
+//  this syntax does not work when username2 has a period in it
+//    $('#console_'+username2).show();
+    $("[id='console_"+username2+"']").show();
+
    }
 }
 function update_messages(){
@@ -588,6 +621,7 @@ function update_messages(){
             var console_iframe2_contentWindow_document = console_iframe2.contentWindow.document;
             //this will "over-scroll", but it works i.e. it moves to the bottom    
             $(console_iframe2_contentWindow_document).scrollTop($(console_iframe2_contentWindow_document).height());  
+
 
 
 
@@ -626,14 +660,18 @@ get_messages_url = 'get_messages?upon_update=True&client_max_time='+max_time;
                     if ( messages_json[item].length > messages_json_old[item].length ) {
                         for ( var i = messages_json_old[item].length, l = messages_json[item].length; i < l; i++ ) { 
                             if (messages_json[item][i][0] == item && item != username2){
-                                $('#'+item).css('background-color','blue');
+// this syntax does not work when the item has a period in it
+//                                $('#'+item).css('background-color','blue');
+                                $("[id='"+item+"']").css('background-color','blue');
                             }
                         }  
                      }
                  } else {
                     for ( var i = 0, l = messages_json[item].length; i < l; i++ ) { 
                         if (messages_json[item][i][0] == item && item != username2){
-                                $('#'+item).css('background-color','blue');
+// this syntax does not work when the item has a period in it
+//                                $('#'+item).css('background-color','blue');
+                                $("[id='"+item+"']").css('background-color','blue');
                         }
                     }  
                  }
@@ -685,14 +723,20 @@ respondtocontactrequeststable.addEventListener('click',function(e) { open('/chat
 function contact_mouseover(e){
 var target = e.target;
 if( target.id != "contactslist"){
-    $('#'+target.id).css('background-color','orange');
+ //this syntax does not work when the target.id has a period in it
+//    $('#'+target.id).css('background-color','orange');
+    $("[id='"+target.id+"']").css('background-color','orange');
 }
 
 }
 function contact_mouseout(e){
 var target = e.target;
+
+
 if( target.id != "contactslist"){
-    $('#'+target.id).css('background-color','green');
+ //this syntax does not work when the target.id has a period in it
+//    $('#'+target.id).css('background-color','green');
+    $("[id='"+target.id+"']").css('background-color','green');
 }
 }
 console_iframe1=document.getElementById('console_iframe1')
