@@ -196,7 +196,7 @@ Ecommunicate is a free online communication service in which all communication i
 
                 html_string += "<div class=\"divider\"></div>"
 
-                html_string += "<div class=\"image\"><img src=\"https://ec2-35-163-111-83.us-west-2.compute.amazonaws.com:8443/ChatBrowserPhoneImage.png\" /></div>"
+                html_string += "<div class=\"image\"><img src=\"/ChatBrowserPhoneImage.png\" /></div>"
                 
                 html_string += "<br>"
 
@@ -204,7 +204,7 @@ Ecommunicate is a free online communication service in which all communication i
 
                 html_string += "<br>"
 
-                html_string += "<div class=\"image\"><img src=\"https://ec2-35-163-111-83.us-west-2.compute.amazonaws.com:8443/EmailBrowserPhoneImage.png\" /></div>"
+                html_string += "<div class=\"image\"><img src=\"/EmailBrowserPhoneImage.png\" /></div>"
                 
                 html_string += "<br>"
 
