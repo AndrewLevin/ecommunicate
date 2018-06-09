@@ -141,6 +141,17 @@ padding-left:1em;
 padding-right:1em;
 }
 
+.divider {
+width:100%;
+height:1px;
+background-color:#dae1e9;
+}
+
+.image {
+max-width:700px;
+}
+
+.image img { width:100%}
 
 </style>
 </head>
@@ -170,11 +181,41 @@ padding-right:1em;
                 html_string += """
 
 <br>
-Ecommunicate is a free online communication service in which <b>all communication is viewable by anyone on the open internet</b> instead of being private. Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after <a href=\"/register\">registering</a> and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"""
+<center><h2>Open and transparent electronic communication</h2></center>
+Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet 
+<ul>
+<li><b>Text messaging</b>, like Google Hangouts or WeChat 
+<li><b>E-mail</b> to other ecommunicate.ch e-mail addresses
+<li><i>Audio and video calling</i> is not available now, but we hope to provide this eventually
+</ul>
+
+<center><a href=\"/register\">Register</a></center>
+
+<br>
+"""
+
+                html_string += "<div class=\"divider\"></div>"
+
+                html_string += "<div class=\"image\"><img src=\"https://ec2-35-163-111-83.us-west-2.compute.amazonaws.com:8443/ChatBrowserPhoneImage.png\" /></div>"
+                
+                html_string += "<br>"
+
+                html_string += "<div class=\"divider\"></div>"
+
+                html_string += "<br>"
+
+                html_string += "<div class=\"image\"><img src=\"https://ec2-35-163-111-83.us-west-2.compute.amazonaws.com:8443/EmailBrowserPhoneImage.png\" /></div>"
+                
+                html_string += "<br>"
+
+                html_string += "<div class=\"divider\"></div>"
 
                 html_string += "<center><h3>Chat Conversations</h3></center>"
 
                 html_string += "<ul style=\"list-style:none;\">"
+
+                if len(conversations) > 10:
+                    conversations = conversations[0:10]
 
                 for conversation in conversations:
                 
@@ -187,11 +228,15 @@ Ecommunicate is a free online communication service in which <b>all communicatio
 
                 html_string += "</ul>"
 
+                html_string += "<div class=\"divider\"></div>"
+
                 html_string += "<center><h3>E-mail Boxes</h3></center>"
 
                 already_listed_usernames = []
 
                 html_string += "<ul style=\"list-style:none;\">"
+
+                n_usernames_listed = 0 
 
                 for username in email_usernames:
 
@@ -200,8 +245,17 @@ Ecommunicate is a free online communication service in which <b>all communicatio
                         html_string+= "<li><a href=\"/view/email?username=%22"+username[0]+"%22\">"+username[0]+"</a><br></li>\n"
 
                         already_listed_usernames.append(username)
+                        
+                        n_usernames_listed+=1
+
+                        if n_usernames_listed == 10:
+                            break
 
                 html_string += "</ul>"
+
+                html_string += "<br>"
+
+                html_string += "<div class=\"divider\"></div>"
 
                 html_string += "<br>"
 
@@ -209,9 +263,19 @@ Ecommunicate is a free online communication service in which <b>all communicatio
 
                 html_string += "<br>"
 
+                html_string += "<div class=\"divider\"></div>"
+
+                html_string += "<br>"
+
                 html_string += "<center><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.email\">Android Email App <a></center>"
 
                 html_string += "<br>"
+
+                html_string += "<div class=\"divider\"></div>"
+
+                html_string += "<br>"
+
+                html_string += "This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br><br>"
 
             else:
 
