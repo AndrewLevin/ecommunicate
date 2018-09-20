@@ -402,16 +402,6 @@ $('#register_form').submit(function(event) {
                     return json.dumps(json_object)
 
 
-            #only allow one person to register at a time
-            ret=os.system("if [ -f /home/ec2-user/registering_someone ]; then exit 0; else exit 1; fi");
-
-            if ret == 0:
-                json_object["success"] = False
-                print json.dumps(json_object)
-                return json.dumps(json_object)
-
-            os.system("touch /home/ec2-user/registering_someone");
-
             secrets_file=open("/home/ec2-user/secrets.txt")
 
             passwords=secrets_file.read().rstrip('\n')
@@ -423,6 +413,16 @@ $('#register_form').submit(function(event) {
             h = hashlib.sha256()
 
             h.update(password)
+
+            #only allow one person to register at a time
+            ret=os.system("if [ -f /home/ec2-user/registering_someone ]; then exit 0; else exit 1; fi");
+
+            if ret == 0:
+                json_object["success"] = False
+                print json.dumps(json_object)
+                return json.dumps(json_object)
+
+            os.system("touch /home/ec2-user/registering_someone");
 
             conn = MySQLdb.connect(host='ecommunicate-production.cphov5mfizlt.us-west-2.rds.amazonaws.com', user='browser', passwd=db_password, port=3306)
 
