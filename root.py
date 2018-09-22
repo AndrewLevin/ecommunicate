@@ -394,6 +394,13 @@ Ecommunicate
 </title>
 <style>
 
+.divider {
+width:100%;
+height:0.1em;
+background-color:#dae1e9;
+}
+
+
 .nonheader { width:960px; margin: 80px auto 0px auto;  }
 
 """+html_strings.header_style+"""
@@ -406,19 +413,59 @@ Ecommunicate
 
             if not utils.is_session_authenticated():
 
-                html_string += "Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private. Text messaging (like Google Hangouts or WeChat) and e-mail (to other ecommunicate.ch e-mail addresses) are implemented already, and we hope to eventually add audio and video calling (like Skype). You can chat or e-mail yourself (after <a href=\"/register\">registering</a> and logging in) or you can view other people's chat conversations or e-mail inboxes (see below). This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"
+                html_string += "<div class=\"divider\"></div>\n"
 
-                html_string += "<br>"
+                html_string += "<br>\n"
+
+                html_string += "<center><h1>Open and transparent electronic communication</h1></center>\n"
+
+                html_string += "<center><p style=\"font-size:22px\">Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet instead of being private.</p></center>\n"
+
+
+                html_string += "<div class=\"divider\"></div>\n"
+
+                html_string += "<center><h2>Text messaging</h2></center>"
+
+                html_string += "<center><p style=\"font-size:17px\">Like Google Hangouts or WeChat</p></center>\n"
+
+                html_string += "<center><img src = \"/ChatBrowserPhoneImage.png\" width=\"900px\" /></center><br><br>\n"
+
+                html_string += "<div class=\"divider\"></div>\n"
+
+                html_string += "<center><h2>E-mail</h2></center>\n"
+
+                html_string += "<center><p style=\"font-size:17px\">To other ecommunicate.ch e-mail addresses</p></center>\n"
+
+                html_string += "<center><img src = \"/EmailBrowserPhoneImage.png\" width = \"900px\" /></center>\n" 
+
+                html_string += "<br>\n"
+
+                html_string += "<div class=\"divider\"></div>\n"
+
+                html_string += "<center>\n"
+
+                html_string+= "<p style=\"font-size:22px\">Click on one of the links below to view a chat conversation or an e-mail inbox. <br><br> Get your own account <a href=\"/register\">here</a>.</p>\n"
+
+                html_string += "</center>\n"
+
+                html_string += "<div class=\"divider\"></div>\n"
+
+                html_string += "<br>\n"
+
+                html_string += "<center>"
+
+                html_string += "<table>\n"
                 
-                html_string += "<table>"
-                
-                html_string += "<tr><th>Chat Conversations</th><th style=\"padding-left:100px\">E-mail Boxes</th><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.chat\">Android Chat App <a></td><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.email\">Android Email App <a></td></tr>"
+                html_string += "<tr><th>Chat Conversations</th><th style=\"padding-left:100px\">E-mail Boxes</th></tr>\n"
                 
                 html_string += "<tr>\n"
         
                 html_string += "<td valign=\"top\">\n"
         
                 html_string += "<ol>\n"
+
+                if len(conversations) > 10:
+                    conversations = conversations[0:10]
 
                 for conversation in conversations:
                 
@@ -455,6 +502,33 @@ Ecommunicate
             
                 html_string += "</table>"
 
+                html_string += "</center>"
+
+                html_string += "<div class=\"divider\"></div>"
+
+                html_string += "<br>\n"
+
+                html_string += "<center>"
+
+                html_string += "<table>"
+
+                html_string += "<tr>\n"
+            
+                html_string += "<td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.chat\">Android Chat App <a></td><td valign = \"top\" style=\"padding-left:100px\"><a href=\"https://play.google.com/store/apps/details?id=ch.ecommunicate.email\">Android Email App <a></td></tr>\n"
+
+                html_string += "</tr>\n"
+            
+                html_string += "</table>"
+
+                html_string += "</center>\n"
+
+                html_string += "<br>\n"
+
+                html_string += "<div class=\"divider\"></div>"
+
+                html_string += "<br>\n"
+
+                html_string += "This website is experimental at this point. You should expect bugs, unexpected downtime, etc. Please contact ecommunicate.feedback@gmail.com for comments, feature requests, etc.<br>"
 
             else:
 
