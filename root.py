@@ -178,39 +178,49 @@ max-width:700px;
 
             if not utils.is_session_authenticated():
 
+                html_string += "<div class=\"divider\"></div>"
+
                 html_string += """
 
 <br>
 <center><h2>Open and transparent electronic communication</h2></center>
 Ecommunicate is a free online communication service in which all communication is viewable by anyone on the open internet 
-<ul>
-<li><b>Text messaging</b>, like Google Hangouts or WeChat 
-<li><b>E-mail</b> to other ecommunicate.ch e-mail addresses
-<li><i>Audio and video calling</i> is not available now, but we hope to provide this eventually
-</ul>
 
-<center><a href=\"/register\">Register</a></center>
 
-<br>
+<br><br>
 """
 
-                html_string += "<div class=\"divider\"></div>"
+                html_string += "<div class=\"divider\"></div>\n"
 
-                html_string += "<div class=\"image\"><img src=\"/ChatBrowserPhoneImage.png\" /></div>"
+                html_string +="<center><h3>Text messaging</h3></center>\n" 
+
+                html_string +="<center>Like Google Hangouts or WeChat</center><br>\n" 
+
+                html_string += "<div class=\"image\"><img src=\"/ChatBrowserPhoneImage.png\" /></div>\n"
                 
-                html_string += "<br>"
+                html_string += "<br>\n"
 
-                html_string += "<div class=\"divider\"></div>"
+                html_string += "<div class=\"divider\"></div>\n"
 
-                html_string += "<br>"
+                html_string +="<center><h3>E-mail</h3></center>\n" 
+
+                html_string +="<center>To other ecommunicate.ch e-mail addresses</center><br>\n" 
 
                 html_string += "<div class=\"image\"><img src=\"/EmailBrowserPhoneImage.png\" /></div>"
                 
-                html_string += "<br>"
+                html_string += "<br>\n"
 
-                html_string += "<div class=\"divider\"></div>"
+                html_string += "<div class=\"divider\"></div>\n"
 
-                html_string += "<center><h3>Chat Conversations</h3></center>"
+                html_string += "<br>\n"
+
+                html_string += "<center>Click on one of the links below to view a chat conversation or an e-mail inbox. </center><br>\n"
+
+                html_string += "<center>Get your own account <a href=\"/register\">here</a>.</center><br>\n"
+
+                html_string += "<div class=\"divider\"></div>\n"
+
+                html_string += "<center><h3>Chat Conversations</h3></center>\n"
 
                 html_string += "<ul style=\"list-style:none;\">"
 
